@@ -24,7 +24,11 @@ annotation_arg = { ident ~ ":" ~ (ident | number | string | "true" | "false") }
 
 // App declaration
 app = { annotation* ~ "app" ~ ident ~ "{" ~ app_member* ~ "}" }
-app_member = { function | variable }
+app_member = { function | variable | ui_component }
+
+// UI Components (v1.1)
+ui_component = { "@ui" ~ "component" ~ ident ~ "{" ~ ui_property* ~ "}" }
+ui_property = { ident ~ ":" ~ expr }
 
 // Function declaration
 function = { 
