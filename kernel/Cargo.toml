@@ -1,6 +1,6 @@
 [package]
 name = "aetheros-kernel"
-version = "0.1.0"
+version = "0.3.0"
 edition = "2021"
 
 [dependencies]
@@ -10,3 +10,5 @@ panic = "abort"
 
 [profile.release]
 panic = "abort"
+opt-level = "z"
+lto = true

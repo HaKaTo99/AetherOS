@@ -1,0 +1,47 @@
+// AetherScript Demo Application
+// This demonstrates the full language capabilities
+
+@memory(budget: 16.mb, distributed: true)
+@compute(min: 1.tflops, priority: .interactive)
+@security(level: .standard)
+app HelloDistributed {
+    
+    distributed func main() {
+        let message = "Hello from AetherOS v1.0!"
+        print(message)
+        
+        // Test memory allocation
+        let data = allocate_buffer(1024)
+        
+        // Test distributed computation
+        let result = heavy_computation(data)
+        
+        print("Computation complete!")
+        
+        return 0
+    }
+    
+    @distributed(threshold: 100.kb)
+    func heavy_computation(data: Buffer) {
+        // This will be automatically partitioned
+        // if data size > 100KB
+        
+        let sum = 0
+        for item in data {
+            sum = sum + item
+        }
+        
+        return sum
+    }
+    
+    func allocate_buffer(size: Int) {
+        // Manual memory management example
+        let buffer = Memory.allocate(size)
+        return buffer
+    }
+    
+    func print(msg: String) {
+        // Syscall to kernel
+        System.print(msg)
+    }
+}

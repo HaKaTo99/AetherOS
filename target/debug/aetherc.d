@@ -1,0 +1,1 @@
+D:\GitHub\OmniOS\target\debug\aetherc.exe: D:\GitHub\OmniOS\compiler\src\codegen.rs D:\GitHub\OmniOS\compiler\src\main.rs D:\GitHub\OmniOS\compiler\src\parser.rs D:\GitHub\OmniOS\compiler\src\passes.rs
