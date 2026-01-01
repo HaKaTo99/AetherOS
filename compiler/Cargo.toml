@@ -1,0 +1,12 @@
+[package]
+name = "aetherc"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+pest = "2.7"
+pest_derive = "2.7"
+
+[[bin]]
+name = "aetherc"
+path = "src/main.rs"
