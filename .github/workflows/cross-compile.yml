@@ -1,0 +1,44 @@
+name: Cross-compile CI
+
+on:
+  push:
+    branches: [ main, 'ci/*' ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        target: [x86_64-unknown-linux-gnu, aarch64-unknown-linux-gnu]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/gh-action-rust-toolchain@stable
+        with:
+          toolchain: stable
+
+      - name: Install target
+        run: |
+          rustup target add ${{ matrix.target }}
+
+      - name: Install dependencies for cross linking (if needed)
+        run: |
+          sudo apt-get update
+          if [ "${{ matrix.target }}" = "aarch64-unknown-linux-gnu" ]; then
+            sudo apt-get install -y gcc-aarch64-linux-gnu libc6-dev-arm64-cross || true
+          fi
+
+      - name: Build (release)
+        run: |
+          cargo build --workspace --release --target ${{ matrix.target }}
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-${{ matrix.target }}
+          path: target/${{ matrix.target }}/release/
