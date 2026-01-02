@@ -1,0 +1,7 @@
+# Minimal Buildroot defconfig placeholder for AetherOS (Raspberry Pi)
+BR2_arm64=y
+BR2_cortex_a53=y
+BR2_TOOLCHAIN_EXTERNAL=y
+BR2_TARGET_ROOTFS_EXT2=y
+# Add packages and kernel options here
+# This is a template - customize per device and Buildroot version
