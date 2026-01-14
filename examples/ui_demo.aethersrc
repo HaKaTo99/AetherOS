@@ -1,0 +1,31 @@
+// AetherOS v1.1 UI Demo
+// Demonstrating Distributed UI Engine (DUIE) features
+
+@ui(distributed: true, resolution: "1080p")
+app DashboardApp {
+    
+    @ui component Header {
+        backgroundColor: "#2C3E50",
+        height: 64,
+        text: "AetherOS Status"
+    }
+    
+    distributed func main() {
+        print("Starting Distributed Dashboard...")
+        
+        // Setup remote rendering
+        UI.connect_remote_display("Device_Kitchen_Tablet")
+        
+        // Render components
+        UI.render(Header)
+        
+        // Dynamic update example
+        var battery = System.get_battery_level()
+        UI.update_text("battery_stat", "Battery: " + battery + "%")
+        
+        loop {
+            UI.refresh()
+            System.sleep(100)
+        }
+    }
+}

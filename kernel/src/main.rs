@@ -9,12 +9,14 @@ mod memory;
 mod scheduler;
 mod bus;
 mod oracle;
+mod ui;
 
 use core::panic::PanicInfo;
 use memory::smme::SymbianModernMemoryEngine;
 use scheduler::{ActiveObjectScheduler, Message};
 use bus::DeviceMesh;
 use oracle::TinyMLPredictor;
+use ui::DistributedFramebuffer;
 
 /// Global SMME instance
 static mut SMME: SymbianModernMemoryEngine = SymbianModernMemoryEngine::new(1 << 30);
@@ -27,6 +29,9 @@ static mut DEVICE_MESH: DeviceMesh = DeviceMesh::new();
 
 /// Global Oracle Engine
 static mut ORACLE: TinyMLPredictor = TinyMLPredictor::new();
+
+/// Global Framebuffer (DUIE)
+static mut FRAMEBUFFER: DistributedFramebuffer = DistributedFramebuffer::new(1920, 1080);
 
 #[no_mangle]
 pub extern "C" fn kernel_main() -> ! {
