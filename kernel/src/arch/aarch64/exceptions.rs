@@ -128,12 +128,46 @@ extern "C" fn irq_handler() {
             // Timer interrupt - increment tick counter
             TICK_COUNT += 1;
             
-            // TODO: Call scheduler tick() when ready
-            // For now, just count ticks
+            // Call scheduler tick every 10ms (10 ticks)
+            if TICK_COUNT % 10 == 0 {
+                scheduler_tick();
+            }
         }
         
         // End of interrupt
         Gic::end_of_interrupt(irq);
+    }
+}
+
+/// Scheduler tick - performs context switch if needed
+unsafe fn scheduler_tick() {
+    use crate::SCHEDULER;
+    
+    let scheduler = &mut *core::ptr::addr_of_mut!(SCHEDULER);
+    
+    // Only switch if we have multiple tasks
+    if scheduler.object_count < 2 {
+        return;
+    }
+    
+    // Get current task index
+    let current_idx = scheduler.current_object.load(core::sync::atomic::Ordering::Relaxed) as usize;
+    
+    // Find next ready task (simple round-robin)
+    let mut next_idx = (current_idx + 1) % scheduler.object_count;
+    
+    if current_idx != next_idx {
+        let current = &mut scheduler.objects[current_idx];
+        let next = &scheduler.objects[next_idx];
+        
+        // Perform context switch
+        crate::arch::aarch64::__switch_context(
+            &mut current.context,
+            &next.context
+        );
+        
+        // Update current task
+        scheduler.current_object.store(next_idx as u32, core::sync::atomic::Ordering::Relaxed);
     }
 }
 
