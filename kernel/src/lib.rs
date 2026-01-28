@@ -38,8 +38,32 @@ static mut ORACLE: TinyMLPredictor = TinyMLPredictor::new();
 pub fn kernel_init() {
     unsafe {
         // 0. Initialize HAL
-        static STUB: hal::stub::StubPlatform = hal::stub::StubPlatform;
-        hal::init_platform(&STUB);
+        #[cfg(target_arch = "aarch64")]
+        {
+            // Use RPiPlatform for real hardware
+            static RPI: hal::rpi::RPiPlatform = hal::rpi::RPiPlatform::new();
+            hal::init_platform(&RPI);
+        }
+        
+        #[cfg(not(target_arch = "aarch64"))]
+        {
+            // Use StubPlatform for testing on host
+            static STUB: hal::stub::StubPlatform = hal::stub::StubPlatform;
+            hal::init_platform(&STUB);
+        }
+
+        // Print initialization message
+        let platform = hal::get_platform();
+        platform.put_char(b'K');
+        platform.put_char(b'e');
+        platform.put_char(b'r');
+        platform.put_char(b'n');
+        platform.put_char(b'e');
+        platform.put_char(b'l');
+        platform.put_char(b' ');
+        platform.put_char(b'O');
+        platform.put_char(b'K');
+        platform.put_char(b'\n');
 
         // 1. Initialize SMME
         // Use addr_of_mut! to avoid creating a reference to static mut which is UB/Error in 2024
