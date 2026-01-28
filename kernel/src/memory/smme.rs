@@ -1,10 +1,6 @@
 //! SMME - Symbian-Modern Memory Engine
 //! Full v1.0 Implementation with Predictive Allocation
 
-#![no_std]
-
-use core::alloc::{GlobalAlloc, Layout};
-use core::ptr::NonNull;
 use core::sync::atomic::{AtomicUsize, Ordering};
 
 /// Memory Pool with Symbian-style two-phase allocation
@@ -73,7 +69,7 @@ pub struct SymbianModernMemoryEngine {
 }
 
 impl SymbianModernMemoryEngine {
-    pub const fn new(total_ram: usize) -> Self {
+    pub const fn new(_total_ram: usize) -> Self {
         // Simplified for no_std - in real impl, use proper memory regions
         Self {
             l0_pool: MemoryPool::new(0x1000_0000, 64 * 1024),
@@ -101,16 +97,16 @@ impl SymbianModernMemoryEngine {
         pool.commit(addr, size)?;
 
         // Update history for prediction
-        let idx = self.history_index.fetch_add(1, Ordering::Relaxed) % 16;
+        let _idx = self.history_index.fetch_add(1, Ordering::Relaxed) % 16;
         // Note: In real impl, this would be atomic or protected
-        // self.allocation_history[idx] = size;
+        // self.allocation_history[_idx] = size;
 
         Ok(addr)
     }
 
     /// Predictive cleanup (Oracle Engine integration point)
     pub fn predictive_cleanup(&self) -> usize {
-        let (reserved, committed) = self.l1_pool.usage();
+        let (_reserved, committed) = self.l1_pool.usage();
         let utilization = (committed * 100) / self.l1_pool.size;
         
         if utilization > 80 {
@@ -125,8 +121,8 @@ impl SymbianModernMemoryEngine {
     pub fn emergency_cleanup(&self) -> usize {
         // In full impl: Scan and reclaim unused allocations
         // For now: Return amount that could be freed
-        let (reserved, committed) = self.l1_pool.usage();
-        reserved.saturating_sub(committed)
+        let (_reserved, committed) = self.l1_pool.usage();
+        _reserved.saturating_sub(committed)
     }
 
     pub fn stats(&self) -> MemoryStats {
