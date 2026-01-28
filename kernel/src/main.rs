@@ -13,10 +13,3 @@ pub extern "C" fn kernel_main() -> ! {
         kernel_tick();
     }
 }
-
-#[cfg(not(test))]
-#[panic_handler]
-fn panic(_info: &core::panic::PanicInfo) -> ! {
-    // In real impl: Log panic info via UART
-    loop {}
-}
