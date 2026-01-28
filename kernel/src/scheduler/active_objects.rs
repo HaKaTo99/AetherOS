@@ -132,9 +132,9 @@ impl ActiveObject {
 }
 
 pub struct ActiveObjectScheduler {
-    objects: [Option<ActiveObject>; MAX_OBJECTS],
-    current_object: AtomicU32,
-    object_count: usize,
+    pub objects: [Option<ActiveObject>; MAX_OBJECTS],
+    pub current_object: AtomicU32,
+    pub object_count: usize,
 }
 
 impl ActiveObjectScheduler {
