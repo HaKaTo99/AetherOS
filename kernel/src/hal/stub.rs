@@ -1,39 +1,37 @@
-//! Stub HAL implementation — no-op safe defaults for host build and testing
-#![no_std]
+//! QEMU Stub Implementation
 
-use super::{CryptoEngine, DeviceManager, PowerController, PerfMode};
+use super::Platform;
 
-pub struct StubHal;
+pub struct StubPlatform;
 
-impl StubHal {
-    pub const fn new() -> Self {
-        StubHal
+impl Platform for StubPlatform {
+    fn init(&self) {
+        // QEMU specific initialization
+    }
+
+    fn shutdown(&self) {
+        // QEMU shutdown command (if needed)
+    }
+
+    fn get_ticks(&self) -> u64 {
+        // In stub, we just increment a counter or read a register
+        // For no_std, we might need assembly or just return 0 for now
+        0 
+    }
+
+    fn sleep_ms(&self, _ms: u64) {
+        // Busy wait
+    }
+
+    fn put_char(&self, _c: u8) {
+        // Write to UART0 for QEMU
+        // Safety: In real impl this writes to 0x09000000
+        unsafe {
+            // Simulated MMIO for example purposes
+            // core::ptr::write_volatile(0x09000000 as *mut u8, c);
+        }
     }
 }
 
-impl PowerController for StubHal {
-    fn set_performance_mode(&self, _mode: PerfMode) {
-        // no-op stub
-    }
-
-    fn battery_level(&self) -> u8 {
-        100 // assume full battery in stub
-    }
-}
-
-impl CryptoEngine for StubHal {
-    fn encrypt_in_place(&self, _buf: &mut [u8]) -> bool {
-        // no-op: pretend success
-        true
-    }
-
-    fn decrypt_in_place(&self, _buf: &mut [u8]) -> bool {
-        true
-    }
-}
-
-impl DeviceManager for StubHal {
-    fn probe(&self) -> usize {
-        0 // no devices in stub
-    }
-}
+// Marker for Sync since it's a stateless stub
+unsafe impl Sync for StubPlatform {}

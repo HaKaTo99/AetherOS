@@ -1,28 +1,30 @@
-//! RPi HAL implementation (minimal, uses stub primitives where platform access is unavailable)
-#![no_std]
+//! Raspberry Pi 4 Platform Implementation
 
-use super::{CryptoEngine, DeviceManager, PowerController, PerfMode};
+use super::Platform;
 
-pub struct RpiHal;
+pub struct RPiPlatform;
 
-impl RpiHal {
-    pub const fn new() -> Self { RpiHal }
-}
-
-impl PowerController for RpiHal {
-    fn set_performance_mode(&self, mode: PerfMode) {
-        // Map perf mode to simple governor settings via platform interface (placeholder)
-        let _ = mode;
+impl Platform for RPiPlatform {
+    fn init(&self) {
+        // RPi GPIO & UART init
     }
 
-    fn battery_level(&self) -> u8 { 100 }
+    fn shutdown(&self) {
+        // Watchdog reset
+    }
+
+    fn get_ticks(&self) -> u64 {
+        // Read system timer
+        0
+    }
+
+    fn sleep_ms(&self, _ms: u64) {
+        // Timer delay
+    }
+
+    fn put_char(&self, _c: u8) {
+        // Write to UART1
+    }
 }
 
-impl CryptoEngine for RpiHal {
-    fn encrypt_in_place(&self, _buf: &mut [u8]) -> bool { true }
-    fn decrypt_in_place(&self, _buf: &mut [u8]) -> bool { true }
-}
-
-impl DeviceManager for RpiHal {
-    fn probe(&self) -> usize { 1 }
-}
+unsafe impl Sync for RPiPlatform {}

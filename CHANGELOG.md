@@ -5,6 +5,14 @@ All notable changes to AetherOS will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] (v1.1-dev)
+
+### Added
+- **Hardware Abstraction Layer (HAL) v2.0**: Dynamic traits for multi-platform support (QEMU & RPi).
+- **Preemptive Scheduler Foundation**: Added quantum/budget tracking and simulation logic.
+- **Virtualization Core**: Introduced `virt` module and `ProcessControlBlock` (PCB).
+- **Cross-Compilation**: Automatic setup for `aarch64-unknown-none`.
+
 ## [1.0.0] - 2026-01-01
 
 ### Added

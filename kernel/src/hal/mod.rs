@@ -1,31 +1,36 @@
-//! Quantum HAL (Q-HAL) - hardware abstraction layer for AetherOS kernel
-#![no_std]
+//! Hardware Abstraction Layer (HAL) v2.0
+//! Dynamic Trait-based abstraction for multi-platform support
 
 pub mod stub;
+pub mod rpi;
 
-/// Power performance modes (0..=255)
-pub type PerfMode = u8;
-
-/// Minimal HAL traits. Implementations live in BSPs or platform crates.
-pub trait PowerController {
-    /// Set performance/power mode (0 = low power, 255 = max perf)
-    fn set_performance_mode(&self, mode: PerfMode);
-    /// Get battery level percentage (0-100)
-    fn battery_level(&self) -> u8;
+/// Core Platform Trait - must be implemented by all hardware backends
+pub trait Platform: Sync {
+    fn init(&self);
+    fn shutdown(&self);
+    
+    // Timer support
+    fn get_ticks(&self) -> u64;
+    fn sleep_ms(&self, ms: u64);
+    
+    // Serial support (debug output)
+    fn put_char(&self, c: u8);
 }
 
-pub trait CryptoEngine {
-    /// Encrypt data in place. Returns true on success.
-    fn encrypt_in_place(&self, buf: &mut [u8]) -> bool;
-    /// Decrypt data in place. Returns true on success.
-    fn decrypt_in_place(&self, buf: &mut [u8]) -> bool;
+/// Global platform instance
+static mut PLATFORM: Option<&'static dyn Platform> = None;
+
+/// Initialize the global platform
+pub fn init_platform(p: &'static dyn Platform) {
+    unsafe {
+        PLATFORM = Some(p);
+        p.init();
+    }
 }
 
-pub trait DeviceManager {
-    /// Probe devices and initialize drivers. Returns number of devices found.
-    fn probe(&self) -> usize;
+/// Get access to global platform
+pub fn get_platform() -> &'static dyn Platform {
+    unsafe {
+        PLATFORM.expect("Platform not initialized!")
+    }
 }
-
-/// Provide a default stub implementation (safe no-op) for builds that don't
-/// have platform-specific HAL yet. BSPs should replace this with real code.
-pub use stub::StubHal;
