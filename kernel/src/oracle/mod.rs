@@ -1,8 +1,6 @@
 //! Oracle Engine - ML-based Predictive Allocation
 //! TinyML predictor for memory management
 
-#![no_std]
-
 /// Simple decision tree for memory prediction
 pub struct TinyMLPredictor {
     // Historical allocation sizes
