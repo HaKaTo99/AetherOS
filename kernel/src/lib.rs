@@ -221,7 +221,6 @@ mod tests {
         let addr = aether_allocate(4096);
         assert!(addr > 0);
 
-        let (_reserved, committed) = aether_get_memory_stats();
         assert!(committed >= 4096);
     }
 }

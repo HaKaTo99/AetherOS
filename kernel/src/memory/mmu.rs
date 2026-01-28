@@ -136,4 +136,32 @@ impl Mmu {
         }
         (sctlr & SCTLR_MMU_ENABLED) != 0
     }
+
+    /// Unmap a page (for stack guards)
+    pub unsafe fn unmap_page(virt_addr: usize) {
+        let tables = &mut *core::ptr::addr_of_mut!(PAGE_TABLES);
+        
+        // Get L1 index
+        let l1_idx = (virt_addr >> 30) & 0x3;
+        let l1_offset = (virt_addr >> 21) & 0x1FF;
+        
+        // Mark as invalid
+        tables.l1_tables[l1_idx].entries[l1_offset].0 = 0;
+        
+        // Flush TLB for this address
+        asm!("tlbi vaae1, {}", in(reg) (virt_addr >> 12));
+        asm!("dsb sy");
+        asm!("isb");
+    }
+
+    /// Setup stack guard page
+    pub unsafe fn setup_stack_guard(stack_base: usize, stack_size: usize) {
+        let guard_addr = stack_base + stack_size;
+        
+        // Align to page boundary
+        let guard_page = (guard_addr + 0xFFF) & !0xFFF;
+        
+        // Unmap guard page
+        Self::unmap_page(guard_page);
+    }
 }

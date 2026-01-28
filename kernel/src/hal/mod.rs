@@ -34,3 +34,8 @@ pub fn get_platform() -> &'static dyn Platform {
         PLATFORM.expect("Platform not initialized!")
     }
 }
+
+/// Try to get platform (for panic handler)
+pub unsafe fn try_get_platform() -> Option<&'static dyn Platform> {
+    PLATFORM
+}
