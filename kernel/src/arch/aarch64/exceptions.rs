@@ -154,20 +154,23 @@ unsafe fn scheduler_tick() {
     let current_idx = scheduler.current_object.load(core::sync::atomic::Ordering::Relaxed) as usize;
     
     // Find next ready task (simple round-robin)
-    let mut next_idx = (current_idx + 1) % scheduler.object_count;
+    let next_idx = (current_idx + 1) % scheduler.object_count;
     
     if current_idx != next_idx {
-        let current = &mut scheduler.objects[current_idx];
-        let next = &scheduler.objects[next_idx];
-        
-        // Perform context switch
-        crate::arch::aarch64::__switch_context(
-            &mut current.context,
-            &next.context
-        );
-        
-        // Update current task
-        scheduler.current_object.store(next_idx as u32, core::sync::atomic::Ordering::Relaxed);
+        // Unwrap Options to get actual tasks
+        if let (Some(current), Some(next)) = (
+            &mut scheduler.objects[current_idx],
+            &scheduler.objects[next_idx]
+        ) {
+            // Perform context switch
+            crate::arch::aarch64::__switch_context(
+                &mut current.context,
+                &next.context
+            );
+            
+            // Update current task
+            scheduler.current_object.store(next_idx as u32, core::sync::atomic::Ordering::Relaxed);
+        }
     }
 }
 

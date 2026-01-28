@@ -25,11 +25,15 @@ pub fn run_tests(tests: &[TestCase]) -> (usize, usize) {
         match result {
             TestResult::Pass => {
                 passed += 1;
-                test_log(&format!("✓ {}", test.name));
+                test_log("✓ ");
+                test_log(test.name);
             }
             TestResult::Fail(msg) => {
                 failed += 1;
-                test_log(&format!("✗ {} - {}", test.name, msg));
+                test_log("✗ ");
+                test_log(test.name);
+                test_log(" - ");
+                test_log(msg);
             }
         }
     }
