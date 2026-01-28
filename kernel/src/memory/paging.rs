@@ -40,6 +40,7 @@ impl PageDescriptor {
 
 /// A 4KB Page Table containing 512 entries
 #[repr(C, align(4096))]
+#[derive(Clone, Copy)]
 pub struct PageTable {
     pub entries: [PageDescriptor; 512],
 }

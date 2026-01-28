@@ -65,4 +65,25 @@ impl Timer {
             core::hint::spin_loop();
         }
     }
+
+    /// Enable timer interrupt (1ms tick)
+    pub unsafe fn enable_interrupt(&self) {
+        let freq = self.get_frequency();
+        let ticks_per_ms = freq / 1000;
+
+        // Set timer value (countdown)
+        asm!("msr cntp_tval_el0, {}", in(reg) ticks_per_ms);
+
+        // Enable timer and unmask interrupt
+        // Bit 0: Enable, Bit 1: Mask (0 = not masked)
+        asm!("msr cntp_ctl_el0, {}", in(reg) 1u64);
+    }
+
+    /// Acknowledge timer interrupt
+    pub unsafe fn acknowledge_interrupt(&self) {
+        // Reload timer for next tick
+        let freq = self.get_frequency();
+        let ticks_per_ms = freq / 1000;
+        asm!("msr cntp_tval_el0, {}", in(reg) ticks_per_ms);
+    }
 }

@@ -5,10 +5,12 @@ use super::Platform;
 mod uart;
 mod timer;
 mod gpio;
+pub mod gic;  // [NEW] Interrupt controller (public for kernel use)
 
 use uart::Uart;
 use timer::Timer;
 use gpio::{Gpio, GpioFunction, GpioPull};
+pub use gic::Gic;  // Export for kernel use
 
 pub struct RPiPlatform {
     uart: Uart,
@@ -48,6 +50,19 @@ impl Platform for RPiPlatform {
         self.uart.puts("  AetherOS v1.3 - Raspberry Pi 4\r\n");
         self.uart.puts("=================================\r\n");
         self.uart.puts("HAL initialized successfully\r\n");
+        
+        // 5. Initialize GIC (Interrupt Controller)
+        unsafe {
+            Gic::init();
+            Gic::enable_interrupt(gic::IRQ_TIMER);
+        }
+        self.uart.puts("GIC initialized successfully\r\n");
+        
+        // 6. Enable timer interrupts
+        unsafe {
+            self.timer.enable_interrupt();
+        }
+        self.uart.puts("Timer interrupts enabled\r\n");
     }
 
     fn shutdown(&self) {

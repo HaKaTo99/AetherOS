@@ -1,6 +1,7 @@
 //! Architecture specific code for AArch64
 
 pub mod context;
+pub mod exceptions;  // [NEW] Exception handling
 
 use core::arch::global_asm;
 

@@ -11,6 +11,7 @@ pub mod ui;
 pub mod hal;
 pub mod virt; // [NEW] Virtualization module
 pub mod arch; // [NEW] Architecture module
+pub mod panic; // [NEW] Panic handler
 
 pub use memory::smme::SymbianModernMemoryEngine;
 pub use scheduler::ActiveObjectScheduler;
@@ -65,7 +66,35 @@ pub fn kernel_init() {
         platform.put_char(b'K');
         platform.put_char(b'\n');
 
-        // 1. Initialize SMME
+        // 1. Initialize MMU (must be before heap allocation)
+        #[cfg(target_arch = "aarch64")]
+        {
+            use crate::memory::mmu::Mmu;
+            Mmu::init();
+            
+            if Mmu::is_enabled() {
+                platform.put_char(b'M');
+                platform.put_char(b'M');
+                platform.put_char(b'U');
+                platform.put_char(b' ');
+                platform.put_char(b'O');
+                platform.put_char(b'K');
+                platform.put_char(b'\n');
+            }
+            
+            // Install exception vector table
+            use crate::arch::aarch64::exceptions;
+            exceptions::install_vector_table();
+            platform.put_char(b'I');
+            platform.put_char(b'R');
+            platform.put_char(b'Q');
+            platform.put_char(b' ');
+            platform.put_char(b'O');
+            platform.put_char(b'K');
+            platform.put_char(b'\n');
+        }
+
+        // 2. Initialize SMME
         // Use addr_of_mut! to avoid creating a reference to static mut which is UB/Error in 2024
         let smme = &mut *core::ptr::addr_of_mut!(SMME);
         match smme.allocate(1 << 20) {
