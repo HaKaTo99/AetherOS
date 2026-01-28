@@ -10,6 +10,7 @@ pub mod oracle;
 pub mod ui;
 pub mod hal;
 pub mod virt; // [NEW] Virtualization module
+pub mod arch; // [NEW] Architecture module
 
 pub use memory::smme::SymbianModernMemoryEngine;
 pub use scheduler::ActiveObjectScheduler;
@@ -141,6 +142,8 @@ mod tests {
 
     #[test]
     fn test_kernel_init() {
+        // Reset state first to ensure clean slate
+        kernel_reset();
         kernel_init();
 
         unsafe {
@@ -159,6 +162,7 @@ mod tests {
 
     #[test]
     fn test_kernel_api() {
+        kernel_reset();
         kernel_init();
 
         let addr = aether_allocate(4096);

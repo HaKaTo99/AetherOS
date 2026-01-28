@@ -27,11 +27,14 @@ impl Message {
     }
 }
 
+use crate::arch::context::CpuContext;
+
 pub struct ActiveObject {
     id: u32,
     process_id: u32, // [NEW] Link to PCB
     priority: u8,
     state: ObjectState,
+    pub context: CpuContext, // [NEW] Task Context
     quantum: u32,        // Max time slice
     ticks_remaining: u32,// Current time slice remaining
     mailbox: [Message; MAX_MESSAGES],
@@ -46,6 +49,7 @@ impl ActiveObject {
             process_id,
             priority,
             state: ObjectState::Idle,
+            context: CpuContext::empty(),
             quantum: 10,
             ticks_remaining: 10,
             mailbox: [Message::empty(); MAX_MESSAGES],
@@ -161,6 +165,14 @@ impl ActiveObjectScheduler {
                         // Forced yield (should have been handled by tick, but double check)
                         obj.state = ObjectState::Ready;
                         obj.ticks_remaining = obj.quantum; // Reset
+                        
+                        // [ARCH] Context Switch Hook
+                        // In v1.2 Real Mode:
+                        // unsafe { 
+                        //     let prev = current_obj.context;
+                        //     let next = next_obj.context;
+                        //     crate::arch::aarch64::__switch_context(&mut prev, &next); 
+                        // }
                         
                          // Move to next object immediately
                         self.current_object.store(
