@@ -1,9 +1,7 @@
 //! Distributed Quantum Bus - HarmonyOS DNA++
 //! Device discovery and resource sharing protocol
 
-#![no_std]
-
-use core::sync::atomic::{AtomicU32, Ordering};
+use core::sync::atomic::AtomicU32;
 
 const MAX_DEVICES: usize = 32;
 

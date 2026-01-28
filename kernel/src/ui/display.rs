@@ -1,9 +1,7 @@
 //! Distributed Framebuffer & UI Management
 
-#![no_std]
-
 use core::sync::atomic::{AtomicU32, Ordering};
-use crate::bus::quantum_bus::DeviceID;
+use crate::bus::quantum_bus::Device;
 
 pub const MAX_WIDTH: usize = 3840;
 pub const MAX_HEIGHT: usize = 2160;
@@ -32,7 +30,7 @@ pub struct DistributedFramebuffer {
     pub height: u32,
     pub format: PixelFormat,
     pub version: AtomicU32,
-    pub remote_host: Option<DeviceID>,
+    pub remote_host: Option<Device>,
 }
 
 impl DistributedFramebuffer {
@@ -46,14 +44,14 @@ impl DistributedFramebuffer {
         }
     }
 
-    pub fn set_remote_host(&mut self, device_id: DeviceID) {
+    pub fn set_remote_host(&mut self, device_id: Device) {
         self.remote_host = Some(device_id);
     }
 
-    pub fn push_update(&self, update: UIUpdate) -> Result<(), ()> {
+    pub fn push_update(&self, _update: UIUpdate) -> Result<(), ()> {
         self.version.fetch_add(1, Ordering::SeqCst);
         
-        if let Some(host) = self.remote_host {
+        if let Some(_host) = self.remote_host {
             // Send update via Quantum Bus
             // In real impl: bus.send(host, update)
             Ok(())

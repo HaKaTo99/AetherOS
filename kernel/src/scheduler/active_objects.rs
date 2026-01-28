@@ -1,8 +1,6 @@
 //! Active Objects Scheduler - Symbian DNA
 //! Cooperative multitasking with message passing
 
-#![no_std]
-
 use core::sync::atomic::{AtomicU32, Ordering};
 
 const MAX_OBJECTS: usize = 256;
@@ -48,33 +46,6 @@ impl ActiveObject {
             mailbox_head: 0,
             mailbox_tail: 0,
         }
-    }
-
-    pub fn post_message(&mut self, msg: Message) -> Result<(), ()> {
-        let next_tail = (self.mailbox_tail + 1) % MAX_MESSAGES;
-        if next_tail == self.mailbox_head {
-            return Err(()); // Mailbox full
-        }
-        
-        self.mailbox[self.mailbox_tail] = msg;
-        self.mailbox_tail = next_tail;
-        
-        if self.state == ObjectState::Idle {
-            self.state = ObjectState::Ready;
-        }
-        
-        Ok(())
-    }
-
-    pub fn get_message(&mut self) -> Option<Message> {
-        if self.mailbox_head == self.mailbox_tail {
-            return None;
-        }
-        
-        let msg = self.mailbox[self.mailbox_head];
-        self.mailbox_head = (self.mailbox_head + 1) % MAX_MESSAGES;
-        msg
-        Ok(())
     }
 
     pub fn post_message(&mut self, msg: Message) -> Result<(), ()> {
