@@ -157,22 +157,34 @@ unsafe fn scheduler_tick() {
     let next_idx = (current_idx + 1) % scheduler.object_count;
     
     if current_idx != next_idx {
-        // Unwrap Options to get actual tasks
-        if let (Some(current), Some(next)) = (
-            &mut scheduler.objects[current_idx],
-            &scheduler.objects[next_idx]
-        ) {
-            // Perform context switch
-            crate::arch::aarch64::__switch_context(
-                &mut current.context,
-                &next.context
-            );
-            
-            // Update current task
-            scheduler.current_object.store(next_idx as u32, core::sync::atomic::Ordering::Relaxed);
+        // Safely obtain mutable references to both task slots
+        if current_idx < next_idx {
+            let (left, right) = scheduler.objects.split_at_mut(next_idx);
+            // Unwrap Option<ActiveObject> safely
+            if let (Some(current), Some(next)) = (left[current_idx].as_mut(), right[0].as_mut()) {
+                // Perform context switch
+                crate::arch::aarch64::__switch_context(
+                    &mut current.context,
+                    &mut next.context,
+                );
+            }
+        } else {
+            // current_idx > next_idx case
+            let (left, right) = scheduler.objects.split_at_mut(current_idx);
+            if let (Some(next), Some(current)) = (left[next_idx].as_mut(), right[0].as_mut()) {
+                // Perform context switch
+                crate::arch::aarch64::__switch_context(
+                    &mut current.context,
+                    &mut next.context,
+                );
+            }
         }
+        // Update current task index
+        scheduler.current_object.store(next_idx as u32, core::sync::atomic::Ordering::Relaxed);
     }
 }
+
+
 
 /// Get current tick count
 pub fn get_tick_count() -> u64 {
