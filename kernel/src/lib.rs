@@ -8,6 +8,8 @@ pub mod scheduler;
 pub mod bus;
 pub mod oracle;
 pub mod ui;
+pub mod hal;
+pub mod virt; // [NEW] Virtualization module
 
 pub use memory::smme::SymbianModernMemoryEngine;
 pub use scheduler::ActiveObjectScheduler;
@@ -34,11 +36,18 @@ static mut ORACLE: TinyMLPredictor = TinyMLPredictor::new();
 
 pub fn kernel_init() {
     unsafe {
+        // 0. Initialize HAL
+        static STUB: hal::stub::StubPlatform = hal::stub::StubPlatform;
+        hal::init_platform(&STUB);
+
         // 1. Initialize SMME
-        match SMME.allocate(1 << 20) {
+        // Use addr_of_mut! to avoid creating a reference to static mut which is UB/Error in 2024
+        let smme = &mut *core::ptr::addr_of_mut!(SMME);
+        match smme.allocate(1 << 20) {
             Ok(_addr) => {
                 // Successfully allocated 1MB for kernel data
-                ORACLE.record_allocation(1 << 20);
+                let oracle = &mut *core::ptr::addr_of_mut!(ORACLE);
+                oracle.record_allocation(1 << 20);
             }
             Err(_) => {
                 // Handle allocation failure
@@ -46,40 +55,48 @@ pub fn kernel_init() {
         }
 
         // 2. Initialize Scheduler
-        let _ = SCHEDULER.create_object(10); // High priority system task
-        let _ = SCHEDULER.create_object(5);  // Normal priority task
+        let scheduler = &mut *core::ptr::addr_of_mut!(SCHEDULER);
+        let _ = scheduler.create_object(10); // High priority system task
+        let _ = scheduler.create_object(5);  // Normal priority task
 
         // 3. Discover devices in mesh
-        DEVICE_MESH.discover();
+        let device_mesh = &mut *core::ptr::addr_of_mut!(DEVICE_MESH);
+        device_mesh.discover();
 
         // 4. Initialize Oracle predictions
-        let predicted = ORACLE.predict_next_size();
+        let oracle = &mut *core::ptr::addr_of_mut!(ORACLE);
+        let predicted = oracle.predict_next_size();
         // Pre-allocate based on prediction
-        let _ = SMME.allocate(predicted);
+        let smme = &mut *core::ptr::addr_of_mut!(SMME);
+        let _ = smme.allocate(predicted);
     }
 }
 
 pub fn kernel_tick() {
     unsafe {
         // 1. Schedule active objects
-        SCHEDULER.schedule();
+        let scheduler = &mut *core::ptr::addr_of_mut!(SCHEDULER);
+        scheduler.schedule();
 
         // 2. Check memory pressure and cleanup if needed
-        let stats = SMME.stats();
+        let smme = &mut *core::ptr::addr_of_mut!(SMME);
+        let stats = smme.stats();
         let utilization = (stats.total_committed * 100) / (1 << 30);
 
         if utilization > 80 {
-            let _freed = SMME.predictive_cleanup();
+            let _freed = smme.predictive_cleanup();
             // Log cleanup results
         }
 
         // 3. Update Oracle with current state
-        ORACLE.record_allocation(stats.total_committed);
+        let oracle = &mut *core::ptr::addr_of_mut!(ORACLE);
+        oracle.record_allocation(stats.total_committed);
 
         // 4. Check for distributed opportunities
-        if ORACLE.should_distribute(stats.total_committed) {
+        if oracle.should_distribute(stats.total_committed) {
             // Find remote device for offloading
-            let _ = DEVICE_MESH.find_best_device(
+            let device_mesh = &mut *core::ptr::addr_of_mut!(DEVICE_MESH);
+            let _ = device_mesh.find_best_device(
                 stats.total_committed / 2,
                 100 // 1 TFLOPS
             );
@@ -90,10 +107,10 @@ pub fn kernel_tick() {
 /// Reset kernel state for testing
 pub fn kernel_reset() {
     unsafe {
-        SMME = SymbianModernMemoryEngine::new(1 << 30);
-        SCHEDULER = ActiveObjectScheduler::new();
-        DEVICE_MESH = DeviceMesh::new();
-        ORACLE = TinyMLPredictor::new();
+        *core::ptr::addr_of_mut!(SMME) = SymbianModernMemoryEngine::new(1 << 30);
+        *core::ptr::addr_of_mut!(SCHEDULER) = ActiveObjectScheduler::new();
+        *core::ptr::addr_of_mut!(DEVICE_MESH) = DeviceMesh::new();
+        *core::ptr::addr_of_mut!(ORACLE) = TinyMLPredictor::new();
     }
 }
 
@@ -101,7 +118,8 @@ pub fn kernel_reset() {
 #[no_mangle]
 pub extern "C" fn aether_allocate(size: usize) -> usize {
     unsafe {
-        match SMME.allocate(size) {
+        let smme = &mut *core::ptr::addr_of_mut!(SMME);
+        match smme.allocate(size) {
             Ok(addr) => addr,
             Err(_) => 0,
         }
@@ -111,7 +129,8 @@ pub extern "C" fn aether_allocate(size: usize) -> usize {
 #[no_mangle]
 pub extern "C" fn aether_get_memory_stats() -> (usize, usize) {
     unsafe {
-        let stats = SMME.stats();
+        let smme = &mut *core::ptr::addr_of_mut!(SMME);
+        let stats = smme.stats();
         (stats.total_reserved, stats.total_committed)
     }
 }
@@ -125,13 +144,16 @@ mod tests {
         kernel_init();
 
         unsafe {
-            let stats = SMME.stats();
+            let smme = &mut *core::ptr::addr_of_mut!(SMME);
+            let stats = smme.stats();
             assert!(stats.total_committed > 0);
 
-            let sched_stats = SCHEDULER.stats();
+            let scheduler = &mut *core::ptr::addr_of_mut!(SCHEDULER);
+            let sched_stats = scheduler.stats();
             assert_eq!(sched_stats.total_objects, 2);
 
-            assert_eq!(DEVICE_MESH.device_count(), 1);
+            let device_mesh = &mut *core::ptr::addr_of_mut!(DEVICE_MESH);
+            assert_eq!(device_mesh.device_count(), 1);
         }
     }
 
