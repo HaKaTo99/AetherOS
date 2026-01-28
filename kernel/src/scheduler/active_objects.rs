@@ -58,6 +58,51 @@ impl ActiveObject {
         }
     }
 
+    /// Create task with allocated stack and guard page
+    pub fn new_with_stack(id: u32, priority: u8, process_id: u32, entry_point: u64) -> Self {
+        const STACK_SIZE: usize = 64 * 1024; // 64KB
+        
+        unsafe {
+            // Allocate stack from SMME (stack + guard page)
+            use crate::SMME;
+            let smme = &mut *core::ptr::addr_of_mut!(SMME);
+            
+            let stack_base = match smme.allocate(STACK_SIZE + 4096) {
+                Ok(addr) => addr,
+                Err(_) => {
+                    // Fallback: use static stack area
+                    0x100000 + (id as usize * (STACK_SIZE + 4096))
+                }
+            };
+            
+            // Setup stack guard page
+            #[cfg(target_arch = "aarch64")]
+            {
+                use crate::memory::mmu::Mmu;
+                Mmu::setup_stack_guard(stack_base, STACK_SIZE);
+            }
+            
+            // Initialize context
+            let sp = (stack_base + STACK_SIZE - 16) as u64; // 16-byte aligned
+            let mut context = CpuContext::empty();
+            context.sp = sp;
+            context.x30 = entry_point; // Link register (return address)
+            
+            Self {
+                id,
+                process_id,
+                priority,
+                state: ObjectState::Ready,
+                context,
+                quantum: 10,
+                ticks_remaining: 10,
+                mailbox: [Message::empty(); MAX_MESSAGES],
+                mailbox_head: 0,
+                mailbox_tail: 0,
+            }
+        }
+    }
+
     pub fn post_message(&mut self, msg: Message) -> Result<(), ()> {
         let next_tail = (self.mailbox_tail + 1) % MAX_MESSAGES;
         if next_tail == self.mailbox_head {
