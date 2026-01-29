@@ -138,6 +138,10 @@ pub fn kernel_init(dtb_ptr: usize) {
             platform.put_char(b'\n');
         }
 
+        // Initialize Driver Manager using DTB
+        use crate::drivers::DriverManager;
+        DriverManager::init(dtb_ptr);
+
         // 2. Initialize SMME
         // Use addr_of_mut! to avoid creating a reference to static mut which is UB/Error in 2024
         let smme = &mut *core::ptr::addr_of_mut!(SMME);

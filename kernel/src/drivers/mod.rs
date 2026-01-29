@@ -49,26 +49,70 @@ static mut GIC: irq::gic400::Gic400 = irq::gic400::Gic400::new(0xFF841000, 0xFF8
 static mut TIMER: timer::arm_generic::ArmGenericTimer = timer::arm_generic::ArmGenericTimer::new();
 
 impl DriverManager {
-    pub unsafe fn init() {
+    pub unsafe fn init(dtb_ptr: usize) {
         #[cfg(target_arch = "aarch64")]
         {
-            // Initialize IRQ Controller first
-            if let Err(_e) = GIC.init() {
-                 // Panic or log failure
-            }
-            
-            // Initialize Serial
-            if let Err(_e) = PL011.init() {
-                 // Panic
-            }
-            
-            // Initialize Timer
-            if let Err(_e) = TIMER.init() {
-                 // Panic
+            // If DTB is provided, try to discover devices
+            if dtb_ptr != 0 {
+                use crate::drivers::dtb::{DeviceTree, DtbItem};
+                if let Some(dt) = DeviceTree::from_raw(dtb_ptr as *const u8) {
+                    for item in dt.nodes() {
+                        if let DtbItem::Property { name, value } = item {
+                            if name == "compatible" {
+                                // Check for GIC
+                                if contains(value, "arm,gic-400") || contains(value, "arm,cortex-a15-gic") {
+                                    let _ = GIC.init();
+                                }
+                                // Check for PL011
+                                if contains(value, "arm,pl011") || contains(value, "arm,primecell") {
+                                     let _ = PL011.init();
+                                }
+                                // Check for Generic Timer
+                                if contains(value, "arm,armv8-timer") || contains(value, "arm,armv7-timer") {
+                                     let _ = TIMER.init();
+                                }
+                            }
+                        }
+                    }
+                }
+            } else {
+                // Fallback to static init if no DTB (e.g. static RPi compile)
+                // Initialize IRQ Controller first
+                if let Err(_e) = GIC.init() {
+                     // Panic or log failure
+                }
+                
+                // Initialize Serial
+                if let Err(_e) = PL011.init() {
+                     // Panic
+                }
+                
+                // Initialize Timer
+                if let Err(_e) = TIMER.init() {
+                     // Panic
+                }
             }
         }
     }
+}
 
+// Helper to check if byte slice contains string
+fn contains(haystack: &[u8], needle: &str) -> bool {
+    // Very basic substring check for now
+    let needle_bytes = needle.as_bytes();
+    if haystack.len() < needle_bytes.len() { return false; }
+    
+    for i in 0..=(haystack.len() - needle_bytes.len()) {
+            if &haystack[i..i+needle_bytes.len()] == needle_bytes {
+                return true;
+            }
+    }
+    false
+}
+
+
+
+impl DriverManager {
     #[cfg(target_arch = "aarch64")]
     pub fn get_serial() -> &'static mut impl Driver {
         unsafe { &mut PL011 }
