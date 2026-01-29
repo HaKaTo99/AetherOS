@@ -1,0 +1,326 @@
+warning: profiles for the non root package will be ignored, specify profiles at the workspace root:
+package:   D:\GitHub\AetherOS\kernel\Cargo.toml
+workspace: D:\GitHub\AetherOS\Cargo.toml
+warning: virtual workspace defaulting to `resolver = "1"` despite one or more workspace members being on edition 2021 which implies `resolver = "2"`
+  |
+  = note: to keep the current resolver, specify `workspace.resolver = "1"` in the workspace root's manifest
+  = note: to use the edition 2021 resolver, specify `workspace.resolver = "2"` in the workspace root's manifest
+  = note: for more details see https://doc.rust-lang.org/cargo/reference/resolver.html#resolver-versions
+   Compiling aetheros-kernel v1.4.0 (D:\GitHub\AetherOS\kernel)
+warning: unused import: `core::marker::PhantomData`
+ --> kernel\src\memory\paging.rs:4:5
+  |
+4 | use core::marker::PhantomData;
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused import: `hal::Platform`
+  --> kernel\src\lib.rs:13:5
+   |
+13 | use hal::Platform; // Import trait for kernel_init usage
+   |     ^^^^^^^^^^^^^
+
+warning: variable `scheduled` is assigned to, but never used
+   --> kernel\src\scheduler\active_objects.rs:191:13
+    |
+191 |         let mut scheduled = 0;
+    |             ^^^^^^^^^^^^^
+    |
+    = note: consider using `_scheduled` instead
+    = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused variable: `msg`
+   --> kernel\src\scheduler\active_objects.rs:205:37
+    |
+205 |                         if let Some(msg) = obj.get_message() {
+    |                                     ^^^ help: if this is intentional, prefix it with an underscore: `_msg`
+
+warning: value assigned to `scheduled` is never read
+   --> kernel\src\scheduler\active_objects.rs:207:29
+    |
+207 | ...                   scheduled += 1;
+    |                       ^^^^^^^^^^^^^^
+    |
+    = help: maybe it is overwritten before being read?
+    = note: `#[warn(unused_assignments)]` (part of `#[warn(unused)]`) on by default
+
+warning: unnecessary `unsafe` block
+  --> kernel\src\hal\stub.rs:29:9
+   |
+29 |         unsafe {
+   |         ^^^^^^ unnecessary `unsafe` block
+   |
+   = note: `#[warn(unused_unsafe)]` (part of `#[warn(unused)]`) on by default
+
+warning: unnecessary `unsafe` block
+  --> kernel\src\debug\gdb_stub.rs:77:13
+   |
+77 |             unsafe {
+   |             ^^^^^^ unnecessary `unsafe` block
+
+warning: unnecessary `unsafe` block
+  --> kernel\src\testing\mod.rs:46:5
+   |
+46 |     unsafe {
+   |     ^^^^^^ unnecessary `unsafe` block
+
+warning: unused variable: `item`
+  --> kernel\src\lib.rs:73:25
+   |
+73 |                     for item in nodes {
+   |                         ^^^^ help: if this is intentional, prefix it with an underscore: `_item`
+
+warning: fields `allocation_history` and `distributed_enabled` are never read
+  --> kernel\src\memory\smme.rs:64:5
+   |
+57 | pub struct SymbianModernMemoryEngine {
+   |            ------------------------- fields in this struct
+...
+64 |     allocation_history: [usize; 16],
+   |     ^^^^^^^^^^^^^^^^^^
+...
+68 |     distributed_enabled: bool,
+   |     ^^^^^^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: fields `id`, `process_id`, and `priority` are never read
+  --> kernel\src\scheduler\active_objects.rs:33:5
+   |
+32 | pub struct ActiveObject {
+   |            ------------ fields in this struct
+33 |     id: u32,
+   |     ^^
+34 |     process_id: u32, // [NEW] Link to PCB
+   |     ^^^^^^^^^^
+35 |     priority: u8,
+   |     ^^^^^^^^
+
+warning: field `local_device_id` is never read
+  --> kernel\src\bus\quantum_bus.rs:60:5
+   |
+57 | pub struct DeviceMesh {
+   |            ---------- field in this struct
+...
+60 |     local_device_id: AtomicU32,
+   |     ^^^^^^^^^^^^^^^
+
+warning: constant `FR_RXFE` is never used
+  --> kernel\src\hal\rpi\uart.rs:18:7
+   |
+18 | const FR_RXFE: u32 = 1 << 4; // Receive FIFO empty
+   |       ^^^^^^^
+
+warning: method `get_char` is never used
+  --> kernel\src\hal\rpi\uart.rs:82:12
+   |
+33 | impl Uart {
+   | --------- method in this implementation
+...
+82 |     pub fn get_char(&self) -> Option<u8> {
+   |            ^^^^^^^^
+
+warning: methods `sleep_us` and `acknowledge_interrupt` are never used
+  --> kernel\src\hal\rpi\timer.rs:59:12
+   |
+ 8 | impl Timer {
+   | ---------- methods in this implementation
+...
+59 |     pub fn sleep_us(&self, us: u64) {
+   |            ^^^^^^^^
+...
+83 |     pub unsafe fn acknowledge_interrupt(&self) {
+   |                   ^^^^^^^^^^^^^^^^^^^^^
+
+warning: constant `GPFSEL1` is never used
+  --> kernel\src\hal\rpi\gpio.rs:10:7
+   |
+10 | const GPFSEL1: usize = 0x04;  // Function Select 1
+   |       ^^^^^^^
+
+warning: constant `GPSET0` is never used
+  --> kernel\src\hal\rpi\gpio.rs:11:7
+   |
+11 | const GPSET0: usize = 0x1C;   // Pin Output Set 0
+   |       ^^^^^^
+
+warning: constant `GPCLR0` is never used
+  --> kernel\src\hal\rpi\gpio.rs:12:7
+   |
+12 | const GPCLR0: usize = 0x28;   // Pin Output Clear 0
+   |       ^^^^^^
+
+warning: constant `GPLEV0` is never used
+  --> kernel\src\hal\rpi\gpio.rs:13:7
+   |
+13 | const GPLEV0: usize = 0x34;   // Pin Level 0
+   |       ^^^^^^
+
+warning: multiple variants are never constructed
+  --> kernel\src\hal\rpi\gpio.rs:20:5
+   |
+19 | pub enum GpioFunction {
+   |          ------------ variants in this enum
+20 |     Input = 0b000,
+   |     ^^^^^
+21 |     Output = 0b001,
+   |     ^^^^^^
+22 |     Alt0 = 0b100,
+23 |     Alt1 = 0b101,
+   |     ^^^^
+24 |     Alt2 = 0b110,
+   |     ^^^^
+25 |     Alt3 = 0b111,
+   |     ^^^^
+26 |     Alt4 = 0b011,
+   |     ^^^^
+27 |     Alt5 = 0b010,
+   |     ^^^^
+   |
+   = note: `GpioFunction` has a derived impl for the trait `Clone`, but this is intentionally ignored during dead code analysis
+
+warning: variants `Down` and `Up` are never constructed
+  --> kernel\src\hal\rpi\gpio.rs:34:5
+   |
+32 | pub enum GpioPull {
+   |          -------- variants in this enum
+33 |     None = 0,
+34 |     Down = 1,
+   |     ^^^^
+35 |     Up = 2,
+   |     ^^
+   |
+   = note: `GpioPull` has a derived impl for the trait `Clone`, but this is intentionally ignored during dead code analysis
+
+warning: methods `set`, `clear`, and `level` are never used
+   --> kernel\src\hal\rpi\gpio.rs:104:12
+    |
+ 42 | impl Gpio {
+    | --------- methods in this implementation
+...
+104 |     pub fn set(&self, pin: u8) {
+    |            ^^^
+...
+118 |     pub fn clear(&self, pin: u8) {
+    |            ^^^^^
+...
+132 |     pub fn level(&self, pin: u8) -> bool {
+    |            ^^^^^
+
+warning: constant `FR_RXFE` is never used
+  --> kernel\src\drivers\serial\pl011.rs:14:7
+   |
+14 | const FR_RXFE: u32 = 1 << 4; // Receive FIFO empty
+   |       ^^^^^^^
+
+warning: associated function `be_to_le` is never used
+  --> kernel\src\drivers\dtb.rs:66:8
+   |
+37 | impl<'a> DeviceTree<'a> {
+   | ----------------------- associated function in this implementation
+...
+66 |     fn be_to_le(val: u32) -> u32 {
+   |        ^^^^^^^^
+
+warning: `extern` fn uses type `(usize, usize)`, which is not FFI-safe
+   --> kernel\src\lib.rs:221:48
+    |
+221 | pub extern "C" fn aether_get_memory_stats() -> (usize, usize) {
+    |                                                ^^^^^^^^^^^^^^ not FFI-safe
+    |
+    = help: consider using a struct instead
+    = note: tuples have unspecified layout
+    = note: `#[warn(improper_ctypes_definitions)]` on by default
+
+warning: constant `MAIR_DEVICE_nGnRnE` should have an upper case name
+  --> kernel\src\memory\mmu.rs:24:7
+   |
+24 | const MAIR_DEVICE_nGnRnE: u64 = 0x00;  // Device memory
+   |       ^^^^^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(non_upper_case_globals)]` (part of `#[warn(nonstandard_style)]`) on by default
+help: convert the identifier to upper case
+   |
+24 - const MAIR_DEVICE_nGnRnE: u64 = 0x00;  // Device memory
+24 + const MAIR_DEVICE_N_GN_RN_E: u64 = 0x00;  // Device memory
+   |
+
+warning: creating a mutable reference to mutable static
+  --> kernel\src\debug\gdb_stub.rs:91:9
+   |
+91 |         GDB_STUB.init();
+   |         ^^^^^^^^^^^^^^^ mutable reference to mutable static
+   |
+   = note: for more information, see <https://doc.rust-lang.org/edition-guide/rust-2024/static-mut-references.html>
+   = note: mutable references to mutable statics are dangerous; it's undefined behavior if any other pointer to the static is used or if any other reference is created for the static while the mutable reference lives
+   = note: `#[warn(static_mut_refs)]` (part of `#[warn(rust_2024_compatibility)]`) on by default
+
+warning: creating a mutable reference to mutable static
+  --> kernel\src\drivers\mod.rs:51:26
+   |
+51 |         if let Err(_e) = GIC.init() {
+   |                          ^^^^^^^^^^ mutable reference to mutable static
+   |
+   = note: for more information, see <https://doc.rust-lang.org/edition-guide/rust-2024/static-mut-references.html>
+   = note: mutable references to mutable statics are dangerous; it's undefined behavior if any other pointer to the static is used or if any other reference is created for the static while the mutable reference lives
+
+warning: creating a mutable reference to mutable static
+  --> kernel\src\drivers\mod.rs:56:26
+   |
+56 |         if let Err(_e) = PL011.init() {
+   |                          ^^^^^^^^^^^^ mutable reference to mutable static
+   |
+   = note: for more information, see <https://doc.rust-lang.org/edition-guide/rust-2024/static-mut-references.html>
+   = note: mutable references to mutable statics are dangerous; it's undefined behavior if any other pointer to the static is used or if any other reference is created for the static while the mutable reference lives
+
+warning: creating a mutable reference to mutable static
+  --> kernel\src\drivers\mod.rs:61:26
+   |
+61 |         if let Err(_e) = TIMER.init() {
+   |                          ^^^^^^^^^^^^ mutable reference to mutable static
+   |
+   = note: for more information, see <https://doc.rust-lang.org/edition-guide/rust-2024/static-mut-references.html>
+   = note: mutable references to mutable statics are dangerous; it's undefined behavior if any other pointer to the static is used or if any other reference is created for the static while the mutable reference lives
+
+warning: creating a mutable reference to mutable static
+  --> kernel\src\drivers\mod.rs:67:18
+   |
+67 |         unsafe { &mut PL011 }
+   |                  ^^^^^^^^^^ mutable reference to mutable static
+   |
+   = note: for more information, see <https://doc.rust-lang.org/edition-guide/rust-2024/static-mut-references.html>
+   = note: mutable references to mutable statics are dangerous; it's undefined behavior if any other pointer to the static is used or if any other reference is created for the static while the mutable reference lives
+help: use `&raw mut` instead to create a raw pointer
+   |
+67 |         unsafe { &raw mut PL011 }
+   |                   +++
+
+warning: creating a mutable reference to mutable static
+  --> kernel\src\drivers\mod.rs:71:18
+   |
+71 |         unsafe { &mut GIC }
+   |                  ^^^^^^^^ mutable reference to mutable static
+   |
+   = note: for more information, see <https://doc.rust-lang.org/edition-guide/rust-2024/static-mut-references.html>
+   = note: mutable references to mutable statics are dangerous; it's undefined behavior if any other pointer to the static is used or if any other reference is created for the static while the mutable reference lives
+help: use `&raw mut` instead to create a raw pointer
+   |
+71 |         unsafe { &raw mut GIC }
+   |                   +++
+
+warning: creating a mutable reference to mutable static
+  --> kernel\src\drivers\mod.rs:75:19
+   |
+75 |          unsafe { &mut TIMER }
+   |                   ^^^^^^^^^^ mutable reference to mutable static
+   |
+   = note: for more information, see <https://doc.rust-lang.org/edition-guide/rust-2024/static-mut-references.html>
+   = note: mutable references to mutable statics are dangerous; it's undefined behavior if any other pointer to the static is used or if any other reference is created for the static while the mutable reference lives
+help: use `&raw mut` instead to create a raw pointer
+   |
+75 |          unsafe { &raw mut TIMER }
+   |                    +++
+
+warning: `aetheros-kernel` (lib) generated 33 warnings (run `cargo fix --lib -p aetheros-kernel` to apply 4 suggestions)
+    Finished `release` profile [optimized] target(s) in 2.04s

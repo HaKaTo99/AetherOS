@@ -1,0 +1,128 @@
+warning: profiles for the non root package will be ignored, specify profiles at the workspace root:
+package:   D:\GitHub\AetherOS\kernel\Cargo.toml
+workspace: D:\GitHub\AetherOS\Cargo.toml
+warning: virtual workspace defaulting to `resolver = "1"` despite one or more workspace members being on edition 2021 which implies `resolver = "2"`
+  |
+  = note: to keep the current resolver, specify `workspace.resolver = "1"` in the workspace root's manifest
+  = note: to use the edition 2021 resolver, specify `workspace.resolver = "2"` in the workspace root's manifest
+  = note: for more details see https://doc.rust-lang.org/cargo/reference/resolver.html#resolver-versions
+   Compiling aetheros-kernel v1.4.0 (D:\GitHub\AetherOS\kernel)
+warning: unused import: `core::marker::PhantomData`
+ --> kernel\src\memory\paging.rs:4:5
+  |
+4 | use core::marker::PhantomData;
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+error[E0599]: no method named `puts` found for reference `&dyn Platform` in the current scope
+  --> kernel\src\lib.rs:55:26
+   |
+55 |                 platform.puts("DTB found at: ");
+   |                          ^^^^ method not found in `&dyn Platform`
+
+error[E0599]: no method named `puts` found for reference `&dyn Platform` in the current scope
+  --> kernel\src\lib.rs:57:26
+   |
+57 |                 platform.puts("0x");
+   |                          ^^^^ method not found in `&dyn Platform`
+
+error[E0599]: no method named `puts` found for reference `&dyn Platform` in the current scope
+  --> kernel\src\lib.rs:59:26
+   |
+59 |                 platform.puts("...\r\n");
+   |                          ^^^^ method not found in `&dyn Platform`
+
+error[E0599]: no method named `puts` found for reference `&dyn Platform` in the current scope
+  --> kernel\src\lib.rs:64:30
+   |
+64 |                     platform.puts("Valid DTB detected. Size: ");
+   |                              ^^^^ method not found in `&dyn Platform`
+
+error[E0599]: no method named `puts` found for reference `&dyn Platform` in the current scope
+  --> kernel\src\lib.rs:66:30
+   |
+66 |                     platform.puts(" bytes\r\n");
+   |                              ^^^^ method not found in `&dyn Platform`
+
+error[E0599]: no method named `puts` found for reference `&dyn Platform` in the current scope
+  --> kernel\src\lib.rs:73:30
+   |
+73 |                     platform.puts("DTB Traversal OK\r\n");
+   |                              ^^^^ method not found in `&dyn Platform`
+
+error[E0599]: no method named `puts` found for reference `&dyn Platform` in the current scope
+  --> kernel\src\lib.rs:75:30
+   |
+75 |                     platform.puts("Invalid DTB Header\r\n");
+   |                              ^^^^ method not found in `&dyn Platform`
+
+error[E0599]: no method named `puts` found for reference `&dyn Platform` in the current scope
+  --> kernel\src\lib.rs:78:26
+   |
+78 |                 platform.puts("No DTB provided (x0 = 0)\r\n");
+   |                          ^^^^ method not found in `&dyn Platform`
+
+warning: variable `scheduled` is assigned to, but never used
+   --> kernel\src\scheduler\active_objects.rs:191:13
+    |
+191 |         let mut scheduled = 0;
+    |             ^^^^^^^^^^^^^
+    |
+    = note: consider using `_scheduled` instead
+    = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused variable: `msg`
+   --> kernel\src\scheduler\active_objects.rs:205:37
+    |
+205 |                         if let Some(msg) = obj.get_message() {
+    |                                     ^^^ help: if this is intentional, prefix it with an underscore: `_msg`
+
+warning: value assigned to `scheduled` is never read
+   --> kernel\src\scheduler\active_objects.rs:207:29
+    |
+207 | ...                   scheduled += 1;
+    |                       ^^^^^^^^^^^^^^
+    |
+    = help: maybe it is overwritten before being read?
+    = note: `#[warn(unused_assignments)]` (part of `#[warn(unused)]`) on by default
+
+warning: unnecessary `unsafe` block
+  --> kernel\src\hal\stub.rs:29:9
+   |
+29 |         unsafe {
+   |         ^^^^^^ unnecessary `unsafe` block
+   |
+   = note: `#[warn(unused_unsafe)]` (part of `#[warn(unused)]`) on by default
+
+warning: unnecessary `unsafe` block
+  --> kernel\src\debug\gdb_stub.rs:77:13
+   |
+77 |             unsafe {
+   |             ^^^^^^ unnecessary `unsafe` block
+
+warning: unnecessary `unsafe` block
+  --> kernel\src\testing\mod.rs:46:5
+   |
+46 |     unsafe {
+   |     ^^^^^^ unnecessary `unsafe` block
+
+error: lifetime may not live long enough
+  --> kernel\src\drivers\dtb.rs:78:20
+   |
+37 |   impl<'a> DeviceTree<'a> {
+   |        -- lifetime `'a` defined here
+...
+71 |       pub fn nodes(&self) -> DtbIterator<'a> {
+   |                    - let's call the lifetime of this reference `'1`
+...
+78 |               return DtbIterator {
+   |  ____________________^
+79 | |                 dt: self,
+80 | |                 offset: self.base.len(), // Force finished
+81 | |             };
+   | |_____________^ method was supposed to return data with lifetime `'a` but it is returning data with lifetime `'1`
+
+For more information about this error, try `rustc --explain E0599`.
+warning: `aetheros-kernel` (lib) generated 7 warnings
+error: could not compile `aetheros-kernel` (lib) due to 9 previous errors; 7 warnings emitted

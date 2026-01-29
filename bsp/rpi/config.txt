@@ -1,0 +1,20 @@
+# Raspberry Pi 4 Boot Configuration for AetherOS
+
+# Enable 64-bit mode
+arm_64bit=1
+
+# Kernel filename
+kernel=kernel8.img
+
+# Enable UART for debugging
+uart_2ndstage=1
+enable_uart=1
+
+# Disable rainbow splash screen
+disable_splash=1
+
+# Set core frequency (helps with UART stability)
+core_freq=250
+
+# GPU memory (minimal for headless)
+gpu_mem=16

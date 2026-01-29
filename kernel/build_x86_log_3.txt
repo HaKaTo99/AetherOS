@@ -1,0 +1,184 @@
+warning: profiles for the non root package will be ignored, specify profiles at the workspace root:
+package:   D:\GitHub\AetherOS\kernel\Cargo.toml
+workspace: D:\GitHub\AetherOS\Cargo.toml
+warning: virtual workspace defaulting to `resolver = "1"` despite one or more workspace members being on edition 2021 which implies `resolver = "2"`
+  |
+  = note: to keep the current resolver, specify `workspace.resolver = "1"` in the workspace root's manifest
+  = note: to use the edition 2021 resolver, specify `workspace.resolver = "2"` in the workspace root's manifest
+  = note: for more details see https://doc.rust-lang.org/cargo/reference/resolver.html#resolver-versions
+   Compiling aetheros-kernel v1.4.0 (D:\GitHub\AetherOS\kernel)
+warning: unused import: `core::marker::PhantomData`
+ --> kernel\src\memory\paging.rs:4:5
+  |
+4 | use core::marker::PhantomData;
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused import: `hal::Platform`
+  --> kernel\src\lib.rs:13:5
+   |
+13 | use hal::Platform; // Import trait for kernel_init usage
+   |     ^^^^^^^^^^^^^
+
+warning: unnecessary `unsafe` block
+   --> kernel\src\scheduler\active_objects.rs:100:17
+    |
+ 65 |         unsafe {
+    |         ------ because it's nested under this `unsafe` block
+...
+100 |                 unsafe {
+    |                 ^^^^^^ unnecessary `unsafe` block
+    |
+    = note: `#[warn(unused_unsafe)]` (part of `#[warn(unused)]`) on by default
+
+warning: variable `scheduled` is assigned to, but never used
+   --> kernel\src\scheduler\active_objects.rs:209:13
+    |
+209 |         let mut scheduled = 0;
+    |             ^^^^^^^^^^^^^
+    |
+    = note: consider using `_scheduled` instead
+    = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused variable: `msg`
+   --> kernel\src\scheduler\active_objects.rs:223:37
+    |
+223 |                         if let Some(msg) = obj.get_message() {
+    |                                     ^^^ help: if this is intentional, prefix it with an underscore: `_msg`
+
+warning: value assigned to `scheduled` is never read
+   --> kernel\src\scheduler\active_objects.rs:225:29
+    |
+225 | ...                   scheduled += 1;
+    |                       ^^^^^^^^^^^^^^
+    |
+    = help: maybe it is overwritten before being read?
+    = note: `#[warn(unused_assignments)]` (part of `#[warn(unused)]`) on by default
+
+warning: unnecessary `unsafe` block
+  --> kernel\src\hal\stub.rs:29:9
+   |
+29 |         unsafe {
+   |         ^^^^^^ unnecessary `unsafe` block
+
+warning: unnecessary `unsafe` block
+  --> kernel\src\debug\gdb_stub.rs:77:13
+   |
+77 |             unsafe {
+   |             ^^^^^^ unnecessary `unsafe` block
+
+warning: unnecessary `unsafe` block
+  --> kernel\src\testing\mod.rs:46:5
+   |
+46 |     unsafe {
+   |     ^^^^^^ unnecessary `unsafe` block
+
+warning: unused variable: `dtb_ptr`
+  --> kernel\src\lib.rs:46:20
+   |
+46 | pub fn kernel_init(dtb_ptr: usize) {
+   |                    ^^^^^^^ help: if this is intentional, prefix it with an underscore: `_dtb_ptr`
+
+warning: fields `allocation_history` and `distributed_enabled` are never read
+  --> kernel\src\memory\smme.rs:64:5
+   |
+57 | pub struct SymbianModernMemoryEngine {
+   |            ------------------------- fields in this struct
+...
+64 |     allocation_history: [usize; 16],
+   |     ^^^^^^^^^^^^^^^^^^
+...
+68 |     distributed_enabled: bool,
+   |     ^^^^^^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: fields `id`, `process_id`, and `priority` are never read
+  --> kernel\src\scheduler\active_objects.rs:33:5
+   |
+32 | pub struct ActiveObject {
+   |            ------------ fields in this struct
+33 |     id: u32,
+   |     ^^
+34 |     process_id: u32, // [NEW] Link to PCB
+   |     ^^^^^^^^^^
+35 |     priority: u8,
+   |     ^^^^^^^^
+
+warning: field `local_device_id` is never read
+  --> kernel\src\bus\quantum_bus.rs:60:5
+   |
+57 | pub struct DeviceMesh {
+   |            ---------- field in this struct
+...
+60 |     local_device_id: AtomicU32,
+   |     ^^^^^^^^^^^^^^^
+
+warning: constant `FR_RXFE` is never used
+  --> kernel\src\drivers\serial\pl011.rs:14:7
+   |
+14 | const FR_RXFE: u32 = 1 << 4; // Receive FIFO empty
+   |       ^^^^^^^
+
+warning: associated function `be_to_le` is never used
+  --> kernel\src\drivers\dtb.rs:66:8
+   |
+37 | impl<'a> DeviceTree<'a> {
+   | ----------------------- associated function in this implementation
+...
+66 |     fn be_to_le(val: u32) -> u32 {
+   |        ^^^^^^^^
+
+warning: `extern` fn uses type `(usize, usize)`, which is not FFI-safe
+   --> kernel\src\lib.rs:228:48
+    |
+228 | pub extern "C" fn aether_get_memory_stats() -> (usize, usize) {
+    |                                                ^^^^^^^^^^^^^^ not FFI-safe
+    |
+    = help: consider using a struct instead
+    = note: tuples have unspecified layout
+    = note: `#[warn(improper_ctypes_definitions)]` on by default
+
+warning: constant `MAIR_DEVICE_nGnRnE` should have an upper case name
+  --> kernel\src\memory\mmu.rs:24:7
+   |
+24 | const MAIR_DEVICE_nGnRnE: u64 = 0x00;  // Device memory
+   |       ^^^^^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(non_upper_case_globals)]` (part of `#[warn(nonstandard_style)]`) on by default
+help: convert the identifier to upper case
+   |
+24 - const MAIR_DEVICE_nGnRnE: u64 = 0x00;  // Device memory
+24 + const MAIR_DEVICE_N_GN_RN_E: u64 = 0x00;  // Device memory
+   |
+
+warning: creating a mutable reference to mutable static
+   --> kernel\src\hal\x86_64.rs:168:13
+    |
+168 |             VGA.write_byte(c);
+    |             ^^^^^^^^^^^^^^^^^ mutable reference to mutable static
+    |
+    = note: for more information, see <https://doc.rust-lang.org/edition-guide/rust-2024/static-mut-references.html>
+    = note: mutable references to mutable statics are dangerous; it's undefined behavior if any other pointer to the static is used or if any other reference is created for the static while the mutable reference lives
+    = note: `#[warn(static_mut_refs)]` (part of `#[warn(rust_2024_compatibility)]`) on by default
+
+warning: creating a mutable reference to mutable static
+  --> kernel\src\debug\gdb_stub.rs:91:9
+   |
+91 |         GDB_STUB.init();
+   |         ^^^^^^^^^^^^^^^ mutable reference to mutable static
+   |
+   = note: for more information, see <https://doc.rust-lang.org/edition-guide/rust-2024/static-mut-references.html>
+   = note: mutable references to mutable statics are dangerous; it's undefined behavior if any other pointer to the static is used or if any other reference is created for the static while the mutable reference lives
+
+error: unknown token in expression
+   |
+note: instantiated into assembly here
+  --> <inline asm>:20:9
+   |
+20 |     jmp .
+   |         ^
+
+warning: `aetheros-kernel` (lib) generated 19 warnings
+error: could not compile `aetheros-kernel` (lib) due to 1 previous error; 19 warnings emitted

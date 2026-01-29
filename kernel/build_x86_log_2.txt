@@ -1,0 +1,90 @@
+warning: profiles for the non root package will be ignored, specify profiles at the workspace root:
+package:   D:\GitHub\AetherOS\kernel\Cargo.toml
+workspace: D:\GitHub\AetherOS\Cargo.toml
+warning: virtual workspace defaulting to `resolver = "1"` despite one or more workspace members being on edition 2021 which implies `resolver = "2"`
+  |
+  = note: to keep the current resolver, specify `workspace.resolver = "1"` in the workspace root's manifest
+  = note: to use the edition 2021 resolver, specify `workspace.resolver = "2"` in the workspace root's manifest
+  = note: for more details see https://doc.rust-lang.org/cargo/reference/resolver.html#resolver-versions
+   Compiling aetheros-kernel v1.4.0 (D:\GitHub\AetherOS\kernel)
+warning: unused import: `core::marker::PhantomData`
+ --> kernel\src\memory\paging.rs:4:5
+  |
+4 | use core::marker::PhantomData;
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused import: `core::fmt`
+ --> kernel\src\hal\x86_64.rs:4:5
+  |
+4 | use core::fmt;
+  |     ^^^^^^^^^
+
+error[E0609]: no field `x30` on type `arch::context::CpuContext`
+  --> kernel\src\scheduler\active_objects.rs:89:21
+   |
+89 |             context.x30 = entry_point; // Link register (return address)
+   |                     ^^^ unknown field
+   |
+   = note: available field is: `sp`
+
+warning: unused import: `hal::Platform`
+  --> kernel\src\lib.rs:13:5
+   |
+13 | use hal::Platform; // Import trait for kernel_init usage
+   |     ^^^^^^^^^^^^^
+
+warning: variable `scheduled` is assigned to, but never used
+   --> kernel\src\scheduler\active_objects.rs:191:13
+    |
+191 |         let mut scheduled = 0;
+    |             ^^^^^^^^^^^^^
+    |
+    = note: consider using `_scheduled` instead
+    = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused variable: `msg`
+   --> kernel\src\scheduler\active_objects.rs:205:37
+    |
+205 |                         if let Some(msg) = obj.get_message() {
+    |                                     ^^^ help: if this is intentional, prefix it with an underscore: `_msg`
+
+warning: value assigned to `scheduled` is never read
+   --> kernel\src\scheduler\active_objects.rs:207:29
+    |
+207 | ...                   scheduled += 1;
+    |                       ^^^^^^^^^^^^^^
+    |
+    = help: maybe it is overwritten before being read?
+    = note: `#[warn(unused_assignments)]` (part of `#[warn(unused)]`) on by default
+
+warning: unnecessary `unsafe` block
+  --> kernel\src\hal\stub.rs:29:9
+   |
+29 |         unsafe {
+   |         ^^^^^^ unnecessary `unsafe` block
+   |
+   = note: `#[warn(unused_unsafe)]` (part of `#[warn(unused)]`) on by default
+
+warning: unnecessary `unsafe` block
+  --> kernel\src\debug\gdb_stub.rs:77:13
+   |
+77 |             unsafe {
+   |             ^^^^^^ unnecessary `unsafe` block
+
+warning: unnecessary `unsafe` block
+  --> kernel\src\testing\mod.rs:46:5
+   |
+46 |     unsafe {
+   |     ^^^^^^ unnecessary `unsafe` block
+
+warning: unused variable: `dtb_ptr`
+  --> kernel\src\lib.rs:46:20
+   |
+46 | pub fn kernel_init(dtb_ptr: usize) {
+   |                    ^^^^^^^ help: if this is intentional, prefix it with an underscore: `_dtb_ptr`
+
+For more information about this error, try `rustc --explain E0609`.
+warning: `aetheros-kernel` (lib) generated 10 warnings
+error: could not compile `aetheros-kernel` (lib) due to 1 previous error; 10 warnings emitted
