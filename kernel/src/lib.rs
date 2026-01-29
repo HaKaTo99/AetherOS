@@ -9,6 +9,9 @@ pub mod bus;
 pub mod oracle;
 pub mod ui;
 pub mod hal;
+
+use hal::Platform; // Import trait for kernel_init usage
+
 pub mod virt; // [NEW] Virtualization module
 pub mod arch; // [NEW] Architecture module
 pub mod panic; // [NEW] Panic handler
@@ -40,7 +43,7 @@ static mut DEVICE_MESH: DeviceMesh = DeviceMesh::new();
 /// Global Oracle Engine
 static mut ORACLE: TinyMLPredictor = TinyMLPredictor::new();
 
-pub fn kernel_init() {
+pub fn kernel_init(dtb_ptr: usize) {
     unsafe {
         // 0. Initialize HAL
         #[cfg(target_arch = "aarch64")]
@@ -48,7 +51,37 @@ pub fn kernel_init() {
             // Use RPiPlatform for real hardware
             static RPI: hal::rpi::RPiPlatform = hal::rpi::RPiPlatform::new();
             hal::init_platform(&RPI);
+            
+            // Log DTB Pointer
+            let platform = hal::get_platform();
+            if dtb_ptr != 0 {
+                platform.puts("DTB found at: ");
+                // TODO: proper hex printing needed, but for now simple ack
+                platform.puts("0x");
+                // (Hex printing implementation omitted for brevity)
+                platform.puts("...\r\n");
+                
+                // Try to parse DTB header
+                use crate::drivers::dtb::DeviceTree;
+                if let Some(dt) = DeviceTree::from_raw(dtb_ptr as *const u8) {
+                    platform.puts("Valid DTB detected. Size: ");
+                    // platform.put_hex(dt.total_size());
+                    platform.puts(" bytes\r\n");
+                    
+                    // Iterate (demo)
+                    let nodes = dt.nodes();
+                    for item in nodes {
+                        // Just iterate to verify
+                    }
+                    platform.puts("DTB Traversal OK\r\n");
+                } else {
+                    platform.puts("Invalid DTB Header\r\n");
+                }
+            } else {
+                platform.puts("No DTB provided (x0 = 0)\r\n");
+            }
         }
+
         
         #[cfg(not(target_arch = "aarch64"))]
         {
@@ -201,7 +234,7 @@ mod tests {
     fn test_kernel_init() {
         // Reset state first to ensure clean slate
         kernel_reset();
-        kernel_init();
+        kernel_init(0); // Pass 0 for testing
 
         unsafe {
             let smme = &mut *core::ptr::addr_of_mut!(SMME);
@@ -220,11 +253,13 @@ mod tests {
     #[test]
     fn test_kernel_api() {
         kernel_reset();
-        kernel_init();
+        kernel_init(0); // Pass 0 for testing
 
         let addr = aether_allocate(4096);
         assert!(addr > 0);
-
+        
+        // stats variable undefined unless committed is checked via api
+        let (reserved, committed) = aether_get_memory_stats();
         assert!(committed >= 4096);
     }
 }
