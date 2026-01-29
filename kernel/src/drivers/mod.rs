@@ -47,17 +47,18 @@ static mut TIMER: timer::arm_generic::ArmGenericTimer = timer::arm_generic::ArmG
 impl DriverManager {
     pub unsafe fn init() {
         // Initialize IRQ Controller first
-        if let Err(e) = GIC.init() {
+        // Initialize IRQ Controller first
+        if let Err(_e) = GIC.init() {
              // Panic or log failure
         }
         
         // Initialize Serial
-        if let Err(e) = PL011.init() {
+        if let Err(_e) = PL011.init() {
              // Panic
         }
         
         // Initialize Timer
-        if let Err(e) = TIMER.init() {
+        if let Err(_e) = TIMER.init() {
              // Panic
         }
     }
