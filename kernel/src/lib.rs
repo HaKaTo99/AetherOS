@@ -13,7 +13,9 @@ pub mod virt; // [NEW] Virtualization module
 pub mod arch; // [NEW] Architecture module
 pub mod panic; // [NEW] Panic handler
 pub mod debug; // [NEW] Debug utilities (GDB stub)
+
 pub mod testing; // [NEW] Test framework
+pub mod drivers; // [NEW] Driver framework
 
 pub use memory::smme::SymbianModernMemoryEngine;
 pub use scheduler::ActiveObjectScheduler;
