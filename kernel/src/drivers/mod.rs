@@ -40,37 +40,46 @@ pub struct DriverManager {
 }
 
 // Global instances
+// Global instances (ARM)
+#[cfg(target_arch = "aarch64")]
 static mut PL011: serial::pl011::Pl011Uart = serial::pl011::Pl011Uart::new(0xFE201000);
+#[cfg(target_arch = "aarch64")]
 static mut GIC: irq::gic400::Gic400 = irq::gic400::Gic400::new(0xFF841000, 0xFF842000);
+#[cfg(target_arch = "aarch64")]
 static mut TIMER: timer::arm_generic::ArmGenericTimer = timer::arm_generic::ArmGenericTimer::new();
 
 impl DriverManager {
     pub unsafe fn init() {
-        // Initialize IRQ Controller first
-        // Initialize IRQ Controller first
-        if let Err(_e) = GIC.init() {
-             // Panic or log failure
-        }
-        
-        // Initialize Serial
-        if let Err(_e) = PL011.init() {
-             // Panic
-        }
-        
-        // Initialize Timer
-        if let Err(_e) = TIMER.init() {
-             // Panic
+        #[cfg(target_arch = "aarch64")]
+        {
+            // Initialize IRQ Controller first
+            if let Err(_e) = GIC.init() {
+                 // Panic or log failure
+            }
+            
+            // Initialize Serial
+            if let Err(_e) = PL011.init() {
+                 // Panic
+            }
+            
+            // Initialize Timer
+            if let Err(_e) = TIMER.init() {
+                 // Panic
+            }
         }
     }
 
+    #[cfg(target_arch = "aarch64")]
     pub fn get_serial() -> &'static mut impl Driver {
         unsafe { &mut PL011 }
     }
 
-     pub fn get_irq_controller() -> &'static mut impl Driver {
+    #[cfg(target_arch = "aarch64")]
+    pub fn get_irq_controller() -> &'static mut impl Driver {
         unsafe { &mut GIC }
     }
 
+    #[cfg(target_arch = "aarch64")]
     pub fn get_timer() -> &'static mut impl Driver {
          unsafe { &mut TIMER }
     }
