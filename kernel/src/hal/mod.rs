@@ -15,6 +15,13 @@ pub trait Platform: Sync {
     
     // Serial support (debug output)
     fn put_char(&self, c: u8);
+
+    // Default implementation for string output
+    fn puts(&self, s: &str) {
+        for c in s.bytes() {
+            self.put_char(c);
+        }
+    }
 }
 
 /// Global platform instance
