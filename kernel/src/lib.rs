@@ -83,11 +83,18 @@ pub fn kernel_init(dtb_ptr: usize) {
         }
 
         
-        #[cfg(not(target_arch = "aarch64"))]
+        #[cfg(target_arch = "x86_64")]
+        {
+            static X86: hal::x86_64::X86Platform = hal::x86_64::X86Platform::new();
+            hal::init_platform(&X86);
+        }
+
+        #[cfg(not(any(target_arch = "aarch64", target_arch = "x86_64")))]
         {
             // Use StubPlatform for testing on host
             static STUB: hal::stub::StubPlatform = hal::stub::StubPlatform;
             hal::init_platform(&STUB);
+            // Stub doesn't print by default, so maybe we skip output
         }
 
         // Print initialization message

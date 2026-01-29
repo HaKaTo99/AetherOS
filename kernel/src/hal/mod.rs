@@ -2,7 +2,11 @@
 //! Dynamic Trait-based abstraction for multi-platform support
 
 pub mod stub;
+#[cfg(target_arch = "aarch64")]
 pub mod rpi;
+#[cfg(target_arch = "x86_64")]
+pub mod x86_64;
+
 
 /// Core Platform Trait - must be implemented by all hardware backends
 pub trait Platform: Sync {

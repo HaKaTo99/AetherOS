@@ -83,10 +83,28 @@ impl ActiveObject {
             }
             
             // Initialize context
-            let sp = (stack_base + STACK_SIZE - 16) as u64; // 16-byte aligned
+            // Initialize context
             let mut context = CpuContext::empty();
-            context.sp = sp;
-            context.x30 = entry_point; // Link register (return address)
+
+            #[cfg(target_arch = "aarch64")]
+            {
+                let sp = (stack_base + STACK_SIZE - 16) as u64;
+                context.sp = sp;
+                context.x30 = entry_point; // Link register (return address)
+            }
+
+            #[cfg(target_arch = "x86_64")]
+            {
+                // On x86_64, ret pops RIP from stack. We need to push entry_point.
+                let mut sp = (stack_base + STACK_SIZE - 16) as u64;
+                unsafe {
+                    let ptr = sp as *mut u64;
+                    // Push return address (entry point)
+                    sp -= 8;
+                    *ptr.sub(1) = entry_point;
+                }
+                context.sp = sp;
+            }
             
             Self {
                 id,

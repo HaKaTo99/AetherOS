@@ -1,0 +1,16 @@
+warning: profiles for the non root package will be ignored, specify profiles at the workspace root:
+package:   D:\GitHub\AetherOS\kernel\Cargo.toml
+workspace: D:\GitHub\AetherOS\Cargo.toml
+warning: virtual workspace defaulting to `resolver = "1"` despite one or more workspace members being on edition 2021 which implies `resolver = "2"`
+  |
+  = note: to keep the current resolver, specify `workspace.resolver = "1"` in the workspace root's manifest
+  = note: to use the edition 2021 resolver, specify `workspace.resolver = "2"` in the workspace root's manifest
+  = note: for more details see https://doc.rust-lang.org/cargo/reference/resolver.html#resolver-versions
+   Compiling aetheros-kernel v1.4.0 (D:\GitHub\AetherOS\kernel)
+error[E0463]: can't find crate for `core`
+  |
+  = note: the `x86_64-unknown-none` target may not be installed
+  = help: consider downloading the target with `rustup target add x86_64-unknown-none`
+
+For more information about this error, try `rustc --explain E0463`.
+error: could not compile `aetheros-kernel` (lib) due to 1 previous error
