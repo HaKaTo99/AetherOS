@@ -22,3 +22,7 @@ codegen-units = 1
 [lib]
 name = "aetheros_kernel"
 path = "src/lib.rs"
+
+[[bin]]
+name = "aetheros-kernel"
+path = "src/main.rs"
