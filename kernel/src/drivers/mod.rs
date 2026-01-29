@@ -1,6 +1,7 @@
 pub mod serial;
 pub mod irq;
 pub mod timer;
+pub mod dtb;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum DriverType {
