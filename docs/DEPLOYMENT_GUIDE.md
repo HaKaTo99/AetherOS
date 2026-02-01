@@ -1,7 +1,7 @@
 # AetherOS Deployment Guide
 
-**Version:** 1.9  
-**Last Updated:** February 1, 2026
+**Version:** 2.0.0  
+**Last Updated:** February 2, 2026
 
 This guide covers deploying AetherOS to physical hardware: x86_64 PCs (USB boot) and Raspberry Pi 4 (SD card).
 
@@ -87,7 +87,7 @@ sudo dd if=target/x86_64-unknown-none/release/bootimage-aetheros-kernel.bin \
 
 **Expected Output** (VGA or serial):
 ```
-[AetherOS] Kernel v1.9 booting...
+[AetherOS] Kernel v2.0.0 booting...
 [AetherOS] SMME initialized (3-tier pools)
 [AetherOS] Scheduler: Priority-based Active Objects
 [AetherOS] Distributed computing ready

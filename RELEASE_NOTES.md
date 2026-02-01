@@ -1,12 +1,12 @@
-# AetherOS v1.0 Release Notes
+# AetherOS v2.0.0 Release Notes
 
-**Release Date**: January 1, 2026  
-**Version**: 1.0.0  
-**Codename**: Quantum Genesis
+**Release Date**: February 2, 2026  
+**Version**: 2.0.0  
+**Codename**: Production Genesis
 
 ## 🎉 Major Milestone
 
-AetherOS v1.0 marks the first production-ready release of the world's first truly universal operating system, combining the best DNA from Symbian, BlackBerry, macOS, Android, and HarmonyOS.
+AetherOS v2.0.0 marks the first **production-ready release** of a truly distributed microkernel operating system, combining modern Rust safety with innovative distributed computing capabilities.
 
 ## ✨ What's New
 

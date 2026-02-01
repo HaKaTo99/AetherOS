@@ -1,7 +1,7 @@
 # AetherOS Developer Guide
 
-**Version:** 1.9  
-**Last Updated:** February 1, 2026
+**Version:** 2.0.0  
+**Last Updated:** February 2, 2026
 
 Welcome to the AetherOS Developer Guide! This document will help you understand, build, debug, and contribute to the AetherOS kernel.
 
