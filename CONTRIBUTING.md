@@ -4,7 +4,7 @@ Thank you for your interest in contributing to AetherOS v2.0! This document prov
 
 ---
 
-## 📋 Code of Conduct
+##  Code of Conduct
 
 - Be respectful, inclusive, and professional in all interactions
 - Provide constructive feedback
@@ -13,7 +13,7 @@ Thank you for your interest in contributing to AetherOS v2.0! This document prov
 
 ---
 
-## 🐛 Reporting Bugs
+##  Reporting Bugs
 
 Before submitting a bug report:
 
@@ -40,7 +40,7 @@ Before submitting a bug report:
 
 ---
 
-## 💡 Suggesting Features
+##  Suggesting Features
 
 Feature requests are welcome! Please:
 
@@ -51,7 +51,7 @@ Feature requests are welcome! Please:
 
 ---
 
-## 🔀 Pull Requests
+##  Pull Requests
 
 ### Workflow
 
@@ -75,15 +75,15 @@ Feature requests are welcome! Please:
 
 ### PR Requirements
 
-- ✅ All tests pass
-- ✅ Code formatted (`cargo fmt`)
-- ✅ No clippy warnings
-- ✅ Documentation updated (if applicable)
-- ✅ CHANGELOG entry (for user-facing changes)
+-  All tests pass
+-  Code formatted (`cargo fmt`)
+-  No clippy warnings
+-  Documentation updated (if applicable)
+-  CHANGELOG entry (for user-facing changes)
 
 ---
 
-## 🛠️ Development Setup
+##  Development Setup
 
 ### Clone Repository
 
@@ -129,7 +129,7 @@ qemu-system-x86_64 \
 
 ---
 
-## 📝 Coding Standards
+##  Coding Standards
 
 ### Rust Code
 
@@ -173,7 +173,7 @@ refactor: Simplify Quantum Bus RPC serialization
 
 ---
 
-## 🧪 Testing
+##  Testing
 
 ### Unit Tests
 
@@ -199,7 +199,7 @@ mod tests {
 
 ---
 
-## 📚 Documentation
+##  Documentation
 
 Update documentation for any changes:
 
@@ -211,7 +211,7 @@ Update documentation for any changes:
 
 ---
 
-## 🏗️ Architecture Guidelines
+##  Architecture Guidelines
 
 When contributing, keep in mind AetherOS design principles:
 
@@ -223,7 +223,7 @@ When contributing, keep in mind AetherOS design principles:
 
 ---
 
-## 🎯 Areas for Contribution
+##  Areas for Contribution
 
 We welcome contributions in these areas:
 
@@ -236,13 +236,13 @@ We welcome contributions in these areas:
 
 ---
 
-## 📄 License
+##  License
 
 By contributing, you agree that your contributions will be licensed under the MIT License.
 
 ---
 
-## ❓ Questions?
+##  Questions?
 
 - **GitHub Discussions**: Ask general questions
 - **GitHub Issues**: Report bugs or request features
@@ -250,10 +250,10 @@ By contributing, you agree that your contributions will be licensed under the MI
 
 ---
 
-## 🙏 Thank You!
+##  Thank You!
 
 Your contributions make AetherOS better for everyone. We appreciate your time and effort!
 
 ---
 
-**Happy Coding!** 🚀
+**Happy Coding!** 
