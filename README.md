@@ -10,7 +10,7 @@ AetherOS is a microkernel operating system written in Rust, designed for distrib
 
 ---
 
-## ✨ Features
+##  Features
 
 ### Core Kernel
 - **SMME Memory Allocator**: Three-tier pool architecture (64KB + 2MB + 16MB)
@@ -35,7 +35,7 @@ AetherOS is a microkernel operating system written in Rust, designed for distrib
 
 ---
 
-## 🚀 Quick Start
+##  Quick Start
 
 ### Prerequisites
 
@@ -87,7 +87,7 @@ qemu-system-aarch64 \
 
 ---
 
-## 📚 Documentation
+##  Documentation
 
 - **[Developer Guide](docs/DEVELOPER_GUIDE.md)**: Architecture, build instructions, debugging
 - **[Deployment Guide](docs/DEPLOYMENT_GUIDE.md)**: USB boot, SD card deployment, troubleshooting
@@ -96,7 +96,7 @@ qemu-system-aarch64 \
 
 ---
 
-## 🏗️ Architecture
+##  Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────┐
@@ -119,7 +119,7 @@ qemu-system-aarch64 \
 
 ---
 
-## 🧪 Testing
+##  Testing
 
 ```bash
 # Run unit tests
@@ -136,7 +136,7 @@ cargo doc --no-deps --open
 
 ---
 
-## 🤝 Contributing
+##  Contributing
 
 We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
@@ -148,7 +148,7 @@ We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 ---
 
-## 🔒 Security
+##  Security
 
 For security vulnerabilities, please see [SECURITY.md](SECURITY.md).
 
@@ -156,7 +156,7 @@ For security vulnerabilities, please see [SECURITY.md](SECURITY.md).
 
 ---
 
-## 🌟 Vision: Internet of Abilities
+##  Vision: Internet of Abilities
 
 AetherOS aims to create a **decentralized network of devices** that share capabilities, not just resources.
 
@@ -172,40 +172,40 @@ AetherOS aims to create a **decentralized network of devices** that share capabi
 
 ---
 
-## 📊 Project Status
+##  Project Status
 
 | Phase | Status | Version |
 |-------|--------|---------|
-| Core Foundation | ✅ Complete | v1.0 |
-| Scheduler & IPC | ✅ Complete | v1.2 |
-| Multi-Platform | ✅ Complete | v1.4 |
-| Security & Power | ✅ Complete | v1.5 |
-| Distributed System | ✅ Complete | v1.6 |
-| Testing | ✅ Complete | v1.6.1 |
-| Framework Services | ✅ Complete | v1.7 |
-| Distributed Finalization | ✅ Complete | v1.8 |
-| Documentation | ✅ Complete | v1.9 |
-| **Pre-Release Stabilization** | ✅ **Complete** | **v2.0** |
+| Core Foundation |  Complete | v1.0 |
+| Scheduler & IPC |  Complete | v1.2 |
+| Multi-Platform |  Complete | v1.4 |
+| Security & Power |  Complete | v1.5 |
+| Distributed System |  Complete | v1.6 |
+| Testing |  Complete | v1.6.1 |
+| Framework Services |  Complete | v1.7 |
+| Distributed Finalization |  Complete | v1.8 |
+| Documentation |  Complete | v1.9 |
+| **Pre-Release Stabilization** |  **Complete** | **v2.0** |
 
-**Overall**: 10/10 phases complete (100%) ✅
+**Overall**: 10/10 phases complete (100%) 
 
 ---
 
-## 📜 License
+##  License
 
 This project is licensed under the MIT License - see [LICENSE](LICENSE) file for details.
 
 ---
 
-## 🙏 Acknowledgments
+##  Acknowledgments
 
-- Built with Rust 🦀
+- Built with Rust 
 - Inspired by Symbian OS, Zircon, and seL4
 - Community contributors and testers
 
 ---
 
-## 📞 Contact
+##  Contact
 
 - **Issues**: [GitHub Issues](https://github.com/HaKaTo99/AetherOS/issues)
 - **Discussions**: [GitHub Discussions](https://github.com/HaKaTo99/AetherOS/discussions)
@@ -213,4 +213,4 @@ This project is licensed under the MIT License - see [LICENSE](LICENSE) file for
 
 ---
 
-**Star ⭐ this repo if you find it interesting!**
+**Star this repo if you find it interesting!**
