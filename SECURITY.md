@@ -122,7 +122,7 @@ We appreciate responsible security researchers. If you report a vulnerability:
 
 ## Security Contact
 
-- **Email**: security@aetheros.org (Placeholder)
+- **Email**: h.krisnanto@gmail.com
 - **PGP Key**: Available upon request
 - **GitHub Security Advisories**: [View Advisories](https://github.com/HaKaTo99/AetherOS/security/advisories)
 
