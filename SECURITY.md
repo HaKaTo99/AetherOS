@@ -19,7 +19,7 @@ We take security seriously. The following versions are currently supported with 
 
 If you discover a security vulnerability in AetherOS, please follow responsible disclosure:
 
-### 🔒 Private Disclosure (Preferred)
+###  Private Disclosure (Preferred)
 
 1. **Do NOT create a public GitHub issue**
 2. **Email**: `security@aetheros.org` (Placeholder - will be active soon)
