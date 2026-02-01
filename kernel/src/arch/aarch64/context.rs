@@ -29,3 +29,29 @@ impl CpuContext {
         }
     }
 }
+
+/// Full trap frame saved on exception entry
+#[repr(C)]
+#[derive(Debug, Clone, Copy, Default)]
+pub struct TrapFrame {
+    // General purpose registers x0-x29
+    pub regs: [u64; 30],
+    
+    // Link Register (x30)
+    pub x30: u64,
+    
+    // Exception Link Register (PC at time of exception)
+    pub elr_el1: u64,
+    
+    // Saved Program Status Register
+    pub spsr_el1: u64,
+    
+    // Stack Pointer
+    pub sp: u64,
+}
+
+impl TrapFrame {
+    pub fn new() -> Self {
+        Self::default()
+    }
+}

@@ -17,7 +17,14 @@ fn panic(info: &PanicInfo) -> ! {
     // Halt CPU
     loop {
         unsafe {
+            #[cfg(target_arch = "aarch64")]
             core::arch::asm!("wfe");
+            
+            #[cfg(target_arch = "x86_64")]
+            core::arch::asm!("hlt");
+
+            #[cfg(not(any(target_arch = "aarch64", target_arch = "x86_64")))]
+            {} // Do nothing or spin
         }
     }
 }

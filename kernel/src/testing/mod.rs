@@ -43,13 +43,13 @@ pub fn run_tests(tests: &[TestCase]) -> (usize, usize) {
 
 /// Log test output
 fn test_log(msg: &str) {
-    unsafe {
+    // unsafe {
         let platform = crate::hal::get_platform();
         for byte in msg.bytes() {
             platform.put_char(byte);
         }
         platform.put_char(b'\n');
-    }
+    // }
 }
 
 /// Assert macro for tests

@@ -23,3 +23,13 @@ impl CpuContext {
         }
     }
 }
+
+#[derive(Debug, Clone, Copy, Default)]
+#[repr(C)]
+pub struct TrapFrame {
+    pub elr: u64, // Dummy for x86
+    pub elr_el1: u64, // GDB compat
+    pub spsr_el1: u64, // GDB compat
+    pub sp_el0: u64, // GDB compat
+    pub x: [u64; 31], // GDB compat
+}

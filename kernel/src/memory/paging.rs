@@ -1,7 +1,7 @@
 //! Virtual Memory Paging (AArch64 VMSA)
 //! Supports 4KB granule, 48-bit PA
 
-use core::marker::PhantomData;
+// use core::marker::PhantomData;
 
 /// Page Table Entry (Descriptor)
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

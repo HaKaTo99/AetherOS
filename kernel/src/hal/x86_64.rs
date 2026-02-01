@@ -163,10 +163,16 @@ impl Platform for X86Platform {
     }
 
     fn put_char(&self, c: u8) {
+        // VGA is static mut, so we need addr_of_mut!
         unsafe {
             SERIAL.send(c);
-            VGA.write_byte(c);
+            let vga_ptr = core::ptr::addr_of_mut!(VGA);
+            (*vga_ptr).write_byte(c);
         }
+    }
+
+    fn cpu_relax(&self) {
+        unsafe { asm!("hlt", options(nomem, nostack, preserves_flags)); }
     }
 }
 

@@ -1,5 +1,6 @@
 pub mod context;
 pub mod boot;
+pub mod multiboot_header;
 
 use core::arch::global_asm;
 
@@ -12,6 +13,7 @@ extern "C" {
 // rdi = ptr to prev CpuContext
 // rsi = ptr to next CpuContext
 global_asm!(
+    // ".intel_syntax noprefix",
     ".global __switch_context",
     "__switch_context:",
     // Save callee-saved registers to prev (rdi)

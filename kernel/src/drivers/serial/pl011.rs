@@ -11,6 +11,7 @@ const CR: usize = 0x30;     // Control Register
 
 // Flag Register bits
 const FR_TXFF: u32 = 1 << 5; // Transmit FIFO full
+#[allow(dead_code)]
 const FR_RXFE: u32 = 1 << 4; // Receive FIFO empty
 
 // Control Register bits

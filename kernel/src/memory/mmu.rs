@@ -1,18 +1,40 @@
 //! MMU (Memory Management Unit) Setup for AArch64
-//! Enables virtual memory with identity mapping
+//! Enables virtual memory with W^X protection
 
 use crate::memory::paging::{PageTable, PageDescriptor, Mapper};
 use core::arch::asm;
 
+// Linker symbols
+extern "C" {
+    static __text_start: usize;
+    static __text_end: usize;
+    static __rodata_start: usize;
+    static __rodata_end: usize;
+    static __data_start: usize;
+    static __data_end: usize;
+    static __bss_start: usize;
+    static __bss_end: usize;
+}
+
 // Memory layout constants
-const KERNEL_BASE: usize = 0x80000;           // Kernel load address
-const KERNEL_SIZE: usize = 0x200000;          // 2MB kernel space
-const PERIPHERAL_BASE: usize = 0xFE000000;    // RPi4 peripherals
-const PERIPHERAL_SIZE: usize = 0x01800000;    // 24MB peripheral space
+const KERNEL_BASE: usize = 0x80000;           
+const PERIPHERAL_BASE: usize = 0xFE000000;    
+const PERIPHERAL_SIZE: usize = 0x01800000;    
 
 // Page table attributes
-const ATTR_DEVICE: u64 = 0x04;     // Device memory (peripherals)
-const ATTR_NORMAL: u64 = 0x44;     // Normal cacheable memory
+const ATTR_DEVICE: u64 = 0x04 | ATTR_UXN | ATTR_PXN;     // Device: nGnRnE, No Exec
+const ATTR_NORMAL: u64 = 0x44;                           // Normal cacheable
+
+// Access Permissions and Execute Never bits
+const ATTR_UXN: u64 = 1 << 54; // Unprivileged Execute Never
+const ATTR_PXN: u64 = 1 << 53; // Privileged Execute Never
+const ATTR_RO: u64 = 1 << 7;   // Read-Only (AP[2]=1)
+
+// Derived attributes for W^X
+// Derived attributes for W^X
+const ATTR_CODE: u64   = ATTR_NORMAL | ATTR_RO | ATTR_UXN;  // RX (Kernel EL1 only), User NX
+const ATTR_RODATA: u64 = ATTR_NORMAL | ATTR_RO | ATTR_UXN | ATTR_PXN; // RO, NX
+const ATTR_DATA: u64   = ATTR_NORMAL | ATTR_UXN | ATTR_PXN;           // RW, NX
 
 // Translation Control Register (TCR_EL1) bits
 const TCR_T0SZ: u64 = 16;          // 48-bit VA for TTBR0
@@ -21,7 +43,7 @@ const TCR_TG0_4K: u64 = 0 << 14;   // 4KB granule for TTBR0
 const TCR_TG1_4K: u64 = 2 << 30;   // 4KB granule for TTBR1
 
 // Memory Attribute Indirection Register (MAIR_EL1)
-const MAIR_DEVICE_nGnRnE: u64 = 0x00;  // Device memory
+const MAIR_DEVICE_N_GN_RN_E: u64 = 0x00;  // Device memory
 const MAIR_NORMAL_NC: u64 = 0x44;      // Normal non-cacheable
 const MAIR_NORMAL: u64 = 0xFF;         // Normal cacheable
 
@@ -45,15 +67,17 @@ static mut PAGE_TABLES: PageTables = PageTables {
 pub struct Mmu;
 
 impl Mmu {
-    /// Initialize and enable MMU
+    /// Initialize and enable MMU with W^X protection.
+    ///
+    /// # Safety
+    /// This function:
+    /// - Modifies system control registers (SCTLR, TCR, MAIR, TTBR0).
+    /// - Enables the MMU, changing memory access semantics globally.
+    /// - Requires exclusive access to memory setup sequence.
+    /// - Must be called only once during early boot.
     pub unsafe fn init() {
-        // 1. Setup page tables
         Self::setup_page_tables();
-
-        // 2. Configure MMU registers
         Self::configure_mmu();
-
-        // 3. Enable MMU
         Self::enable_mmu();
     }
 
@@ -69,14 +93,45 @@ impl Mmu {
                 (l1_addr as u64 & 0x0000_FFFF_FFFF_F000);
         }
 
-        // Identity map kernel space (0x80000 - 0x280000)
-        // Use raw pointer to avoid borrow checker issues
+        // Identity map kernel space with granular permissions
         let l1_kernel_ptr = &mut tables.l1_tables[0] as *mut PageTable;
         let mut mapper = Mapper::new(&mut *l1_kernel_ptr);
         
-        // Map kernel as normal cacheable memory
-        for addr in (KERNEL_BASE..KERNEL_BASE + KERNEL_SIZE).step_by(0x200000) {
-            mapper.map_memory(addr, addr, ATTR_NORMAL | PageDescriptor::ACCESS);
+        // Get section addresses from linker symbols
+        let text_start = &__text_start as *const _ as usize;
+        let text_end = &__text_end as *const _ as usize;
+        let rodata_start = &__rodata_start as *const _ as usize;
+        let rodata_end = &__rodata_end as *const _ as usize;
+        let data_start = &__data_start as *const _ as usize;
+
+        let bss_end = &__bss_end as *const _ as usize;
+
+        // 1. Text (RX)
+        for addr in (text_start..text_end).step_by(4096) {
+            mapper.map_memory(addr, addr, ATTR_CODE | PageDescriptor::ACCESS);
+        }
+
+        // 2. Read-Only Data (RO, NX)
+        for addr in (rodata_start..rodata_end).step_by(4096) {
+            mapper.map_memory(addr, addr, ATTR_RODATA | PageDescriptor::ACCESS);
+        }
+
+        // 3. Data + BSS (RW, NX)
+        // Combine Data and BSS ranges (assuming contiguous)
+        let rw_start = data_start;
+        let rw_end = bss_end;
+        for addr in (rw_start..rw_end).step_by(4096) {
+            mapper.map_memory(addr, addr, ATTR_DATA | PageDescriptor::ACCESS);
+        }
+        
+        // 4. Map remaining kernel space (Heap/Stack area) as RW NX
+        // Up to 2MB mark or further
+        let heap_start = (bss_end + 4095) & !4095;
+        let kernel_limit = KERNEL_BASE + 0x200000; // 2MB total
+        if heap_start < kernel_limit {
+            for addr in (heap_start..kernel_limit).step_by(4096) {
+                mapper.map_memory(addr, addr, ATTR_DATA | PageDescriptor::ACCESS);
+            }
         }
 
         // Identity map peripherals (0xFE000000+)
@@ -102,7 +157,7 @@ impl Mmu {
 
         // Set Memory Attribute Indirection Register (MAIR_EL1)
         let mair = 
-            (MAIR_DEVICE_nGnRnE << 0) |  // Index 0: Device
+            (MAIR_DEVICE_N_GN_RN_E << 0) |  // Index 0: Device
             (MAIR_NORMAL_NC << 8) |      // Index 1: Normal non-cacheable
             (MAIR_NORMAL << 16);         // Index 2: Normal cacheable
         asm!("msr mair_el1, {}", in(reg) mair);
@@ -119,6 +174,8 @@ impl Mmu {
 
         // Enable MMU, caches, and instruction cache
         sctlr |= SCTLR_MMU_ENABLED | SCTLR_CACHE_ENABLED | SCTLR_ICACHE_ENABLED;
+        // Make sure WXN (Write Execute Never) is set to enforce W^X globally if desired
+        // sctlr |= (1 << 19); // WXN bit
 
         // Write back SCTLR_EL1
         asm!("msr sctlr_el1, {}", in(reg) sctlr);

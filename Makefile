@@ -69,6 +69,42 @@ docker:
 	@echo "✓ Docker image built"
 	@echo "Run: docker run -it --rm -v $$(pwd):/aetheros aetheros-dev"
 
+# Android Boot Image Target
+android-image: kernel
+	@echo "=== Building Android boot.img ==="
+	@if exist bsp/android/build_bootimg.sh ( \
+		bash bsp/android/build_bootimg.sh \
+			kernel/target/aarch64-unknown-none/release/aetheros-kernel \
+			aetheros-boot.img \
+	) else ( \
+		echo "Skipping boot.img build: script not found" \
+	)
+
+# Flash/Boot on Android Device
+flash-android: android-image
+	@echo "=== Booting on Android Device ==="
+	@if exist bsp/android/flash.sh ( \
+		bash bsp/android/flash.sh aetheros-boot.img \
+	) else ( \
+		echo "Skipping flash: script not found" \
+	)
+
+# x86_64 ISO Image Target (GRUB)
+iso-image:
+	@echo "=== Building x86_64 ISO Image ==="
+	cd kernel && cargo build --release --target x86_64-unknown-none
+	@mkdir -p isofiles/boot/grub
+	@cp kernel/target/x86_64-unknown-none/release/aetheros-kernel isofiles/boot/kernel.bin
+	@echo "set timeout=0" > isofiles/boot/grub/grub.cfg
+	@echo "set default=0" >> isofiles/boot/grub/grub.cfg
+	@echo "" >> isofiles/boot/grub/grub.cfg
+	@echo "menuentry \"AetherOS\" {" >> isofiles/boot/grub/grub.cfg
+	@echo "    multiboot2 /boot/kernel.bin" >> isofiles/boot/grub/grub.cfg
+	@echo "    boot" >> isofiles/boot/grub/grub.cfg
+	@echo "}" >> isofiles/boot/grub/grub.cfg
+	@grub-mkrescue -o aetheros.iso isofiles 2> /dev/null || \
+		echo "WARNING: grub-mkrescue not found. ISO not created. (Install mtools & xorriso)"
+
 # Clean
 clean:
 	@echo "=== Cleaning Build Artifacts ==="

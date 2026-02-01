@@ -26,10 +26,10 @@ impl Platform for StubPlatform {
     fn put_char(&self, _c: u8) {
         // Write to UART0 for QEMU
         // Safety: In real impl this writes to 0x09000000
-        unsafe {
+        // unsafe {
             // Simulated MMIO for example purposes
             // core::ptr::write_volatile(0x09000000 as *mut u8, c);
-        }
+        // }
     }
 }
 

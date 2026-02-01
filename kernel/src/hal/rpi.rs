@@ -7,7 +7,7 @@ mod timer;
 mod gpio;
 pub mod gic;  // [NEW] Interrupt controller (public for kernel use)
 
-use uart::Uart;
+pub use uart::Uart;
 use timer::Timer;
 use gpio::{Gpio, GpioFunction, GpioPull};
 pub use gic::Gic;  // Export for kernel use
@@ -67,10 +67,7 @@ impl Platform for RPiPlatform {
 
     fn shutdown(&self) {
         self.uart.puts("System shutting down...\r\n");
-        // In real implementation: halt CPU
-        loop {
-            unsafe { core::arch::asm!("wfe") };
-        }
+        self.cpu_halt();
     }
 
     fn get_ticks(&self) -> u64 {
@@ -83,6 +80,66 @@ impl Platform for RPiPlatform {
 
     fn put_char(&self, c: u8) {
         self.uart.put_char(c);
+    }
+
+    fn cpu_relax(&self) {
+        // WFE: Wait For Event - low power state until event
+        unsafe { core::arch::asm!("wfe") };
+    }
+
+    fn cpu_halt(&self) -> ! {
+        // Infinite loop with WFE for shutdown
+        loop {
+            unsafe { core::arch::asm!("wfe") };
+        }
+    }
+
+    fn enter_idle_state(&self) {
+        // WFI: Wait For Interrupt - low power state until interrupt
+        // This is better for scheduler idle as it wakes on any interrupt
+        unsafe { core::arch::asm!("wfi") };
+    }
+
+    fn set_power_state(&self, domain_id: usize, on: bool) -> Result<bool, ()> {
+        // Use RPi4 Mailbox for power control
+        // Map domain_id to mailbox::PowerDomain
+        use crate::drivers::mailbox::{self, PowerDomain};
+        
+        // Simple mapping: 0=SdCard, 1=Uart0, etc. (Or validation)
+        let domain = match domain_id {
+            0 => PowerDomain::SdCard,
+            1 => PowerDomain::Uart0,
+            2 => PowerDomain::Uart1,
+            3 => PowerDomain::UsbHcd,
+            4 => PowerDomain::I2c0,
+            5 => PowerDomain::I2c1,
+            6 => PowerDomain::I2c2,
+            7 => PowerDomain::Spi,
+            8 => PowerDomain::Ccp2tx,
+            _ => return Err(()), // Unknown domain
+        };
+        
+        let _ = mailbox::init(); // Ensure initialized
+        mailbox::set_power_state(domain, on)
+    }
+    
+    fn get_power_state(&self, domain_id: usize) -> Result<bool, ()> {
+        use crate::drivers::mailbox::{self, PowerDomain};
+        let domain = match domain_id {
+            0 => PowerDomain::SdCard,
+            1 => PowerDomain::Uart0,
+            2 => PowerDomain::Uart1,
+            3 => PowerDomain::UsbHcd,
+            4 => PowerDomain::I2c0,
+            5 => PowerDomain::I2c1,
+            6 => PowerDomain::I2c2,
+            7 => PowerDomain::Spi,
+            8 => PowerDomain::Ccp2tx,
+            _ => return Err(()),
+        };
+        
+        let _ = mailbox::init(); // Ensure initialized
+        mailbox::get_power_state(domain)
     }
 }
 

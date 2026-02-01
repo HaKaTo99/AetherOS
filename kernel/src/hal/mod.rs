@@ -26,6 +26,38 @@ pub trait Platform: Sync {
             self.put_char(c);
         }
     }
+
+    // Power management
+    fn cpu_relax(&self) {
+        // Default: busy loop hint
+        core::hint::spin_loop();
+    }
+
+    /// Halt CPU indefinitely (for shutdown)
+    fn cpu_halt(&self) -> ! {
+        loop {
+            self.cpu_relax();
+        }
+    }
+
+    /// Enter low-power idle state (can be woken by interrupts)
+    /// Uses WFI (Wait For Interrupt) or WFE (Wait For Event)
+    fn enter_idle_state(&self) {
+        self.cpu_relax();
+    }
+
+    /// Set power state for a specific domain (device specific)
+    /// Returns Ok(true) if state is ON, Ok(false) if OFF
+    fn set_power_state(&self, _domain_id: usize, _on: bool) -> Result<bool, ()> {
+        // Default implementation does nothing
+        Err(())
+    }
+
+    /// Get power state for a specific domain
+    fn get_power_state(&self, _domain_id: usize) -> Result<bool, ()> {
+        // Default implementation does nothing
+        Err(())
+    }
 }
 
 /// Global platform instance

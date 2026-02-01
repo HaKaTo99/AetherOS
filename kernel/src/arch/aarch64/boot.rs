@@ -28,7 +28,8 @@ _start:
 
 3:  
     // 3. Jump to kernel_main
-    // x0 already contains DTB pointer
+    // x0 already contains DTB pointer passed by bootloader (U-Boot/ABL/UEFI)
+    // This standard ARM64 boot protocol allows generic booting.
     bl kernel_main
 
     // 4. Halt

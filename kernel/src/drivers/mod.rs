@@ -1,7 +1,20 @@
 pub mod serial;
 pub mod irq;
+pub mod video; // [NEW] Video drivers (SimpleFB)
 pub mod timer;
 pub mod dtb;
+pub mod pci; // [NEW] PCI Driver
+pub mod mailbox; // RPi4 specific
+pub mod acpi; // [NEW] ACPI Driver
+
+#[cfg(target_arch = "aarch64")]
+pub mod dvfs;
+
+#[cfg(target_arch = "aarch64")]
+pub mod power;
+
+pub mod input; // [NEW] Input Subsystem
+
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum DriverType {
@@ -49,13 +62,13 @@ static mut GIC: irq::gic400::Gic400 = irq::gic400::Gic400::new(0xFF841000, 0xFF8
 static mut TIMER: timer::arm_generic::ArmGenericTimer = timer::arm_generic::ArmGenericTimer::new();
 
 impl DriverManager {
-    pub unsafe fn init(dtb_ptr: usize) {
+    pub unsafe fn init(_dtb_ptr: usize) {
         #[cfg(target_arch = "aarch64")]
         {
             // If DTB is provided, try to discover devices
-            if dtb_ptr != 0 {
+            if _dtb_ptr != 0 {
                 use crate::drivers::dtb::{DeviceTree, DtbItem};
-                if let Some(dt) = DeviceTree::from_raw(dtb_ptr as *const u8) {
+                if let Some(dt) = DeviceTree::from_raw(_dtb_ptr as *const u8) {
                     for item in dt.nodes() {
                         if let DtbItem::Property { name, value } = item {
                             if name == "compatible" {
@@ -74,6 +87,11 @@ impl DriverManager {
                             }
                         }
                     }
+                    
+                    // Initialize Simple Framebuffer (Video) for Android standard output
+                    // This handles efifb handover from bootloader
+                    use crate::drivers::video::simplefb;
+                    simplefb::init(&dt);
                 }
             } else {
                 // Fallback to static init if no DTB (e.g. static RPi compile)
@@ -97,6 +115,7 @@ impl DriverManager {
 }
 
 // Helper to check if byte slice contains string
+#[cfg(target_arch = "aarch64")]
 fn contains(haystack: &[u8], needle: &str) -> bool {
     // Very basic substring check for now
     let needle_bytes = needle.as_bytes();

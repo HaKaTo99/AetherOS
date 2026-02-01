@@ -63,6 +63,7 @@ impl<'a> DeviceTree<'a> {
     }
 
     // Helper to byte-swap (big endian to little endian)
+    #[allow(dead_code)]
     fn be_to_le(val: u32) -> u32 {
         u32::from_be(val)
     }

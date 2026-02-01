@@ -1,3 +1,4 @@
 pub mod active_objects;
 
-pub use active_objects::ActiveObjectScheduler;
+pub use active_objects::{ActiveObjectScheduler, ActiveObject};
+

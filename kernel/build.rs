@@ -2,14 +2,22 @@ use std::env;
 use std::path::PathBuf;
 
 fn main() {
-    // Set the linker script to use
     let manifest_dir = env::var("CARGO_MANIFEST_DIR").unwrap();
-    let link_script = PathBuf::from(manifest_dir).join("link.ld");
+    let arch = env::var("CARGO_CFG_TARGET_ARCH").unwrap();
 
-    // Tell cargo to search the current directory for the linker script
-    println!("cargo:rustc-link-search={}", env::current_dir().unwrap().display());
+    let link_script = if arch == "x86_64" {
+        PathBuf::from(manifest_dir).join("src/arch/x86_64/linker.ld")
+    } else {
+        // Default to aarch64 / RPi4
+        PathBuf::from(manifest_dir).join("link.ld")
+    };
+
+    // Tell cargo to search directory containing link script
+    if let Some(parent) = link_script.parent() {
+        println!("cargo:rustc-link-search={}", parent.display());
+    }
     
     // Tell cargo to rerun if link.ld changes
     println!("cargo:rerun-if-changed={}", link_script.display());
-    println!("cargo:rerun-if-changed=link.ld");
+    println!("cargo:rustc-link-arg=-T{}", link_script.file_name().unwrap().to_str().unwrap());
 }
