@@ -50,6 +50,6 @@ impl Driver for NeuralLink {
     }
 
     fn device_type(&self) -> DriverType {
-        DriverType::Unknown // Should consist of Bci type
+        DriverType::BCI
     }
 }

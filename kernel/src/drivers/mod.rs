@@ -26,6 +26,7 @@ pub enum DriverType {
     Timer,
     BlockDevice,
     Network,
+    BCI, // [NEW] Brain-Computer Interface
     Unknown,
 }
 

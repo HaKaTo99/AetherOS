@@ -34,11 +34,43 @@ impl Qubit {
 
     /// Apply Hadamard Gate
     pub fn h_gate(&mut self) {
-        // H = 1/sqrt(2) * [[1, 1], [1, -1]]
-        // Simulation: Just flip state for demo
+        // Hadamard: |0> -> (|0> + |1>)/sqrt(2), |1> -> (|0> - |1>)/sqrt(2)
+        let inv_sqrt2 = 0.70710678;
+        let new_alpha = self.alpha.add(self.beta).scale(inv_sqrt2);
+        let new_beta = self.alpha.sub(self.beta).scale(inv_sqrt2);
+        self.alpha = new_alpha;
+        self.beta = new_beta;
+    }
+
+    pub fn x_gate(&mut self) {
+        // Pauli-X (NOT): |0> -> |1>, |1> -> |0>
         let temp = self.alpha;
-        self.alpha = Complex::new((self.alpha.re + self.beta.re) * 0.707, 0.0);
-        self.beta = Complex::new((temp.re - self.beta.re) * 0.707, 0.0);
+        self.alpha = self.beta;
+        self.beta = temp;
+    }
+
+    pub fn z_gate(&mut self) {
+        // Pauli-Z: |0> -> |0>, |1> -> -|1>
+        self.beta = self.beta.scale(-1.0);
+    }
+
+    pub fn measure(&mut self) -> bool {
+        // Simplified measurement probability
+        // A proper measurement would use a random number generator
+        // and collapse the state based on probabilities |alpha|^2 and |beta|^2.
+        // For this simulation, we'll use a threshold on beta's probability.
+        let prob_one = self.beta.norm_sq();
+        if prob_one > 0.5 {
+            // Collapse to |1>
+            self.alpha = Complex::new(0.0, 0.0);
+            self.beta = Complex::new(1.0, 0.0);
+            true
+        } else {
+            // Collapse to |0>
+            self.alpha = Complex::new(1.0, 0.0);
+            self.beta = Complex::new(0.0, 0.0);
+            false
+        }
     }
 }
 
@@ -53,15 +85,27 @@ impl QuantumSim {
     }
 
     pub fn allocate_qubit(&mut self) -> usize {
-        self.qubits.push(Qubit::zero());
+        self.qubits.push(Qubit::new());
         self.qubits.len() - 1
     }
 
-    pub fn run_measure(&self, qubit_idx: usize) -> bool {
-        // Measurement collapses state
-        if let Some(q) = self.qubits.get(qubit_idx) {
-            // Simplified measurement probability
-            q.beta.re.abs() > 0.5
+    pub fn cnot(&mut self, control_idx: usize, target_idx: usize) {
+        // Simplified CNOT simulation for separate qubits (not fully entangled state vector)
+        // If Control is heavily weighted to |1>, flip Target.
+        // Note: Real quantum computing requires a combined state vector (Size 2^N).
+        // This is a "Internet of Abilities" simulation.
+        if let Some(control) = self.qubits.get(control_idx) {
+            if control.beta.norm_sq() > 0.5 {
+                if let Some(target) = self.qubits.get_mut(target_idx) {
+                    target.x_gate();
+                }
+            }
+        }
+    }
+
+    pub fn run_measure(&mut self, idx: usize) -> bool {
+        if let Some(qubit) = self.qubits.get_mut(idx) {
+            qubit.measure()
         } else {
             false
         }

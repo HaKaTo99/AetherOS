@@ -32,31 +32,74 @@ pub trait NpuDriver: Send + Sync {
 }
 
 /// Simulated NPU for Development
+struct NpuJob {
+    id: usize,
+    complexity: u32,
+    ticks_remaining: u32,
+}
+
 pub struct SimulatedNpu {
-    initialized: bool,
+    status: bool,
+    pending_jobs: Vec<NpuJob>,
+    next_id: usize,
 }
 
 impl SimulatedNpu {
     pub const fn new() -> Self {
-        Self { initialized: false }
+        Self {
+            status: false,
+            pending_jobs: Vec::new(),
+            next_id: 1,
+        }
+    }
+
+    pub fn submit_job(&mut self, complexity: u32) -> usize {
+        let id = self.next_id;
+        self.next_id += 1;
+        self.pending_jobs.push(NpuJob {
+            id,
+            complexity,
+            ticks_remaining: complexity,
+        });
+        id
+    }
+
+    pub fn process_step(&mut self) -> Option<usize> {
+        // Process head of queue
+        if let Some(job) = self.pending_jobs.first_mut() {
+            if job.ticks_remaining > 0 {
+                job.ticks_remaining -= 1;
+                return None;
+            }
+        }
+        
+        // Job complete
+        if !self.pending_jobs.is_empty() {
+             let job = self.pending_jobs.remove(0);
+             return Some(job.id);
+        }
+        None
     }
 }
 
 impl NpuDriver for SimulatedNpu {
     fn init(&mut self) -> Result<(), &'static str> {
-        self.initialized = true;
-        crate::println!("[NPU] Simulated Neural Engine Online (CPU Fallback)");
+        self.status = true;
+        crate::println!("[NPU] Initialized (Simulated)");
         Ok(())
     }
 
     fn load_model(&mut self, _model_data: &[u8]) -> Result<u32, &'static str> {
-        if !self.initialized { return Err("NPU Not Initialized"); }
-        crate::println!("[NPU] Model Loaded: ID 1 (Llama-7B-Quantized)");
+        // In the job queue model, loading a model might just be a "job" or a synchronous setup.
+        // For now, we'll return a dummy ID.
+        if !self.status { return Err("NPU Not Initialized"); }
+        crate::println!("[NPU] Model Loaded: ID 1 (Simulated)");
         Ok(1)
     }
 
     fn run_inference(&mut self, _model_id: u32, _inputs: &[TensorBuffer], _outputs: &mut [TensorBuffer]) -> Result<(), &'static str> {
-        // Simulate computation time
+        // This is the original run_inference, which simulates a synchronous operation.
+        // The job queue logic would typically replace or wrap this for asynchronous processing.
         crate::println!("[NPU] Inference running... Done (12ms)");
         Ok(())
     }

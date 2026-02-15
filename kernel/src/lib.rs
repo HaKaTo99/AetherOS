@@ -534,7 +534,27 @@ pub fn kernel_tick() {
                 stack.poll(0i64);
             }
         }
+
+        // 8. Phase 19: Internet of Abilities Background Tasks
+        {
+            // 19.2: NPU Job Processing
+            use crate::ai::GLOBAL_NPU;
+            if let Some(completed_job) = GLOBAL_NPU.lock().process_step() {
+                 unsafe {
+                    if let Some(platform) = crate::hal::try_get_platform() {
+                         // platform.puts("[NPU] Job Completed\r\n"); // Verbose
+                    }
+                 }
+            }
+
+            // 19.3: Quantum Coherence Check (Simulation)
+            // In a real QPU, we might need to apply error correction codes (ECC) periodically
+            use crate::quantum::GLOBAL_QPU;
+            let _qpu = GLOBAL_QPU.lock(); 
+            // no-op for simulation, just locking proves access
+        }
     }
+}
 
 /// Reset kernel state for testing
 pub fn kernel_reset() {
