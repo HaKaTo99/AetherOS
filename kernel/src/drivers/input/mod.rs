@@ -2,6 +2,8 @@
 //! Defines events and key codes for specific drivers to translate into.
 
 pub mod ps2;
+pub mod usb_hid; // [NEW] USB HID driver (Phase 13.2)
+pub mod touch;   // [NEW] Touch gesture + IME (Phase 13.2)
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum KeyCode {

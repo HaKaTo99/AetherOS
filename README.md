@@ -1,6 +1,6 @@
 # AetherOS
 
-**Version 2.0.0** - Production-Ready Distributed Operating System
+**Version 3.0.0** - Cross-Platform Distributed Operating System
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Rust](https://img.shields.io/badge/rust-nightly-orange.svg)](https://www.rust-lang.org/)

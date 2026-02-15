@@ -29,6 +29,7 @@ pub mod net;      // [NEW] Networking Stack (Phase 5)
 pub mod ipc;      // [NEW] IPC & RPC (Phase 5.2)
 pub mod ai;       // [NEW] AI Inference (Phase 5.4)
 pub mod distributed; // [NEW] Distributed Computing (Phase 8)
+pub mod events;      // [NEW] Event Queue System (Phase 12.2)
 
 pub mod tests;    // [NEW] Functional Test Suite (Phase 6.2)
 
@@ -62,6 +63,9 @@ pub static ORACLE: spin::Mutex<TinyMLPredictor> = spin::Mutex::new(TinyMLPredict
 
 /// Global Network Stack (Phase 5)
 pub static NETWORK: spin::Mutex<Option<crate::net::NetworkStack>> = spin::Mutex::new(None);
+
+/// Global Distributed System (Phase 8) - Exposed for testing
+pub use distributed::{MIGRATION_MANAGER, KV_STORE, LOAD_BALANCER};
 
 use core::sync::atomic::{AtomicUsize, Ordering};
 static TICK_COUNTER: AtomicUsize = AtomicUsize::new(0);
@@ -346,7 +350,7 @@ pub fn kernel_tick() {
             let mut network = NETWORK.lock();
             if let Some(stack) = network.as_mut() {
                 // TODO: Get real timestamp
-                stack.poll(0);
+                stack.poll(0i64);
             }
         }
     }

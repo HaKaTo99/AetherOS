@@ -17,6 +17,11 @@ impl LoopbackDevice {
             queue: Mutex::new(VecDeque::new()),
         }
     }
+
+    /// Inject a packet into the receive queue (for testing)
+    pub fn inject(&self, packet: Vec<u8>) {
+        self.queue.lock().push_back(packet);
+    }
 }
 
 pub struct LoopbackRxToken {

@@ -14,6 +14,7 @@ pub mod dvfs;
 pub mod power;
 
 pub mod input; // [NEW] Input Subsystem
+pub mod media; // [NEW] Media Subsystem (Phase 13.3)
 
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

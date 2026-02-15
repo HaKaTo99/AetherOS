@@ -2,6 +2,9 @@
 //! 
 //! Simple test framework that works in no_std environment
 
+pub mod perf;      // [NEW] Performance Tuning & Bug Tracker (Phase 11.2/11.3)
+pub mod benchmark; // [NEW] Benchmark Framework (Phase 13.4)
+
 /// Test result
 #[derive(Debug, PartialEq)]
 pub enum TestResult {

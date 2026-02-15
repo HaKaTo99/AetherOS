@@ -32,6 +32,14 @@
 pub mod display;
 pub mod widget; // [NEW] Widget system
 pub mod layout; // [NEW] Layout engine
+pub mod window; // [NEW] Window Manager (Phase 13.1)
+pub mod components; // [NEW] Menu, FilePicker, Notifications (Phase 13.1)
+pub mod toolkit; // [NEW] App UI Toolkit (Phase 14.2)
+
+pub use display::*;
+pub use widget::*;
+pub use layout::*;
+pub use window::{Window, WindowManager, WINDOW_MANAGER};
 
 pub use display::{DistributedFramebuffer, UIUpdate, PixelFormat, VectorRenderer};
 pub use widget::{Widget, Rect, Label, Button};

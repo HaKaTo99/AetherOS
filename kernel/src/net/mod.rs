@@ -4,6 +4,9 @@
 pub mod driver;
 pub mod loopback;
 pub mod discovery; // Device Discovery Protocol
+pub mod virtio_net; // [NEW] VirtIO-net driver (Phase 12.1)
+pub mod bcm_genet;  // [NEW] BCM GENET RPi4 ethernet (Phase 12.1)
+pub mod dhcp;       // [NEW] DHCP client (Phase 12.1)
 
 use smoltcp::iface::{Config, Interface, SocketSet};
 use smoltcp::time::Instant;

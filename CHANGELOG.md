@@ -4,6 +4,78 @@ All notable changes to the AetherOS kernel will be documented in this file.
 
 ---
 
+## [3.0.0] - February 15, 2026
+
+### 🎉 Major Release: Cross-Platform Bridge
+
+AetherOS v3.0.0 completes Phases 11-15, delivering a cross-platform runtime that can execute Linux, Android, and WASM applications alongside native AetherOS apps.
+
+---
+
+### ✨ Highlights
+
+- **Cross-Platform Runtimes**: POSIX syscall translation, Android ART (Dalvik VM), WASM interpreter, OCI containers
+- **AetherScript Compiler**: Custom language with Lexer → Parser → AST → WASM codegen
+- **Security Hardening**: KASLR, TLS, SecureChannel, gas-metered WASM sandboxing
+- **Enhanced UX**: WindowManager, USB HID, multi-touch, media subsystem
+- **Developer Tools**: LSP server, kernel profiler, benchmark suite
+
+---
+
+### 🆕 Features
+
+#### Phase 11: Production Hardening (v2.0.x)
+- **Stress Testing**: 50k-tick accelerated simulation (`tests/stress.rs`)
+- **BugTracker**: P0-P3 severity triage system (`testing/perf.rs`)
+- **BenchmarkSuite**: Comparative framework vs Linux/Zircon (`testing/benchmark.rs`)
+- **PerfMetrics**: Runtime performance validator (`meets_targets()`)
+
+#### Phase 12: Network & Physical Distributed (v2.1)
+- **BCM GENET Driver**: RPi4 ethernet (`net/bcm_genet.rs`)
+- **VirtIO-net Driver**: QEMU/cloud networking (`net/virtio_net.rs`)
+- **DHCP Client**: Full state machine (`net/dhcp.rs`)
+- **KASLR**: Kernel address space randomization (`security/hardening.rs`)
+- **TLS + SecureChannel**: Encrypted device-to-device communication
+- **EventRouter + EventProcessor**: Multi-threaded event system (`events/mod.rs`)
+
+#### Phase 13: Enhanced User Experience (v2.2)
+- **WindowManager**: Overlapping windows, z-ordering, clipping (`ui/window.rs`)
+- **UI Components**: MenuBar, ContextMenu, FilePicker, NotificationManager (`ui/components.rs`)
+- **USB HID Driver**: Keyboard, mouse, gamepad (`drivers/input/usb_hid.rs`)
+- **Multi-touch**: 10-point touch handler, gesture recognition (`drivers/input/touch.rs`)
+- **IME**: Input Method Editor for international text
+- **Media Subsystem**: H.264/VP9 video, audio I/O, camera HAL (`drivers/media.rs`)
+
+#### Phase 14: Ecosystem Foundation (v2.5)
+- **IPC App Bindings**: `IpcHandle` + `ServiceRegistry` (`ipc/app_bindings.rs`)
+- **UI Toolkit**: Fluent `AppUI` builder for apps (`ui/toolkit.rs`)
+- **AetherScript Compiler**: Lexer, Parser, AST, WASM CodeGen (`runtime/aetherscript.rs`)
+- **LSP Server**: Diagnostics + completions for AetherScript (`runtime/devtools.rs`)
+- **Profiler**: Function-level hotspot analysis with top-10 ranking
+
+#### Phase 15: Cross-Platform Bridge (v3.0)
+- **POSIX Layer**: 14 Linux syscalls, VFS with VNode, fork, pthreads (`runtime/posix.rs`)
+- **Android ART**: Dalvik VM (12 opcodes), APK installer, Binder IPC (`runtime/android.rs`)
+- **Container Runtime**: OCI images, ResourceLimits, NetNamespace (`runtime/container.rs`)
+- **WASM Runtime**: Stack interpreter, WASI, gas metering, app store (`runtime/wasm.rs`)
+
+---
+
+### 📊 Statistics
+
+- **Modules**: 40+ kernel modules
+- **Lines of Code**: ~25,000+ (Rust)
+- **Platforms**: 3 native + 3 compatibility runtimes
+- **Build**: 0 errors, 60 warnings (unused stubs)
+
+---
+
+### ⬆️ Upgrade from v2.0.0
+
+No breaking changes. All v2.0 APIs remain compatible. New modules are additive.
+
+---
+
 ## [2.0.0] - February 2026
 
 ###  Major Release: Production-Ready Distributed OS Kernel

@@ -1,4 +1,5 @@
 pub mod capabilities;
+pub mod hardening; // [NEW] KASLR, TLS, SecureChannel (Phase 12.3)
 
 // High-level security checks
 pub fn check_permission(subject: &capabilities::SecurityContext, object: u32, perm: u32) -> bool {
