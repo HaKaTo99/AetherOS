@@ -88,13 +88,73 @@ qemu-system-aarch64 \
 
 ---
 
+##  Project Structure
+
+```
+AetherOS/
+├── boot/                  # Boot configuration (GRUB)
+├── bsp/                   # Board Support Packages
+│   ├── android/           #   Android device BSP
+│   ├── buildroot/         #   Buildroot integration
+│   ├── rpi/               #   Raspberry Pi 4 BSP
+│   └── yocto/             #   Yocto Linux BSP
+├── compiler/              # AetherScript compiler
+├── docs/                  # Documentation
+│   ├── archive/           #   Historical docs (v1.x)
+│   ├── guides/            #   Developer & deployment guides
+│   ├── porting/           #   Platform porting guides
+│   ├── reference/         #   API & capabilities reference
+│   ├── reports/           #   Implementation & test reports
+│   ├── MASTER_TODO.md     #   Full development roadmap
+│   └── VERSION_HISTORY.md #   v1.0 → v3.0 evolution
+├── examples/              # AetherScript example apps
+├── installer/             # OS installer
+├── kernel/                # Kernel source code
+│   ├── src/
+│   │   ├── ai/            #   Oracle AI predictor
+│   │   ├── arch/          #   Architecture (aarch64, x86_64)
+│   │   ├── bus/           #   Quantum Bus RPC
+│   │   ├── distributed/   #   KV store, migration, load balancer
+│   │   ├── drivers/       #   Device drivers (input, video, etc.)
+│   │   ├── events/        #   Event router & processor
+│   │   ├── hal/           #   Hardware Abstraction Layer
+│   │   ├── ipc/           #   Inter-Process Communication
+│   │   ├── loader/        #   ELF loader & user mode
+│   │   ├── memory/        #   SMME allocator, MMU, paging
+│   │   ├── net/           #   Network stack (BCM GENET, VirtIO)
+│   │   ├── oracle/        #   AI inference engine
+│   │   ├── runtime/       #   POSIX, Android, WASM, containers
+│   │   ├── scheduler/     #   Active Object scheduler
+│   │   ├── security/      #   Capabilities, KASLR, hardening
+│   │   ├── syscall/       #   System call interface
+│   │   ├── testing/       #   Benchmarks & perf metrics
+│   │   ├── tests/         #   Unit & stress tests
+│   │   ├── ui/            #   Window manager, widgets, toolkit
+│   │   └── virt/          #   Virtualization
+│   ├── Cargo.toml
+│   └── build.rs
+├── scripts/               # Build & deployment scripts
+├── security/              # Keys & signing infrastructure
+├── tools/                 # Build tools (ISO creator)
+├── website/               # Landing page
+├── CHANGELOG.md           # Detailed change log
+├── CONTRIBUTING.md        # Contribution guidelines
+├── Dockerfile             # Container build
+├── Makefile               # Build automation
+├── README.md              # ← You are here
+├── RELEASE_NOTES.md       # v3.0.0 release notes
+└── SECURITY.md            # Security policy
+```
+
+---
+
 ##  Documentation
 
+- **[Version History](docs/VERSION_HISTORY.md)**: Complete v1.0 → v3.0 evolution
 - **[Capabilities v3.0](docs/reference/CAPABILITIES_v2.0.md)**: Full feature overview (Phase 1-15)
-- **[Developer Guide](docs/guides/DEVELOPER_GUIDE.md)**: Architecture, build instructions, debugging
-- **[Deployment Guide](docs/guides/DEPLOYMENT_GUIDE.md)**: USB boot, RPi4 setup, troubleshooting
+- **[Developer Guide](docs/guides/DEVELOPER_GUIDE.md)**: Architecture, build, debugging
+- **[Deployment Guide](docs/guides/DEPLOYMENT_GUIDE.md)**: USB boot, RPi4 setup
 - **[API Reference](docs/reference/API_REFERENCE.md)**: Rustdoc overview
-- **[Porting Roadmap](docs/porting/PORTING_ROADMAP.md)**: Porting strategy
 - **[CHANGELOG](CHANGELOG.md)**: Full v3.0 release notes
 
 ---
