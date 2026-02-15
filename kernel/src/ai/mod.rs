@@ -2,34 +2,36 @@
 //! Stub implementation for NPU/AI acceleration
 
 pub mod tensor; // N-dimensional arrays (Phase 5.4)
-pub mod engine; // Inference engine (Phase 5.4)
 pub mod npu;    // NPU Driver (Phase 19.2)
 
 pub use tensor::Tensor;
-pub use engine::{InferenceEngine, ModelMetadata};
 pub use npu::{NpuDriver, SimulatedNpu, GLOBAL_NPU};
 use alloc::vec;
 use alloc::vec::Vec;
 use alloc::string::String;
 
+/// AI Model Metadata
+#[derive(Clone)]
+pub struct ModelMetadata {
+    pub name: String,
+    pub version: u32,
+}
+
 /// AI Model representation
 #[derive(Clone)]
 pub struct Model {
-    /// Model name/identifier
-    pub name: String,
-    /// Model version
-    pub version: u32,
-    /// Input tensor dimensions
+    pub metadata: ModelMetadata,
     pub input_shape: Vec<usize>,
-    /// Output tensor dimensions
     pub output_shape: Vec<usize>,
 }
 
 impl Model {
     pub fn new(name: &str, input_shape: Vec<usize>, output_shape: Vec<usize>) -> Self {
         Self {
-            name: String::from(name),
-            version: 1,
+            metadata: ModelMetadata {
+                name: String::from(name),
+                version: 1,
+            },
             input_shape,
             output_shape,
         }
@@ -57,13 +59,12 @@ impl InferenceResult {
     }
 }
 
-/// AI Engine - Manages inference execution
-pub struct AiEngine {
+pub struct InferenceEngine {
     /// Loaded models
     models: Vec<Model>,
 }
 
-impl AiEngine {
+impl InferenceEngine {
     pub const fn new() -> Self {
         Self {
             models: Vec::new(),
@@ -72,7 +73,7 @@ impl AiEngine {
     
     /// Load a model (stub - no actual loading)
     pub fn load_model(&mut self, model: Model) {
-        log::info!("AI: Loading model '{}' v{}", model.name, model.version);
+        log::info!("AI: Loading model '{}' v{}", model.metadata.name, model.metadata.version);
         self.models.push(model);
     }
     
@@ -80,7 +81,7 @@ impl AiEngine {
     pub fn run_inference(&self, model_name: &str, input: &Tensor) -> Result<InferenceResult, &'static str> {
         // Find model
         let _model = self.models.iter()
-            .find(|m| m.name == model_name)
+            .find(|m| m.metadata.name == model_name)
             .ok_or("Model not found")?;
         
         log::debug!("AI: Running inference for model '{}'", model_name);
@@ -111,7 +112,7 @@ impl AiEngine {
 }
 
 // Global AI Engine
-static mut AI_ENGINE: AiEngine = AiEngine::new();
+static mut AI_ENGINE: InferenceEngine = InferenceEngine::new();
 
 /// Initialize AI subsystem
 pub fn init_ai() {
@@ -134,7 +135,7 @@ pub fn init_ai() {
 }
 
 /// Get global AI engine
-pub fn get_ai_engine() -> &'static mut AiEngine {
+pub fn get_ai_engine() -> &'static mut InferenceEngine {
     unsafe { &mut AI_ENGINE }
 }
 
@@ -144,7 +145,7 @@ mod tests {
     
     #[test]
     fn test_mock_inference() {
-        let mut engine = AiEngine::new();
+        let mut engine = InferenceEngine::new();
         let model = Model::new("test_model", vec![1, 10], vec![1, 5]);
         engine.load_model(model);
         

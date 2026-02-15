@@ -5,11 +5,13 @@ use alloc::string::String;
 use alloc::vec::Vec;
 use alloc::collections::BTreeMap;
 use spin::Mutex;
+/// Node ID Type for the Mesh
+pub type NodeId = u64;
 
 /// A node in the AetherOS mesh
 #[derive(Debug, Clone)]
 pub struct MeshNode {
-    pub id: u64,
+    pub id: NodeId,
     pub name: String,
     pub capabilities: Vec<String>,
     pub signal_strength: u8, // 0-100

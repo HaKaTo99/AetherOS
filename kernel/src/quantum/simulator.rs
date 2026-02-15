@@ -15,6 +15,22 @@ impl Complex {
     pub fn new(re: f64, im: f64) -> Self {
         Self { re, im }
     }
+
+    pub fn add(self, other: Self) -> Self {
+        Self::new(self.re + other.re, self.im + other.im)
+    }
+
+    pub fn sub(self, other: Self) -> Self {
+        Self::new(self.re - other.re, self.im - other.im)
+    }
+
+    pub fn scale(self, factor: f64) -> Self {
+        Self::new(self.re * factor, self.im * factor)
+    }
+
+    pub fn norm_sq(self) -> f64 {
+        self.re * self.re + self.im * self.im
+    }
 }
 
 /// A Qubit State
@@ -25,6 +41,10 @@ pub struct Qubit {
 }
 
 impl Qubit {
+    pub fn new() -> Self {
+        Self::zero()
+    }
+
     pub fn zero() -> Self {
         Self {
             alpha: Complex::new(1.0, 0.0),

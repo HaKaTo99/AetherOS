@@ -485,74 +485,59 @@ pub fn kernel_tick() {
     // 5. Poll keyboard input (Phase 7.3)
     #[cfg(target_arch = "x86_64")]
     {
-            use crate::drivers::input::ps2;
-            unsafe {
-                if let Some(_event) = ps2::KEYBOARD.poll() {
-                    // TODO: Push to event queue or handle
-                    // For now, keyboard input is captured but not processed visually
-                }
+        use crate::drivers::input::ps2;
+        unsafe {
+            if let Some(_event) = ps2::KEYBOARD.poll() {
+                // TODO: Push to event queue or handle
             }
         }
+    }
 
-        // 6. Update load balancer metrics (Phase 8.3)
-        use crate::distributed::LOAD_BALANCER;
-        // Scope guards for safe locking
-        {
-            let scheduler = SCHEDULER.lock();
-            let smme = SMME.lock();
-            LOAD_BALANCER.lock().update_metrics(&scheduler, &smme);
-        }
+    // 6. Update load balancer metrics (Phase 8.3)
+    use crate::distributed::LOAD_BALANCER;
+    {
+        let scheduler = SCHEDULER.lock();
+        let smme = SMME.lock();
+        LOAD_BALANCER.lock().update_metrics(&scheduler, &smme);
+    }
 
-        // Check if migration needed
-        if LOAD_BALANCER.lock().should_migrate() {
-            use crate::distributed::MIGRATION_MANAGER;
-            let mut migration = MIGRATION_MANAGER.lock();
-            let _ = migration.migrate_task(1, 2); // Fake task ID 1 to Fake Device 2
-        }
+    // Check if migration needed
+    if LOAD_BALANCER.lock().should_migrate() {
+        use crate::distributed::MIGRATION_MANAGER;
+        let mut migration = MIGRATION_MANAGER.lock();
+        let _ = migration.migrate_task(1, 2);
+    }
 
-        // --- Phase 10.6: Internal Simulation & Stress Test ---
-        let ticks = TICK_COUNTER.fetch_add(1, Ordering::Relaxed);
-        if ticks % 100 == 0 {
-            // Every 100 ticks, simulate high load
-            let mut lb = LOAD_BALANCER.lock();
-            lb.simulate_high_load();
-            
-            // Log simulation
-            unsafe {
-                if let Some(platform) = crate::hal::try_get_platform() {
-                     platform.puts("[SIM] High Load Simulated! Triggering Migration...\r\n");
-                }
+    // --- Phase 10.6: Internal Simulation & Stress Test ---
+    let ticks = TICK_COUNTER.fetch_add(1, Ordering::Relaxed);
+    if ticks % 100 == 0 {
+        let mut lb = LOAD_BALANCER.lock();
+        lb.simulate_high_load();
+        
+        unsafe {
+            if let Some(platform) = crate::hal::try_get_platform() {
+                 platform.puts("[SIM] High Load Simulated! Triggering Migration...\r\n");
             }
         }
-        // -----------------------------------------------------
+    }
 
-        // 7. Poll Network Stack (Phase 5)
-        {
-            let mut network = NETWORK.lock();
-            if let Some(stack) = network.as_mut() {
-                // TODO: Get real timestamp
-                stack.poll(0i64);
-            }
+    // 7. Poll Network Stack (Phase 5)
+    {
+        let mut network = NETWORK.lock();
+        if let Some(stack) = network.as_mut() {
+            stack.poll(0i64);
+        }
+    }
+
+    // 8. Phase 19: Internet of Abilities Background Tasks
+    {
+        use crate::ai::GLOBAL_NPU;
+        if let Some(_completed_job) = GLOBAL_NPU.lock().process_step() {
+             // Job progress...
         }
 
-        // 8. Phase 19: Internet of Abilities Background Tasks
-        {
-            // 19.2: NPU Job Processing
-            use crate::ai::GLOBAL_NPU;
-            if let Some(completed_job) = GLOBAL_NPU.lock().process_step() {
-                 unsafe {
-                    if let Some(platform) = crate::hal::try_get_platform() {
-                         // platform.puts("[NPU] Job Completed\r\n"); // Verbose
-                    }
-                 }
-            }
-
-            // 19.3: Quantum Coherence Check (Simulation)
-            // In a real QPU, we might need to apply error correction codes (ECC) periodically
-            use crate::quantum::GLOBAL_QPU;
-            let _qpu = GLOBAL_QPU.lock(); 
-            // no-op for simulation, just locking proves access
-        }
+        use crate::quantum::GLOBAL_QPU;
+        let _qpu = GLOBAL_QPU.lock(); 
     }
 }
 
