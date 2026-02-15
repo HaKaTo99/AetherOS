@@ -11,7 +11,7 @@ Practical guides for getting started and developing on AetherOS.
 
 ##  Reference
 Technical specifications and detailed reference material.
-- [Capabilities v2.0](reference/CAPABILITIES_v2.0.md) - **Latest capabilities overview.**
+- [Capabilities v3.0](reference/CAPABILITIES_v2.0.md) - **Latest capabilities overview (Phase 1-15).**
 - [API Reference](reference/API_REFERENCE.md) - Kernel API documentation.
 - [Secure Boot](reference/SECURE_BOOT.md) - Security and signing infrastructure.
 - [UEFI Installation](reference/UEFI_INSTALL.md) - x86_64 UEFI specifics.

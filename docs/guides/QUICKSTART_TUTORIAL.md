@@ -1,7 +1,7 @@
 # QUICKSTART TUTORIAL — Developer Guide
 
-> **⚠️ NOTE**: This tutorial describes the **future vision** for the AetherOS SDK (targeted for v2.3+). 
-> For current kernel development instructions, please see [DEVELOPER_GUIDE.md](DEVELOPER_GUIDE.md).
+> **✅ AetherScript SDK**: Available as of v3.0.0. The AetherScript compiler supports Lexer → Parser → AST → WASM codegen.  
+> For kernel development instructions, see [DEVELOPER_GUIDE.md](DEVELOPER_GUIDE.md).
 
 ## 5-Minute Quick Start (Vision)
 

@@ -1,7 +1,7 @@
 # AetherOS Developer Guide
 
-**Version:** 2.0.0  
-**Last Updated:** February 2, 2026
+**Version:** 3.0.0  
+**Last Updated:** February 15, 2026
 
 Welcome to the AetherOS Developer Guide! This document will help you understand, build, debug, and contribute to the AetherOS kernel.
 
@@ -26,28 +26,39 @@ AetherOS is a microkernel operating system written in Rust, designed for distrib
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│                    AetherOS Kernel                      │
+│                  AetherOS Kernel v3.0                    │
 ├─────────────────────────────────────────────────────────┤
 │  Phase 1-2: Foundation                                  │
 │  ├─ SMME (Memory Allocator)                            │
 │  ├─ Active Object Scheduler (Priority-based)           │
 │  ├─ Synchronization Primitives (Mutex, RwLock, etc.)   │
-│  └─ IPC (Quantum Channel RPC)                          │
+│  └─ IPC (Quantum Channel RPC + App Bindings)           │
 ├─────────────────────────────────────────────────────────┤
 │  Phase 3-5: Platform & Distribution                     │
 │  ├─ HAL (RPi4, x86_64, Android)                        │
-│  ├─ Network Stack (smoltcp)                             │
+│  ├─ Network Stack (smoltcp + BCM GENET + VirtIO)       │
 │  ├─ Device Discovery (Beacon protocol)                  │
 │  └─ AI Inference (Oracle predictor)                     │
 ├─────────────────────────────────────────────────────────┤
-│  Phase 7-8: Services & Distribution                     │
-│  ├─ Graphics (VGA, SimpleFB)                            │
-│  ├─ UI Framework (Widget + FlexLayout)                  │
-│  ├─ Input (PS/2 Keyboard - polling)                     │
-│  ├─ Task Migration                                      │
-│  ├─ Distributed KV Store                                │
-│  ├─ Load Balancing                                      │
-│  └─ Internal Simulation (Auto-Stress Test)              │
+│  Phase 7-8, 13: Services & UX                           │
+│  ├─ Graphics (VGA, SimpleFB, WindowManager)             │
+│  ├─ UI Framework (Widget + FlexLayout + UI Toolkit)     │
+│  ├─ Input (USB HID + Multi-touch + IME)                 │
+│  ├─ Media (Video, Audio, Camera)                        │
+│  ├─ Task Migration & Load Balancing                     │
+│  └─ Distributed KV Store                                │
+├─────────────────────────────────────────────────────────┤
+│  Phase 14: Ecosystem                                    │
+│  ├─ AetherScript Compiler (Lexer→Parser→AST→WASM)      │
+│  ├─ Package Manager (apm / .apkg)                       │
+│  ├─ Developer Tools (LSP, Profiler)                     │
+│  └─ App Framework & UI Toolkit                          │
+├─────────────────────────────────────────────────────────┤
+│  Phase 15: Cross-Platform Bridge                        │
+│  ├─ POSIX Layer (syscall translation, VFS, pthreads)    │
+│  ├─ Android ART (Dalvik VM, APK, Binder)                │
+│  ├─ Container Runtime (OCI, cgroups, namespaces)        │
+│  └─ WASM Runtime (interpreter, WASI, app store)         │
 └─────────────────────────────────────────────────────────┘
 ```
 
@@ -57,6 +68,7 @@ AetherOS is a microkernel operating system written in Rust, designed for distrib
 - **Rust Safety**: Memory-safe by default, `unsafe` only where necessary
 - **Microkernel**: Minimal kernel, services in userspace (future)
 - **Distributed-First**: Multi-device computing as a core feature
+- **Cross-Platform**: Run Linux, Android, and WASM apps natively
 
 ---
 

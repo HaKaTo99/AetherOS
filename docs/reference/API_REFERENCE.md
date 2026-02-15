@@ -1,7 +1,7 @@
 # AetherOS API Reference
 
-**Version:** 2.0.0  
-**Last Updated:** February 2, 2026
+**Version:** 3.0.0  
+**Last Updated:** February 15, 2026
 
 This document serves as an overview of the AetherOS API documentation.
 

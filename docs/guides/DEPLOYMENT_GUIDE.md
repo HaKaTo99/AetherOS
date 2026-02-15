@@ -1,7 +1,7 @@
 # AetherOS Deployment Guide
 
-**Version:** 2.0.0  
-**Last Updated:** February 2, 2026
+**Version:** 3.0.0  
+**Last Updated:** February 15, 2026
 
 This guide covers deploying AetherOS to physical hardware: x86_64 PCs (USB boot) and Raspberry Pi 4 (SD card).
 
@@ -87,7 +87,7 @@ sudo dd if=target/x86_64-unknown-none/release/bootimage-aetheros-kernel.bin \
 
 **Expected Output** (VGA or serial):
 ```
-[AetherOS] Kernel v2.0.0 booting...
+[AetherOS] Kernel v3.0.0 booting...
 [AetherOS] SMME initialized (3-tier pools)
 [AetherOS] Scheduler: Priority-based Active Objects
 [AetherOS] Distributed computing ready
@@ -165,7 +165,7 @@ Connect USB-to-TTL adapter to RPi4 GPIO:
 [AetherOS] UART: PL011 @ 115200 baud
 [AetherOS] SMME: 3-tier memory pools ready
 [AetherOS] Scheduler: 8 priority levels
-[AetherOS] Network: Loopback ready (Physical deferred to v2.1)
+[AetherOS] Network: BCM GENET ready (DHCP client active)
 [SIM] High Load Simulated! Triggering Migration...
 ```
 
