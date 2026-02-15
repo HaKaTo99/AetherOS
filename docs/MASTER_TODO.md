@@ -684,34 +684,62 @@
 
 ---
 
-### 🌍 Phase 16: Multi-Device Orchestration (v3.1 - v3.3)
+### 🛠️ Phase 16: IDE Support & Developer Experience (v3.1)
 
-**Timeline**: Q4 2026 - Q1 2027  
-**Goal**: True distributed computing ecosystem  
+**Timeline**: Q2 2026
+**Goal**: Run full IDEs and self-host development
+**Status**: 🚧 **PLANNED**
+
+#### 16.1 Web-Based IDE Support (WASM)
+- [ ] QuickJS integration (JavaScript engine)
+- [ ] Monaco Editor port (VS Code core)
+- [ ] File system access API for WASM
+- [ ] Terminal emulator widget (xterm.js port)
+- [ ] **Checkpoint**: Run VS Code Web on AetherOS
+
+#### 16.2 Native Terminal Tools (POSIX)
+- [ ] PTY (Pseudo-terminal) support in kernel
+- [ ] Signal handling (SIGINT, SIGTSTP)
+- [ ] Pipe support (stdin/stdout redirection)
+- [ ] Port Vim / Nano / Helix editors
+- [ ] **Checkpoint**: Edit code via terminal IDE
+
+#### 16.3 Self-Hosting Capabilities
+- [ ] Port Rust compiler (rustc) or mrustc
+- [ ] Port Cargo build system
+- [ ] Git client implementation
+- [ ] **Checkpoint**: Compile AetherOS on AetherOS
+
+---
+
+### 🌍 Phase 17: Multi-Device Orchestration (v3.2 - v3.5)
+
+**Timeline**: Q3-Q4 2026
+**Goal**: True distributed computing ecosystem
 **Status**: 🔮 **LONG-TERM**
 
-#### 16.1 Device Mesh Network
+#### 17.1 Device Mesh Network
 - [ ] Mesh routing protocol (BATMAN-like)
 - [ ] Multi-hop communication
 - [ ] Network resilience (auto-healing)
 - [ ] Gateway nodes (internet bridge)
 - [ ] **Checkpoint**: 5+ device mesh functional
 
-#### 16.2 Advanced Task Migration
+#### 17.2 Advanced Task Migration
 - [ ] Live migration (process state + memory)
 - [ ] GPU workload migration
 - [ ] AI inference offloading
 - [ ] Automatic load balancing across mesh
 - [ ] **Checkpoint**: Migrate tasks seamlessly
 
-#### 16.3 Distributed Storage
+#### 17.3 Distributed Storage
 - [ ] Distributed filesystem (like Ceph)
 - [ ] Replication (3x default)
 - [ ] Consistency protocol (Raft/Paxos)
 - [ ] Data deduplication
 - [ ] **Checkpoint**: Shared storage across devices
 
-#### 16.4 Capability Trading Marketplace
+#### 17.4 Capability Trading Marketplace
 - [ ] Capability advertisement (GPU, NPU, storage)
 - [ ] Bidding protocol (resource pricing)
 - [ ] Micropayment integration (cryptocurrency/tokens)
@@ -720,34 +748,34 @@
 
 ---
 
-### 🏢 Phase 17: Enterprise & Cloud (v4.0)
+### 🏢 Phase 18: Enterprise & Cloud (v4.0)
 
-**Timeline**: Q1-Q2 2027  
-**Goal**: Production-ready for enterprise deployment  
+**Timeline**: Q1-Q2 2027
+**Goal**: Production-ready for enterprise deployment
 **Status**: 🔮 **LONG-TERM**
 
-#### 17.1 Cloud Integration
+#### 18.1 Cloud Integration
 - [ ] Cloud-init support
 - [ ] AWS/Azure/GCP deployment templates
 - [ ] Kubernetes operator for AetherOS pods
 - [ ] Auto-scaling integration
 - [ ] **Checkpoint**: Deploy on cloud providers
 
-#### 17.2 Management & Monitoring
+#### 18.2 Management & Monitoring
 - [ ] Central management console (web UI)
 - [ ] Device fleet management
 - [ ] Telemetry (Prometheus/Grafana)
 - [ ] Log aggregation (ELK stack)
 - [ ] **Checkpoint**: Monitor 100+ devices
 
-#### 17.3 Enterprise Features
+#### 18.3 Enterprise Features
 - [ ] LDAP/AD authentication
 - [ ] Role-Based Access Control (RBAC)
 - [ ] Audit logging
 - [ ] Compliance certifications (SOC 2, ISO 27001)
 - [ ] **Checkpoint**: Enterprise deployment ready
 
-#### 17.4 OEM Partnerships
+#### 18.4 OEM Partnerships
 - [ ] Hardware certification program
 - [ ] Pre-installation support
 - [ ] Custom BSP development
@@ -756,33 +784,33 @@
 
 ---
 
-### 🌐 Phase 18: Internet of Abilities (v5.0+)
+### 🌐 Phase 19: Internet of Abilities (v5.0+)
 
-**Timeline**: 2027+  
-**Goal**: Global distributed computing fabric  
+**Timeline**: 2027+
+**Goal**: Global distributed computing fabric
 **Status**: 🔮 **VISION**
 
-#### 18.1 Global Device Mesh
+#### 19.1 Global Device Mesh
 - [ ] Global peer discovery (DHT-based)
 - [ ] Geographic routing optimization
 - [ ] Cross-region data synchronization
 - [ ] Edge computing integration
 - [ ] **Checkpoint**: 1M+ devices in mesh
 
-#### 18.2 AI-Native OS
+#### 19.2 AI-Native OS
 - [ ] Neural network accelerator support (NPU)
 - [ ] On-device ML training
 - [ ] Federated learning framework
 - [ ] Privacy-preserving AI (homomorphic encryption)
 - [ ] **Checkpoint**: Run LLMs locally
 
-#### 18.3 Quantum Computing Integration
+#### 19.3 Quantum Computing Integration
 - [ ] Quantum simulator integration
 - [ ] Hybrid classical-quantum algorithms
 - [ ] Quantum-resistant cryptography
 - [ ] **Checkpoint**: Quantum workload support
 
-#### 18.4 Brain-Computer Interface (BCI)
+#### 19.4 Brain-Computer Interface (BCI)
 - [ ] Neuralink/OpenBCI drivers
 - [ ] Thought-based UI navigation
 - [ ] Privacy-preserving neural data
@@ -819,6 +847,7 @@ Transform AetherOS into a global fabric where:
 - [x] v2.3: Package manager (apm) - **DONE**
 - [x] v2.5: SDK + AetherScript compiler - **DONE**
 - [x] v3.0: Cross-platform app support - **DONE (POSIX + ART + WASM + Containers)**
+- [ ] v3.1: Self-hosted development (IDE + Compiler)
 - [ ] v4.0: Enterprise tools
 
 ### User Ecosystem
@@ -854,8 +883,9 @@ Transform AetherOS into a global fabric where:
 | v2.2 | ✅ Feb 2026 | Enhanced UX | ✅ Released |
 | v2.5 | ✅ Feb 2026 | Ecosystem Foundation | ✅ Released |
 | v3.0 | ✅ Feb 2026 | Cross-platform bridge | ✅ Released |
-| v3.x | Q1 2027 | Multi-device orchestration | Long-term |
-| v4.0 | Q2 2027 | Enterprise | Long-term |
+| v3.1 | Q2 2026 | Web-Based IDE Support | Planned |
+| v3.2 | Q3 2026 | Multi-device orchestration | Long-term |
+| v4.0 | Q1 2027 | Enterprise | Long-term |
 | v5.0+ | 2028+ | Internet of Abilities | Vision |
 
 ---
@@ -889,8 +919,8 @@ Transform AetherOS into a global fabric where:
 ---
 
 **Current Status**: v3.0.0 Cross-Platform Release ✅  
-**Current Focus**: Phase 16 (Multi-Device Orchestration)  
-**Next Milestone**: v3.x (Device Mesh Network)  
+**Current Focus**: Phase 16 (IDE Support & Developer Experience)  
+**Next Milestone**: v3.1 (Web-Based IDE)  
 **Long-term Goal**: Transform computing through distributed capabilities
 
 **Join us**: https://github.com/HaKaTo99/AetherOS  
