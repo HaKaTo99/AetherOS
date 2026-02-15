@@ -90,12 +90,12 @@ qemu-system-aarch64 \
 
 ##  Documentation
 
-- **[Capabilities v2.0](docs/reference/CAPABILITIES_v2.0.md)**: Latest feature overview
+- **[Capabilities v3.0](docs/reference/CAPABILITIES_v2.0.md)**: Full feature overview (Phase 1-15)
 - **[Developer Guide](docs/guides/DEVELOPER_GUIDE.md)**: Architecture, build instructions, debugging
 - **[Deployment Guide](docs/guides/DEPLOYMENT_GUIDE.md)**: USB boot, RPi4 setup, troubleshooting
 - **[API Reference](docs/reference/API_REFERENCE.md)**: Rustdoc overview
 - **[Porting Roadmap](docs/porting/PORTING_ROADMAP.md)**: Porting strategy
-- **[CHANGELOG](CHANGELOG.md)**: Full v2.0 release notes
+- **[CHANGELOG](CHANGELOG.md)**: Full v3.0 release notes
 
 ---
 
@@ -103,22 +103,27 @@ qemu-system-aarch64 \
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│                    AetherOS Kernel                      │
+│                 AetherOS Kernel v3.0                     │
 ├─────────────────────────────────────────────────────────┤
-│  Memory (SMME) │ Scheduler │ IPC (Quantum Bus)          │
-│  Distributed   │ Graphics  │ UI Framework               │
-│  Security      │ Network   │ Device Drivers             │
+│  Core       │ Scheduler  │ IPC        │ Security       │
+│  Network    │ Graphics   │ UI         │ Input/Media    │
+│  Ecosystem  │ Runtimes   │ Containers │ WASM           │
 └─────────────────────────────────────────────────────────┘
          │                    │                   │
-    x86_64 PC          Raspberry Pi 4        Android (Future)
+    x86_64 PC          Raspberry Pi 4        Android
+         │                    │                   │
+    ┌────┴────────────────┴─────────────────┴────┐
+    │  Compatibility: POSIX │ ART │ WASM │ OCI  │
+    └────────────────────────────────────────────┘
 ```
 
 ### Key Components
 
 - **SMME**: Symbian-Modern Memory Engine with two-phase allocation
 - **Active Objects**: Message-passing concurrency model
-- **Quantum Bus**: RPC framework for distributed computing
-- **FlexLayout**: Responsive UI layout engine
+- **Quantum Bus**: TLS-encrypted RPC for distributed computing
+- **AetherScript**: Custom language with WASM codegen
+- **Cross-Platform**: POSIX, Android ART, WASM, and Container runtimes
 
 ---
 
@@ -155,7 +160,7 @@ We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 For security vulnerabilities, please see [SECURITY.md](SECURITY.md).
 
-**Current Status**: v2.0.0 production release with comprehensive security hardening.
+**Current Status**: v3.0.0 cross-platform release with KASLR, TLS, SecureChannel, WASM sandboxing.
 
 ---
 
@@ -179,18 +184,23 @@ AetherOS aims to create a **decentralized network of devices** that share capabi
 
 | Phase | Status | Version |
 |-------|--------|---------|
-| Core Foundation |  Complete | v1.0 |
-| Scheduler & IPC |  Complete | v1.2 |
-| Multi-Platform |  Complete | v1.4 |
-| Security & Power |  Complete | v1.5 |
-| Distributed System |  Complete | v1.6 |
-| Testing |  Complete | v1.6.1 |
-| Framework Services |  Complete | v1.7 |
-| Distributed Finalization |  Complete | v1.8 |
-| Documentation |  Complete | v1.9 |
-| **Pre-Release Stabilization** |  **Complete** | **v2.0** |
+| Core Foundation | ✅ Complete | v1.0 |
+| Scheduler & IPC | ✅ Complete | v1.2 |
+| Multi-Platform | ✅ Complete | v1.4 |
+| Security & Power | ✅ Complete | v1.5 |
+| Distributed System | ✅ Complete | v1.6 |
+| Testing | ✅ Complete | v1.6.1 |
+| Framework Services | ✅ Complete | v1.7 |
+| Distributed Finalization | ✅ Complete | v1.8 |
+| Documentation | ✅ Complete | v1.9 |
+| Pre-Release Stabilization | ✅ Complete | v2.0 |
+| **Production Hardening** | ✅ **Complete** | **v2.0.x** |
+| **Network & Distributed** | ✅ **Complete** | **v2.1** |
+| **Enhanced UX** | ✅ **Complete** | **v2.2** |
+| **Ecosystem Foundation** | ✅ **Complete** | **v2.5** |
+| **Cross-Platform Bridge** | ✅ **Complete** | **v3.0** |
 
-**Overall**: 10/10 phases complete (100%) 
+**Overall**: 15/15 phases complete (100%) 
 
 ---
 

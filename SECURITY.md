@@ -6,12 +6,12 @@ We take security seriously. The following versions are currently supported with 
 
 | Version | Supported          | Status |
 | ------- | ------------------ | ------ |
-| 2.0.x   | :white_check_mark: | **Current Production Release** |
-| 1.9.x   | :white_check_mark: | Maintenance (until March 2026) |
-| 1.8.x   | :x:                | End of Life |
-| < 1.8   | :x:                | No longer supported |
+| 3.0.x   | :white_check_mark: | **Current Cross-Platform Release** |
+| 2.0.x   | :white_check_mark: | Maintenance (until June 2026) |
+| 1.9.x   | :x:                | End of Life |
+| < 1.9   | :x:                | No longer supported |
 
-**Recommendation**: Always use the latest stable release (v2.0.0+) for the best security.
+**Recommendation**: Always use the latest stable release (v3.0.0+) for the best security.
 
 ---
 
@@ -38,21 +38,26 @@ If you discover a security vulnerability in AetherOS, please follow responsible 
 
 ---
 
-## Security Features in AetherOS v2.0
+## Security Features in AetherOS v3.0
 
 ### Current Protections
 
 - **Memory Safety**: Rust's ownership system prevents common vulnerabilities
 - **Capability System**: Token-based access control
 - **Guard Pages**: Stack overflow protection
+- **KASLR**: Kernel Address Space Layout Randomization
+- **TLS**: Encrypted Quantum Bus RPC communication
+- **SecureChannel**: Device-to-device encrypted communication
+- **WASM Sandboxing**: Gas-metered execution prevents runaway processes
 - **Code Signing**: Secure boot framework (stub implementation)
 - **Minimal Attack Surface**: Microkernel architecture
+- **Container Isolation**: Resource limits (cgroups-like) and network namespaces
 
 ### Known Limitations
 
-- **Network Stack**: Currently limited to loopback (physical network support in development)
 - **Input Validation**: Not all RPC message deserialization paths are fuzz-tested
 - **Cryptography**: Uses standard Rust crypto libraries (not yet quantum-resistant)
+- **Formal Verification**: Critical paths not yet formally verified
 
 ---
 
@@ -76,7 +81,7 @@ When a vulnerability is confirmed:
 - Notify key stakeholders (if applicable)
 
 ### 4. Release
-- Publish patched version (e.g., v2.0.1)
+- Publish patched version (e.g., v3.0.1)
 - Release security advisory
 - Update this SECURITY.md
 
@@ -105,7 +110,6 @@ Future security improvements planned:
 
 - **Fuzzing**: Comprehensive fuzzing of RPC deserialization (cargo-fuzz)
 - **Formal Verification**: Critical components (memory allocator, scheduler)
-- **Network Security**: TLS support for Quantum Bus RPC
 - **Quantum-Resistant Crypto**: Post-quantum cryptography integration
 - **Hardware Security**: TPM support, secure enclaves
 
@@ -144,4 +148,4 @@ We appreciate responsible security researchers. If you report a vulnerability:
 
 ---
 
-**Last Updated**: February 1, 2026 (v2.0.0 release)
+**Last Updated**: February 15, 2026 (v3.0.0 release)

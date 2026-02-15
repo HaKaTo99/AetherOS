@@ -1,6 +1,6 @@
 # Contributing to AetherOS
 
-Thank you for your interest in contributing to AetherOS v2.0! This document provides guidelines and information for contributors.
+Thank you for your interest in contributing to AetherOS v3.0! This document provides guidelines and information for contributors.
 
 ---
 
@@ -18,13 +18,13 @@ Thank you for your interest in contributing to AetherOS v2.0! This document prov
 Before submitting a bug report:
 
 1. **Check existing issues** to avoid duplicates
-2. **Use the latest version** (v2.0.0)
+2. **Use the latest version** (v3.0.0)
 3. **Provide clear reproduction steps**
 
 **Bug Report Template**:
 ```markdown
 **Environment**:
-- AetherOS Version: v2.0.0
+- AetherOS Version: v3.0.0
 - Platform: x86_64 / aarch64
 - Host OS: Windows/Linux/macOS
 
