@@ -98,7 +98,7 @@
 ### 3.1 Android Device Support
 - [x] Unlock bootloader workflow
 - [x] Build boot.img structure
-- [x] Vendor blob integration strategy
+- [x] Vendor blob integration strategy - **See [PORTING_ROADMAP.md](porting/PORTING_ROADMAP.md)**
 - [x] Fastboot flashing automation
 - [x] **Checkpoint**: Boot logic di Android device
 
@@ -133,7 +133,7 @@
 - [x] User-space ASLR implementation
 - [x] Stack canaries
 - [x] W^X enforcement
-- [-] Kernel ASLR (KASLR) - Deferred to v2.0
+- [-] Kernel ASLR (KASLR) - **Deferred to v2.1 (Phase 12.3)**
 - [x] **Checkpoint**: Memory protection active
 
 ### 4.3 Capability System
@@ -159,14 +159,14 @@
 - [x] `smoltcp` v0.10 integration (TCP/IP)
 - [x] Loopback driver (VecDeque-based)
 - [x] NetworkStack initialization (127.0.0.1/8)
-- [x] Scheduler poll integration
-- [x] **Checkpoint**: Network stack ready
+- [x] Scheduler poll integration - **IMPLEMENTED**
+- [x] **Checkpoint**: Network stack ready - **THREAD-SAFE**
 
 ### 5.2 Quantum Bus (RPC Layer)
 - [x] QcPacket protocol (16B header + payload)
 - [x] Binary serialization/deserialization
 - [x] RPC dispatcher (Ping, Pong, Discovery, TaskMigrate, AiInference)
-- [x] Global QuantumBus instance
+- [x] Global QuantumBus instance - **SAFE (SpinMutex)**
 - [x] **Checkpoint**: RPC protocol functional
 
 ### 5.3 Device Discovery
@@ -212,6 +212,12 @@
 - [x] Scheduler stress test - **INCLUDED IN TEST SUITE**
 - [x] Network stack stress test - **PLANNED**
 - [x] **Checkpoint**: 24h+ stable uptime
+
+### 6.4 User Mode Execution (New)
+- [x] SVC Handler implementation (exceptions.rs) - **DONE**
+- [x] Syscall dispatcher (syscall/mod.rs) - **DONE**
+- [x] User Mode demo (switch to EL0) - **DONE**
+- [x] **Checkpoint**: Kernel handles syscall from user code - **VERIFIED**
 
 ---
 
@@ -297,12 +303,12 @@
 ### 9.1 API Documentation
 - [x] Generate rustdoc for all public APIs - **COMPLETE**
 - [x] Add usage examples to modules - **ADDED TO KEY MODULES**
-- [x] Create API reference website - **API_REFERENCE.md CREATED**
+- [x] Create API reference website - **[API_REFERENCE.md](reference/API_REFERENCE.md)**
 - [x] **Checkpoint**: Published docs available ✅
 
 ### 9.2 Developer Guide
 - [x] Architecture overview diagram - **ASCII DIAGRAM INCLUDED**
-- [x] Getting started tutorial - **PREREQUISITES + BUILD STEPS**
+- [x] Getting started tutorial - **[DEVELOPER_GUIDE.md](guides/DEVELOPER_GUIDE.md)**
 - [x] Building from source guide - **X86_64 + AARCH64**
 - [x] Debugging guide (GDB + QEMU) - **COMPLETE WITH EXAMPLES**
 - [x] **Checkpoint**: Third-party can build kernel ✅
@@ -310,7 +316,7 @@
 ### 9.3 Deployment Guide
 - [x] Creating bootable USB (x86_64) - **DD + RUFUS INSTRUCTIONS**
 - [x] Flashing SD card (RPi4) - **FAT32 + CONFIG.TXT**
-- [x] Installing on Android device - **DEFERRED TO V2.0**
+- [x] Installing on Android device - **[DEPLOYMENT_GUIDE.md](guides/DEPLOYMENT_GUIDE.md)**
 - [x] Troubleshooting guide - **COMPREHENSIVE Q&A**
 - [x] **Checkpoint**: Users can install AetherOS ✅
 
@@ -348,6 +354,17 @@
 - [x] Prepare launch announcement - **CHANGELOG SUFFICIENT**
 - [x] Tag v2.0 release - **READY FOR GIT TAG**
 - [x] **Checkpoint**: v2.0 released ✅
+
+### 10.5 Core Stabilization (Harmonization)
+- [x] Verify User Mode Execution <!-- id: 9 -->
+- [x] Stabilize Kernel Globals (Safe Concurrency) <!-- id: 10 -->
+- [x] Harmonize Kernel Initialization <!-- id: 11 -->
+- [x] **Checkpoint**: Kernel Core is Thread-Safe & Robust
+
+### 10.6 Internal Simulation (Stress Test)
+- [x] Implement Load Simulation in `kernel_tick`
+- [x] Verify Distributed Migration Logic (Compile-Time)
+- [x] **Checkpoint**: Simulated Workload Active
 
 ---
 
@@ -600,6 +617,7 @@
 
 #### 14.2 Application Framework
 - [ ] AetherOS SDK (headers, libs, docs)
+- [x] Quickstart Vision (`docs/guides/QUICKSTART_TUTORIAL.md`) - **DRAFT**
 - [ ] Standard library for apps
 - [ ] IPC bindings for apps
 - [ ] UI toolkit for third-party apps

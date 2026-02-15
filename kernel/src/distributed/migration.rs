@@ -61,4 +61,5 @@ impl MigrationManager {
 }
 
 // Global Migration Manager
-pub static mut MIGRATION_MANAGER: MigrationManager = MigrationManager::new();
+// Global Migration Manager
+pub static MIGRATION_MANAGER: spin::Mutex<MigrationManager> = spin::Mutex::new(MigrationManager::new());

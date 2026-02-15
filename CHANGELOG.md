@@ -6,13 +6,13 @@ All notable changes to the AetherOS kernel will be documented in this file.
 
 ## [2.0.0] - February 2026
 
-### 🎉 Major Release: Production-Ready Distributed OS Kernel
+###  Major Release: Production-Ready Distributed OS Kernel
 
 The first production release of AetherOS, featuring a fully functional microkernel with distributed computing capabilities, multi-platform support, and comprehensive documentation.
 
 ---
 
-### ✨ Highlights
+###  Highlights
 
 - **Distributed Computing**: Complete task migration, KV store, and load balancing
 - **Multi-Platform Support**: RPi4 (aarch64) and x86_64 PC
@@ -22,7 +22,7 @@ The first production release of AetherOS, featuring a fully functional microkern
 
 ---
 
-### 🚀 Features
+###  Features
 
 #### Phase 1-2: Core Foundation
 - **SMME (Symbian-Modern Memory Engine)**: Three-tier memory allocator (L0: 64KB, L1: 2MB, L2: 16MB)
@@ -102,7 +102,7 @@ The first production release of AetherOS, featuring a fully functional microkern
 
 ---
 
-### 📈 Performance
+###  Performance
 
 - **Scheduler Latency**: <100μs (target achieved)
 - **Memory Footprint**: ~18MB total (L0+L1+L2 pools)
@@ -111,7 +111,7 @@ The first production release of AetherOS, featuring a fully functional microkern
 
 ---
 
-### 🔒 Security
+###  Security
 
 - All `unsafe` blocks documented with safety requirements
 - Clippy warnings resolved
@@ -120,7 +120,7 @@ The first production release of AetherOS, featuring a fully functional microkern
 
 ---
 
-### 🐛 Known Limitations
+###  Known Limitations
 
 1. **Input Event Queue**: Keyboard events captured but not integrated with UI event loop
 2. **Network Stack**: Limited to loopback, no physical device support yet
@@ -129,7 +129,7 @@ The first production release of AetherOS, featuring a fully functional microkern
 
 ---
 
-### 📦 Deliverables
+###  Deliverables
 
 - **Kernel Binaries**:
   - `aetheros-kernel` (x86_64-unknown-none)
@@ -144,26 +144,26 @@ The first production release of AetherOS, featuring a fully functional microkern
 
 ---
 
-### 🔧 Breaking Changes
+###  Breaking Changes
 
 None (first major release)
 
 ---
 
-### 📝 Migration Guide
+###  Migration Guide
 
 This is the first production release. No migration needed.
 
 ---
 
-### 🙏 Acknowledgments
+###  Acknowledgments
 
-Built with Rust 🦀  
+Built with Rust   
 Inspired by Symbian OS, Zircon, and seL4
 
 ---
 
-### 📅 Release Timeline
+###  Release Timeline
 
 - **Phase 1-2** (Foundation): December 2025
 - **Phase 3-5** (Multi-Platform & Distribution): January 2026

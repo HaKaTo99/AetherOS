@@ -49,16 +49,22 @@ pub struct MemoryStats {
 }
 
 /// Global SMME instance
-static mut SMME: SymbianModernMemoryEngine = SymbianModernMemoryEngine::new(1 << 30);
+pub static SMME: spin::Mutex<SymbianModernMemoryEngine> = spin::Mutex::new(SymbianModernMemoryEngine::new(1 << 30));
 
 /// Global Scheduler instance
-static mut SCHEDULER: ActiveObjectScheduler = ActiveObjectScheduler::new();
+pub static SCHEDULER: spin::Mutex<ActiveObjectScheduler> = spin::Mutex::new(ActiveObjectScheduler::new());
 
 /// Global Device Mesh
-static mut DEVICE_MESH: DeviceMesh = DeviceMesh::new();
+pub static DEVICE_MESH: spin::Mutex<DeviceMesh> = spin::Mutex::new(DeviceMesh::new());
 
 /// Global Oracle Engine
-static mut ORACLE: TinyMLPredictor = TinyMLPredictor::new();
+pub static ORACLE: spin::Mutex<TinyMLPredictor> = spin::Mutex::new(TinyMLPredictor::new());
+
+/// Global Network Stack (Phase 5)
+pub static NETWORK: spin::Mutex<Option<crate::net::NetworkStack>> = spin::Mutex::new(None);
+
+use core::sync::atomic::{AtomicUsize, Ordering};
+static TICK_COUNTER: AtomicUsize = AtomicUsize::new(0);
 
 pub fn kernel_init(dtb_ptr: usize) {
     unsafe {
@@ -210,46 +216,68 @@ pub fn kernel_init(dtb_ptr: usize) {
         }
 
         // 2. Initialize SMME
-        let smme = &mut *core::ptr::addr_of_mut!(SMME);
-        match smme.allocate(1 << 20) {
-            Ok(_addr) => {
-                let oracle = &mut *core::ptr::addr_of_mut!(ORACLE);
-                oracle.record_allocation(1 << 20);
+        {
+            let smme = SMME.lock();
+            match smme.allocate(1 << 20) {
+                Ok(_addr) => {
+                    let mut oracle = ORACLE.lock();
+                    oracle.record_allocation(1 << 20);
+                }
+                Err(_) => {}
             }
-            Err(_) => {}
         }
 
         // 2. Initialize Scheduler
-        let scheduler = &mut *core::ptr::addr_of_mut!(SCHEDULER);
-        let _ = scheduler.create_object(10); // High priority system task
-        let _ = scheduler.create_object(5);  // Normal priority task
+        {
+            let mut scheduler = SCHEDULER.lock();
+            let _ = scheduler.create_object(10); // High priority system task
+            let _ = scheduler.create_object(5);  // Normal priority task
+        }
 
         // 3. Discover devices in mesh
-        let device_mesh = &mut *core::ptr::addr_of_mut!(DEVICE_MESH);
-        device_mesh.discover();
+        {
+            let mut device_mesh = DEVICE_MESH.lock();
+            device_mesh.discover();
+        }
 
         // 4. Initialize Oracle predictions
-        let oracle = &mut *core::ptr::addr_of_mut!(ORACLE);
-        let predicted = oracle.predict_next_size();
-        let smme = &mut *core::ptr::addr_of_mut!(SMME);
-        let _ = smme.allocate(predicted);
+        {
+            let oracle = ORACLE.lock();
+            let predicted = oracle.predict_next_size();
+            let smme = SMME.lock();
+            let _ = smme.allocate(predicted);
+        }
 
         // 5. Initialize Distributed Computing (Phase 8)
         use crate::distributed::{MIGRATION_MANAGER, KV_STORE, LOAD_BALANCER};
-        MIGRATION_MANAGER.init();
-        KV_STORE.init();
-        LOAD_BALANCER.init();
+        MIGRATION_MANAGER.lock().init();
+        KV_STORE.lock().init();
+        LOAD_BALANCER.lock().init();
+
+        // 6. Initialize Network Stack (Phase 5)
+        {
+            let mut network = NETWORK.lock();
+            *network = Some(crate::net::NetworkStack::new());
+        }
+        
+        // 6. User Mode Demo (Phase 6.4)
+        #[cfg(target_arch = "aarch64")]
+        {
+            crate::loader::user_demo::run_user_demo();
+        }
     }
 }
 
 pub fn kernel_tick() {
-    unsafe {
-        // 1. Schedule active objects
-        let scheduler = &mut *core::ptr::addr_of_mut!(SCHEDULER);
+    // 1. Schedule active objects
+    {
+        let mut scheduler = SCHEDULER.lock();
         scheduler.schedule();
+    }
 
-        // 2. Check memory pressure and cleanup if needed
-        let smme = &mut *core::ptr::addr_of_mut!(SMME);
+    // 2. Check memory pressure and cleanup if needed
+    {
+        let smme = SMME.lock();
         let stats = smme.stats();
         let utilization = (stats.total_committed * 100) / (1 << 30);
 
@@ -258,17 +286,18 @@ pub fn kernel_tick() {
         }
 
         // 3. Update Oracle with current state
-        let oracle = &mut *core::ptr::addr_of_mut!(ORACLE);
+        let mut oracle = ORACLE.lock();
         oracle.record_allocation(stats.total_committed);
 
         // 4. Check for distributed opportunities
         if oracle.should_distribute(stats.total_committed) {
-            let device_mesh = &mut *core::ptr::addr_of_mut!(DEVICE_MESH);
-            let _ = device_mesh.find_best_device(
-                stats.total_committed / 2,
-                100 // 1 TFLOPS
-            );
+             let device_mesh = DEVICE_MESH.lock();
+             let _ = device_mesh.find_best_device(
+                 stats.total_committed / 2,
+                 100 // 1 TFLOPS
+             );
         }
+    }
 
         // 5. Poll keyboard input (Phase 7.3)
         #[cfg(target_arch = "x86_64")]
@@ -282,36 +311,61 @@ pub fn kernel_tick() {
 
         // 6. Update load balancer metrics (Phase 8.3)
         use crate::distributed::LOAD_BALANCER;
-        let scheduler = &*core::ptr::addr_of!(SCHEDULER);
-        let smme = &*core::ptr::addr_of!(SMME);
-        LOAD_BALANCER.update_metrics(scheduler, smme);
+        // Scope guards for safe locking
+        {
+            let scheduler = SCHEDULER.lock();
+            let smme = SMME.lock();
+            LOAD_BALANCER.lock().update_metrics(&scheduler, &smme);
+        }
 
         // Check if migration needed
-        if LOAD_BALANCER.should_migrate() {
-            // TODO: Trigger migration via MIGRATION_MANAGER
+        if LOAD_BALANCER.lock().should_migrate() {
+            use crate::distributed::MIGRATION_MANAGER;
+            let mut migration = MIGRATION_MANAGER.lock();
+            let _ = migration.migrate_task(1, 2); // Fake task ID 1 to Fake Device 2
+        }
+
+        // --- Phase 10.6: Internal Simulation & Stress Test ---
+        let ticks = TICK_COUNTER.fetch_add(1, Ordering::Relaxed);
+        if ticks % 100 == 0 {
+            // Every 100 ticks, simulate high load
+            let mut lb = LOAD_BALANCER.lock();
+            lb.simulate_high_load();
+            
+            // Log simulation
+            unsafe {
+                if let Some(platform) = crate::hal::try_get_platform() {
+                     platform.puts("[SIM] High Load Simulated! Triggering Migration...\r\n");
+                }
+            }
+        }
+        // -----------------------------------------------------
+
+        // 7. Poll Network Stack (Phase 5)
+        {
+            let mut network = NETWORK.lock();
+            if let Some(stack) = network.as_mut() {
+                // TODO: Get real timestamp
+                stack.poll(0);
+            }
         }
     }
-}
 
 /// Reset kernel state for testing
 pub fn kernel_reset() {
-    unsafe {
-        *core::ptr::addr_of_mut!(SMME) = SymbianModernMemoryEngine::new(1 << 30);
-        *core::ptr::addr_of_mut!(SCHEDULER) = ActiveObjectScheduler::new();
-        *core::ptr::addr_of_mut!(DEVICE_MESH) = DeviceMesh::new();
-        *core::ptr::addr_of_mut!(ORACLE) = TinyMLPredictor::new();
-    }
+    *SMME.lock() = SymbianModernMemoryEngine::new(1 << 30);
+    *SCHEDULER.lock() = ActiveObjectScheduler::new();
+    *DEVICE_MESH.lock() = DeviceMesh::new();
+    *ORACLE.lock() = TinyMLPredictor::new();
 }
 
 // Kernel API exports
 #[no_mangle]
 pub extern "C" fn aether_allocate(size: usize) -> usize {
-    unsafe {
-        let smme = &mut *core::ptr::addr_of_mut!(SMME);
-        match smme.allocate(size) {
-            Ok(addr) => addr,
-            Err(_) => 0,
-        }
+    let smme = SMME.lock();
+    match smme.allocate(size) {
+        Ok(addr) => addr,
+        Err(_) => 0,
     }
 }
 
@@ -323,13 +377,11 @@ pub struct MemoryStatsFFI {
 
 #[no_mangle]
 pub extern "C" fn aether_get_memory_stats() -> MemoryStatsFFI {
-    unsafe {
-        let smme = &mut *core::ptr::addr_of_mut!(SMME);
-        let stats = smme.stats();
-        MemoryStatsFFI {
-            reserved: stats.total_reserved,
-            committed: stats.total_committed,
-        }
+    let smme = SMME.lock();
+    let stats = smme.stats();
+    MemoryStatsFFI {
+        reserved: stats.total_reserved,
+        committed: stats.total_committed,
     }
 }
 
@@ -341,8 +393,8 @@ mod tests {
     fn test_kernel_init() {
         kernel_reset();
         kernel_init(0);
-        unsafe {
-            let smme = &mut *core::ptr::addr_of_mut!(SMME);
+        {
+            let smme = SMME.lock();
             let stats = smme.stats();
             assert!(stats.total_committed > 0);
         }

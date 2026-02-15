@@ -64,6 +64,13 @@ impl LoadBalancer {
         self.local_metrics.memory_pressure = used_pct;
     }
 
+    /// Simulate high load for testing (Phase 10.6)
+    pub fn simulate_high_load(&mut self) {
+        self.local_metrics.cpu_utilization = 95;
+        self.local_metrics.active_tasks = 100;
+        self.local_metrics.memory_pressure = 90;
+    }
+
     /// Check if migration should be triggered
     pub fn should_migrate(&self) -> bool {
         self.enabled && self.local_metrics.load_score() > 80
@@ -83,4 +90,4 @@ impl LoadBalancer {
 }
 
 // Global Load Balancer
-pub static mut LOAD_BALANCER: LoadBalancer = LoadBalancer::new();
+pub static LOAD_BALANCER: spin::Mutex<LoadBalancer> = spin::Mutex::new(LoadBalancer::new());

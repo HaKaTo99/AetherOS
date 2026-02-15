@@ -10,28 +10,24 @@ use smoltcp::time::Instant;
 use smoltcp::wire::{EthernetAddress, IpAddress, IpCidr, Ipv4Address};
 use loopback::LoopbackDevice;
 
-static mut LOOPBACK_DEVICE: Option<LoopbackDevice> = None;
 
-pub struct NetworkStack<'a> {
+
+pub struct NetworkStack {
     pub interface: Interface,
-    pub sockets: SocketSet<'a>,
-    pub device: &'a mut LoopbackDevice,
+    pub sockets: SocketSet<'static>,
+    pub device: LoopbackDevice,
 }
 
-impl<'a> NetworkStack<'a> {
+impl NetworkStack {
     /// Initialize the network stack with loopback device
-    /// 
-    /// # Safety
-    /// Must be called only once during kernel initialization
-    pub unsafe fn init() -> Self {
+    pub fn new() -> Self {
         // Initialize loopback device
-        LOOPBACK_DEVICE = Some(LoopbackDevice::new());
-        let device = LOOPBACK_DEVICE.as_mut().unwrap();
+        let mut device = LoopbackDevice::new();
         
         // Configure interface
         let mac_addr = EthernetAddress([0x02, 0x00, 0x00, 0x00, 0x00, 0x01]);
         let config = Config::new(mac_addr.into());
-        let mut interface = Interface::new(config, device, Instant::from_millis(0));
+        let mut interface = Interface::new(config, &mut device, Instant::from_millis(0));
         
         // Assign IP address (127.0.0.1/8 for loopback)
         interface.update_ip_addrs(|ip_addrs| {
@@ -54,7 +50,7 @@ impl<'a> NetworkStack<'a> {
     /// Poll the network stack (call from scheduler loop)
     pub fn poll(&mut self, timestamp_ms: i64) {
         let timestamp = Instant::from_millis(timestamp_ms);
-        let _ = self.interface.poll(timestamp, self.device, &mut self.sockets);
+        let _ = self.interface.poll(timestamp, &mut self.device, &mut self.sockets);
     }
 }
 

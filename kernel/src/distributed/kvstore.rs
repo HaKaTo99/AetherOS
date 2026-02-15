@@ -93,4 +93,5 @@ impl KvStore {
 }
 
 // Global KV Store
-pub static mut KV_STORE: KvStore = KvStore::new();
+// Global KV Store
+pub static KV_STORE: spin::Mutex<KvStore> = spin::Mutex::new(KvStore::new());

@@ -43,6 +43,7 @@ AetherOS is a microkernel operating system written in Rust, designed for distrib
   ```bash
   curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
   rustup default nightly
+  rustup component add llvm-tools-preview
   ```
 
 - **Cross-Compilation Targets**:
@@ -89,9 +90,11 @@ qemu-system-aarch64 \
 
 ##  Documentation
 
-- **[Developer Guide](docs/DEVELOPER_GUIDE.md)**: Architecture, build instructions, debugging
-- **[Deployment Guide](docs/DEPLOYMENT_GUIDE.md)**: USB boot, SD card deployment, troubleshooting
-- **[API Reference](docs/API_REFERENCE.md)**: Rustdoc overview
+- **[Capabilities v2.0](docs/reference/CAPABILITIES_v2.0.md)**: Latest feature overview
+- **[Developer Guide](docs/guides/DEVELOPER_GUIDE.md)**: Architecture, build instructions, debugging
+- **[Deployment Guide](docs/guides/DEPLOYMENT_GUIDE.md)**: USB boot, RPi4 setup, troubleshooting
+- **[API Reference](docs/reference/API_REFERENCE.md)**: Rustdoc overview
+- **[Porting Roadmap](docs/porting/PORTING_ROADMAP.md)**: Porting strategy
 - **[CHANGELOG](CHANGELOG.md)**: Full v2.0 release notes
 
 ---

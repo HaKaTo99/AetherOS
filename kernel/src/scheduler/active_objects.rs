@@ -88,7 +88,7 @@ impl ActiveObject {
         
         unsafe {
             use crate::SMME;
-            let smme = &mut *core::ptr::addr_of_mut!(SMME);
+            let smme = SMME.lock();
             
             let stack_base = match smme.allocate(STACK_SIZE + 4096) {
                 Ok(addr) => addr,

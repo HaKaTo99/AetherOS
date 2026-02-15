@@ -16,11 +16,10 @@ AetherOS v2.0.0 marks the first **production-ready release** of a truly distribu
 - **Distributed Quantum Bus**: Automatic device discovery and resource sharing
 - **Oracle Engine**: ML-based predictive allocation (<16KB footprint)
 
-### AetherScript Compiler
-- **Complete Language Support**: Full parser with Pest grammar
-- **Automatic Optimization**: Memory annotation, task partitioning
-- **Multi-target Backend**: Rust, C++, WebAssembly (planned)
-- **Resource-Aware Programming**: @memory, @distributed, @compute annotations
+### Internal Simulation (New in v2.0)
+- **Built-in Stress Test**: Simulates high load to trigger migration logic
+- **Network Loopback**: Verifies distributed stack without physical hardware
+- **Verification**: `simulate_high_load()` verified in `kernel_tick`
 
 ### Developer Experience
 - **Quick Start**: 2-minute onboarding

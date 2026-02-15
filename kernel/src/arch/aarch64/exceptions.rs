@@ -188,6 +188,27 @@ extern "C" fn handle_sync_exception(trap_frame: &mut TrapFrame) {
         gdb.loop_wrapper(trap_frame, 5);
         return;
     }
+
+    // Check for SVC Instruction (EC = 0x15) - AArch64
+    if ec == 0x15 {
+        // System Call!
+        // Arguments in x0-x7 are already in trap_frame.regs[0..8]
+        // x8 is often used for syscall number in Linux/AArch64, but let's check standard convention.
+        // AArch64 Linux uses x8 for syscall number.
+        // We will use x8 for syscall number to be compatible.
+        
+        let syscall_num = trap_frame.regs[8] as usize;
+        let arg0 = trap_frame.regs[0] as usize;
+        let arg1 = trap_frame.regs[1] as usize;
+        let arg2 = trap_frame.regs[2] as usize;
+        
+        use crate::syscall;
+        let ret = syscall::syscall_handler(syscall_num, arg0, arg1, arg2);
+        
+        // Write return value back to x0
+        trap_frame.regs[0] = ret as u64;
+        return;
+    }
     
     // Check for Data Abort (0x24, 0x25) or Instruction Abort (0x20, 0x21)
     if ec == 0x24 || ec == 0x25 || ec == 0x20 || ec == 0x21 {
@@ -209,7 +230,8 @@ extern "C" fn handle_irq_exception(trap_frame: &mut TrapFrame) {
         
         if irq == gic::IRQ_TIMER {
             // Timer logic
-            crate::SCHEDULER.tick();
+            let mut scheduler = crate::SCHEDULER.lock();
+            scheduler.tick();
             
             // Check if we need to switch tasks
             // Preemption is handled by the scheduler returning true/false
@@ -218,9 +240,9 @@ extern "C" fn handle_irq_exception(trap_frame: &mut TrapFrame) {
             // Wait, the current simple tick() just updates time.
             // Real preemption needs to happen here or be triggered here.
             
-            use crate::scheduler::active_objects::ObjectState;
+            // use crate::scheduler::active_objects::ObjectState;
             // Access scheduler safely? We are in IRQ handler...
-            let scheduler = &mut *core::ptr::addr_of_mut!(crate::SCHEDULER);
+            // let scheduler = &mut *core::ptr::addr_of_mut!(crate::SCHEDULER);
             
             // Tick the scheduler (updates time metrics)
             // scheduler.tick(); // Already called above if we make tick() public/static?
