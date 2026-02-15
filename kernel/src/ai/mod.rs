@@ -1,9 +1,13 @@
 //! AI Inference Module
 //! Stub implementation for NPU/AI acceleration
 
-pub mod tensor;
+pub mod tensor; // N-dimensional arrays (Phase 5.4)
+pub mod engine; // Inference engine (Phase 5.4)
+pub mod npu;    // NPU Driver (Phase 19.2)
 
-use tensor::Tensor;
+pub use tensor::Tensor;
+pub use engine::{InferenceEngine, ModelMetadata};
+pub use npu::{NpuDriver, SimulatedNpu, GLOBAL_NPU};
 use alloc::vec;
 use alloc::vec::Vec;
 use alloc::string::String;

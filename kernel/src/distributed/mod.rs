@@ -45,11 +45,14 @@ pub mod loadbalancer;
 pub mod mesh;    // Phase 17.1 (Network)
 pub mod storage; // Phase 17.2 (Data)
 pub mod market;  // Phase 17.3 (Economy)
+pub mod dht;     // [NEW] Global DHT (Phase 19.1)
 
 pub use migration::{MigrationManager, MIGRATION_MANAGER};
 pub use kvstore::{KvStore, KV_STORE};
 pub use loadbalancer::{LoadBalancer, LOAD_BALANCER};
 pub use mesh::{MeshNetwork, MESH_NETWORK};
 pub use storage::{DistStorage, DIST_STORAGE};
-pub use market::{CapabilityMarket, CAPABILITY_MARKET};
+pub static GLOBAL_DHT: spin::Mutex<dht::DistributedHashTable> = spin::Mutex::new(dht::DistributedHashTable::new());
+pub use dht::{DistributedHashTable, DhtId};
 
+pub use market::{CapabilityMarket, CAPABILITY_MARKET};

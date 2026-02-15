@@ -31,6 +31,7 @@ pub mod ai;       // [NEW] AI Inference (Phase 5.4)
 pub mod distributed; // [NEW] Distributed Computing (Phase 8 & 17)
 pub mod enterprise;  // [NEW] Enterprise & Cloud (Phase 18)
 pub mod events;      // [NEW] Event Queue System (Phase 12.2)
+pub mod quantum;     // [NEW] Quantum Computing (Phase 19.3)
 
 pub mod tests;    // [NEW] Functional Test Suite (Phase 6.2)
 
@@ -360,16 +361,20 @@ pub fn kernel_init(dtb_ptr: usize) {
             let _ = cam.capture();
         }
 
-        // 14. Phase 17: Distributed Orchestration (Mesh & Market)
+        // 13. Phase 17: Distributed Orchestration (Mesh & Market)
         {
-            use crate::distributed::{MESH_NETWORK, CAPABILITY_MARKET, DIST_STORAGE};
+            use crate::distributed::{MESH_NETWORK, CAPABILITY_MARKET, DIST_STORAGE, GLOBAL_DHT};
             let mut mesh = MESH_NETWORK.lock();
             let mut market = CAPABILITY_MARKET.lock();
             let mut storage = DIST_STORAGE.lock();
+            let mut dht = GLOBAL_DHT.lock(); // DHT is thread-safe internally or we lock it here
 
             mesh.init();
             storage.init();
             market.init();
+            
+            // Phase 19.1: Join Global DHT
+            dht.bootstrap([8, 8, 8, 8]); // Bootstrap via Google DNS IP (hypothetical bootnode)
 
             // Simulate Discovery & Trading
             let neighbors = mesh.discover();
@@ -397,7 +402,53 @@ pub fn kernel_init(dtb_ptr: usize) {
                 telemetry.push_heartbeat();
             }
         }
+
+        // 14. Phase 19: Internet of Abilities (v5.0)
+        {
+            // 19.2 AI-Native OS
+            use crate::ai::{GLOBAL_NPU, NpuDriver};
+            let mut npu = GLOBAL_NPU.lock();
+            let _ = npu.init();
+
+            // 19.3 Quantum Computing
+            use crate::quantum::{GLOBAL_QPU, Complex};
+            let mut qpu = GLOBAL_QPU.lock();
+            let q_idx = qpu.allocate_qubit();
+            if let Some(qubit) = qpu.qubits.get_mut(q_idx) {
+                qubit.h_gate(); // Create superposition
+            }
+
+            // 19.4 Brain-Computer Interface
+            use crate::drivers::bci::NeuralLink;
+            use crate::drivers::Driver;
+            let mut neural = NeuralLink::new(0xABC00000);
+            unsafe { let _ = neural.init(); }
+
+            // "The Singularity" Demo
+            if let Some(signal) = neural.read_signal() {
+                if signal.beta_wave > 0.7 {
+                    let platform = hal::get_platform();
+                    platform.puts("\r\n[AetherOS] Thought Detected! Collapsing Quantum State...\r\n");
+                    let result = qpu.run_measure(q_idx);
+                     platform.puts(if result { " -> State |1>\r\n" } else { " -> State |0>\r\n" });
+                }
+            }
+        }
     }
+}
+
+#[macro_export]
+macro_rules! print {
+    ($($arg:tt)*) => ({
+        use core::fmt::Write;
+        let _ = write!(crate::hal::ConsoleWriter, $($arg)*);
+    });
+}
+
+#[macro_export]
+macro_rules! println {
+    () => (crate::print!("\n"));
+    ($($arg:tt)*) => (crate::print!("{}\n", format_args!($($arg)*)));
 }
 
 pub fn kernel_tick() {
@@ -431,23 +482,9 @@ pub fn kernel_tick() {
         }
     }
 
-#[macro_export]
-macro_rules! print {
-    ($($arg:tt)*) => ({
-        use core::fmt::Write;
-        let _ = write!(crate::hal::ConsoleWriter, $($arg)*);
-    });
-}
-
-#[macro_export]
-macro_rules! println {
-    () => (crate::print!("\n"));
-    ($($arg:tt)*) => (crate::print!("{}\n", format_args!($($arg)*)));
-}
-
-        // 5. Poll keyboard input (Phase 7.3)
-        #[cfg(target_arch = "x86_64")]
-        {
+    // 5. Poll keyboard input (Phase 7.3)
+    #[cfg(target_arch = "x86_64")]
+    {
             use crate::drivers::input::ps2;
             unsafe {
                 if let Some(_event) = ps2::KEYBOARD.poll() {
