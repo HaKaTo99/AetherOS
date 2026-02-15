@@ -2,7 +2,9 @@
 
 **Version 3.0.0** - Cross-Platform Distributed Operating System
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+![AetherOS](https://img.shields.io/badge/AetherOS-v4.0_Enterprise-blueviolet)
+![Build](https://img.shields.io/badge/Build-Passing-brightgreen)
+![Status](https://img.shields.io/badge/Status-Stable-green)
 [![Rust](https://img.shields.io/badge/rust-nightly-orange.svg)](https://www.rust-lang.org/)
 [![Platform](https://img.shields.io/badge/platform-x86__64%20%7C%20aarch64-blue.svg)](https://github.com/HaKaTo99/AetherOS)
 

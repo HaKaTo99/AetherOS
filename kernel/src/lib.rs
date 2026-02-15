@@ -28,7 +28,8 @@ pub mod security; // [NEW] Capability & Security Model
 pub mod net;      // [NEW] Networking Stack (Phase 5)
 pub mod ipc;      // [NEW] IPC & RPC (Phase 5.2)
 pub mod ai;       // [NEW] AI Inference (Phase 5.4)
-pub mod distributed; // [NEW] Distributed Computing (Phase 8)
+pub mod distributed; // [NEW] Distributed Computing (Phase 8 & 17)
+pub mod enterprise;  // [NEW] Enterprise & Cloud (Phase 18)
 pub mod events;      // [NEW] Event Queue System (Phase 12.2)
 
 pub mod tests;    // [NEW] Functional Test Suite (Phase 6.2)
@@ -269,6 +270,133 @@ pub fn kernel_init(dtb_ptr: usize) {
         {
             crate::loader::user_demo::run_user_demo();
         }
+
+        // 7. Phase 16.1: Universal App Runtime (QuickJS Demo)
+        {
+            use crate::runtime::QuickJsRuntime;
+            let mut js_runtime = QuickJsRuntime::new();
+            // This simulates loading "vscode-web-core.js" or "antigravity-agent.js"
+            if let Ok(result) = js_runtime.eval("console.log('Hello from AetherOS Universal Runtime!')") {
+                let platform = hal::get_platform();
+                platform.puts("[Kernel] JS Execution Success: ");
+                platform.puts(&result);
+                platform.puts("\r\n");
+            }
+        }
+
+        // 8. Phase 16.2: AI Agent Runtime (WASM Inference Demo)
+        {
+            use crate::runtime::AiAgentRuntime;
+            // Initialize with "Llama-7B-WASM"
+            let mut agent = AiAgentRuntime::new("Llama-7B-Quantized");
+            
+            // Simulate chat
+            if let Ok(response) = agent.chat("Hello AetherOS, what is your status?") {
+                let platform = hal::get_platform();
+                platform.puts("\r\n[Kernel] AI Agent Response:\r\n");
+                platform.puts(&response);
+                platform.puts("\r\n");
+            }
+        }
+
+        // 9. Phase 16.4: Universal Data Services (SQL Demo)
+        {
+            use crate::runtime::DatabaseRuntime;
+            let mut db = DatabaseRuntime::new("users.db");
+            
+            // Simulate SQL Workflow
+            let _ = db.query("CREATE TABLE users (id INT, name TEXT)");
+            let _ = db.query("INSERT INTO users VALUES (1, 'Alice')");
+            
+            if let Ok(results) = db.query("SELECT * FROM users") {
+                let platform = hal::get_platform();
+                platform.puts("\r\n[Kernel] SQL Query Results:\r\n");
+                for row in results {
+                    platform.puts(" - ");
+                    platform.puts(&row);
+                    platform.puts("\r\n");
+                }
+            }
+        }
+
+        // 10. Phase 16.5: Universal App Frameworks (Laravel Demo)
+        {
+            use crate::runtime::PhpRuntime;
+            // 1. Simulate Laravel Artisan CLI
+            let mut artisan = PhpRuntime::new("/var/www/laravel/artisan");
+            let _ = artisan.execute();
+
+            // 2. Simulate Web Request
+            let mut index = PhpRuntime::new("/var/www/laravel/public/index.php");
+            let _ = index.execute();
+        }
+
+        // 11. Phase 16.2: Universal Terminal Tools (PTY/Shell)
+        {
+            use crate::runtime::TerminalRuntime;
+            let mut term = TerminalRuntime::new();
+            let _pty_id = term.open_terminal();
+            term.run_command("vim");
+        }
+
+        // 12. Phase 16.3: Self-Hosting Capabilities (Rustc/Git)
+        {
+            use crate::runtime::DevTools;
+            let mut dev = DevTools::new();
+            let _ = dev.git_clone("https://github.com/HaKaTo99/AetherOS");
+            dev.cargo_build();
+        }
+
+        // 13. Phase 16.6: Universal Multimedia (Movie & Camera)
+        {
+            use crate::runtime::MediaRuntime;
+            
+            // 1. Play Movie
+            let mut player = MediaRuntime::new("Avatar_The_Way_of_Water.mkv");
+            let _ = player.play();
+
+            // 2. Camera Capture
+            let mut cam = MediaRuntime::new("/dev/video0");
+            let _ = cam.capture();
+        }
+
+        // 14. Phase 17: Distributed Orchestration (Mesh & Market)
+        {
+            use crate::distributed::{MESH_NETWORK, CAPABILITY_MARKET, DIST_STORAGE};
+            let mut mesh = MESH_NETWORK.lock();
+            let mut market = CAPABILITY_MARKET.lock();
+            let mut storage = DIST_STORAGE.lock();
+
+            mesh.init();
+            storage.init();
+            market.init();
+
+            // Simulate Discovery & Trading
+            let neighbors = mesh.discover();
+            if neighbors > 0 {
+                use crate::distributed::market::ResourceType;
+                market.place_bid(1, ResourceType::Compute(10), 50); // Bid 50 AT for 10 TFLOPS
+                market.place_ask(2, ResourceType::Compute(10), 45); // Ask 45 AT
+            }
+        }
+
+        // 13. Phase 18: Enterprise & Cloud (RBAC, Cloud-Init, Telemetry)
+        {
+            use crate::enterprise::{CLOUD_MANAGER, RBAC_SYSTEM, TELEMETRY_AGENT};
+            let mut cloud = CLOUD_MANAGER.lock();
+            let mut rbac = RBAC_SYSTEM.lock();
+            let mut telemetry = TELEMETRY_AGENT.lock();
+
+            cloud.init();
+            rbac.init();
+            telemetry.init();
+
+            // Simulate Enterprise Workflow
+            if rbac.login("root") {
+                telemetry.collect_metrics();
+                telemetry.push_heartbeat();
+            }
+        }
     }
 }
 
@@ -303,13 +431,29 @@ pub fn kernel_tick() {
         }
     }
 
+#[macro_export]
+macro_rules! print {
+    ($($arg:tt)*) => ({
+        use core::fmt::Write;
+        let _ = write!(crate::hal::ConsoleWriter, $($arg)*);
+    });
+}
+
+#[macro_export]
+macro_rules! println {
+    () => (crate::print!("\n"));
+    ($($arg:tt)*) => (crate::print!("{}\n", format_args!($($arg)*)));
+}
+
         // 5. Poll keyboard input (Phase 7.3)
         #[cfg(target_arch = "x86_64")]
         {
             use crate::drivers::input::ps2;
-            if let Some(_event) = ps2::KEYBOARD.poll() {
-                // TODO: Push to event queue or handle
-                // For now, keyboard input is captured but not processed visually
+            unsafe {
+                if let Some(_event) = ps2::KEYBOARD.poll() {
+                    // TODO: Push to event queue or handle
+                    // For now, keyboard input is captured but not processed visually
+                }
             }
         }
 

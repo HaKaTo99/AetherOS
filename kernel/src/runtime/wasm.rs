@@ -191,12 +191,26 @@ impl WasiEnv {
 
     pub fn fd_write(&self, fd: i32, data: &[u8]) -> Result<usize, i32> {
         match fd {
-            1 | 2 => Ok(data.len()),
+            1 | 2 => {
+                // Stdout/Stderr: Write to kernel console
+                if let Ok(s) = core::str::from_utf8(data) {
+                    crate::print!("{}", s);
+                } else {
+                    // Fallback for non-utf8 data
+                    for b in data {
+                        crate::print!("{}", *b as char);
+                    }
+                }
+                Ok(data.len())
+            }
             _ => Err(8), // EBADF
         }
     }
 
-    pub fn proc_exit(&mut self, code: i32) { self.exit_code = Some(code); }
+    pub fn proc_exit(&mut self, code: i32) {
+        crate::println!("[WASI] Process exited with code: {}", code);
+        self.exit_code = Some(code);
+    }
 }
 
 // ===========================

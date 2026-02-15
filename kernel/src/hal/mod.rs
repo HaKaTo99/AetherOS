@@ -82,3 +82,13 @@ pub fn get_platform() -> &'static dyn Platform {
 pub unsafe fn try_get_platform() -> Option<&'static dyn Platform> {
     PLATFORM
 }
+
+/// Helper for println! macro
+pub struct ConsoleWriter;
+
+impl core::fmt::Write for ConsoleWriter {
+    fn write_str(&mut self, s: &str) -> core::fmt::Result {
+        get_platform().puts(s);
+        Ok(())
+    }
+}
