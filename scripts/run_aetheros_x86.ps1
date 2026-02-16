@@ -12,7 +12,10 @@
     Requires: qemu-system-x86_64 installed and in PATH.
 #>
 
-$KernelPath = "$PSScriptRoot\..\kernel\target\x86_64-unknown-none\release\aetheros-kernel"
+$KernelPath = "$PSScriptRoot\..\target\x86_64-unknown-none\release\aetheros-kernel"
+if (-not (Test-Path $KernelPath)) {
+    $KernelPath = "$PSScriptRoot\..\kernel\target\x86_64-unknown-none\release\aetheros-kernel"
+}
 $QemuExe = "qemu-system-x86_64.exe"
 
 Write-Host "AetherOS x86_64 Launcher" -ForegroundColor Cyan

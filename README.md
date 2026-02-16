@@ -1,14 +1,32 @@
 # AetherOS
 
-**Version 5.0.0** - Internet of Abilities (Singularity Release)
+**Version 6.0.0** - Quantum Fortress (Security & AI Release)
 
-![AetherOS](https://img.shields.io/badge/AetherOS-v5.0_Singularity-blueviolet)
+![AetherOS](https://img.shields.io/badge/AetherOS-v6.0_Quantum_Fortress-blueviolet)
 ![Build](https://img.shields.io/badge/Build-Passing-brightgreen)
 ![Status](https://img.shields.io/badge/Status-Stable-green)
 [![Rust](https://img.shields.io/badge/rust-nightly-orange.svg)](https://www.rust-lang.org/)
 [![Platform](https://img.shields.io/badge/platform-x86__64%20|%20aarch64%20|%20quantum-blue.svg)](https://github.com/HaKaTo99/AetherOS)
 
-AetherOS is a microkernel operating system written in Rust, designed for the "Internet of Abilities". V5.0 introduces AI-Native drivers, Quantum Computing simulations, and a Global Device Mesh.
+AetherOS is a microkernel operating system written in Rust, designed for the "Internet of Abilities". V6.0 introduces Zero-Trust Security, Homomorphic Encryption stubs, and an advanced AI Oracle Engine.
+
+---
+
+##  🚀 How to Run (Windows/x86_64)
+
+I have prepared a one-click launcher script for the easiest experience.
+
+1.  **Prerequisite**: Install QEMU
+    ```powershell
+    winget install -e --id SoftwareFreedomConservancy.QEMU
+    # Verify installation
+    qemu-system-x86_64 --version
+    ```
+2.  **Launch**:
+    ```powershell
+    .\scripts\run_aetheros_x86.ps1
+    ```
+    *(Note: If using CMD, remove the leading `.\`. See [QEMU Documentation](https://www.qemu.org/docs/master/) for troubleshooting)*
 
 ---
 
@@ -19,6 +37,12 @@ AetherOS is a microkernel operating system written in Rust, designed for the "In
 - **Active Object Scheduler**: Priority-based preemptive multitasking
 - **Quantum Bus RPC**: Lightweight cross-device communication
 - **Capability System**: Token-based security and access control
+
+### Quantum Fortress (v6.0)
+- **Zero-Trust**: Continuous attestation stub for verifying system integrity.
+- **AI Oracle v2**: Predictive resource management engine.
+- **PQC**: Post-Quantum Cryptography (Kyber/Dilithium) integration.
+- **Immutable Core**: Atomic update logic.
 
 ### Internet of Abilities (v5.0)
 - **AI-Native**: NPU drivers with asynchronous job queues for neural processing.
@@ -90,7 +114,7 @@ AetherOS/
 │   ├── reference/         #   API & capabilities reference
 │   ├── reports/           #   Implementation & test reports
 │   ├── MASTER_TODO.md     #   Full development roadmap
-│   └── VERSION_HISTORY.md #   v1.0 → v5.0 evolution
+│   └── VERSION_HISTORY.md #   v1.0 → v6.0 evolution
 ├── examples/              # AetherScript example apps
 ├── kernel/                # Kernel source code
 │   ├── src/
@@ -110,7 +134,7 @@ AetherOS/
 ├── CHANGELOG.md           # Detailed change log
 ├── CONTRIBUTING.md        # Contribution guidelines
 ├── README.md              # ← You are here
-├── RELEASE_NOTES_v5.0.md  # v5.0.0 release notes
+├── RELEASE_NOTES_v6.0.md  # v6.0.0 release notes
 └── SECURITY.md            # Security policy
 ```
 
@@ -118,7 +142,7 @@ AetherOS/
 
 ##  Documentation
 
-- **[Version History](docs/VERSION_HISTORY.md)**: Complete v1.0 → v5.0 evolution
+- **[Version History](docs/VERSION_HISTORY.md)**: Complete v1.0 → v6.0 evolution
 - **[Capabilities v4.0](docs/reference/CAPABILITIES_v4.0.md)**: Feature overview
 - **[Developer Guide](docs/guides/DEVELOPER_GUIDE.md)**: Architecture, build, debugging
 - **[Deployment Guide](docs/guides/DEPLOYMENT_GUIDE.md)**: USB boot, RPi4 setup
@@ -130,10 +154,10 @@ AetherOS/
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│                 AetherOS Kernel v5.0                     │
+│              AetherOS Kernel v6.0 (Quantum)             │
 ├─────────────────────────────────────────────────────────┤
-│  Core       │ Scheduler  │ IPC        │ Security (RBAC)│
-│  Network    │ Graphics   │ UI         │ BCI / Quantum  │
+│  Core       │ Scheduler  │ IPC        │ Security (PQC) │
+│  Network    │ Graphics   │ UI         │ BCI / Oracle   │
 │  Enterprise │ Cloud      │ Telemetry  │ Global Mesh    │
 └─────────────────────────────────────────────────────────┘
          │                    │                   │
@@ -150,6 +174,7 @@ AetherOS/
 - **Global Mesh**: DHT-based discovery for internet-scale clusters
 - **QuantumSim**: Integrated qubit simulation with entanglement
 - **NeuralLink**: Driver for brain-computer interfaces
+- **Oracle Engine**: AI-driven resource prediction
 
 ---
 
@@ -162,9 +187,10 @@ AetherOS/
 | UX & Ecosystem | ✅ Complete | v2.5 |
 | Cross-Platform | ✅ Complete | v3.0 |
 | Enterprise & Cloud | ✅ Complete | v4.0 |
-| **Internet of Abilities** | ✅ **Complete** | **v5.0** |
+| Internet of Abilities | ✅ Complete | v5.0 |
+| **Quantum Fortress** | ✅ **Complete** | **v6.0** |
 
-**Overall**: 19/19 Phases Complete (100%).
+**Overall**: 24/24 Phases Complete (100%).
 
 ---
 

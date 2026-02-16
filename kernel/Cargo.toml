@@ -29,7 +29,7 @@ opt-level = 3              # Maximum optimization
 lto = true                 # Link-Time Optimization
 codegen-units = 1          # Single codegen unit
 panic = "abort"            # Smaller binary
-strip = true               # Strip symbols  
+strip = false              # Keep symbols for Multiboot header  
 overflow-checks = false    # Performance
 debug = false              # No debug info
 

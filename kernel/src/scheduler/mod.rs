@@ -1,4 +1,4 @@
-pub mod active_object;
+pub mod active_objects;
 pub mod optimization; // [NEW] Phase 21
 
-pub use active_object::{ActiveObjectScheduler, ActiveObject};
+pub use active_objects::{ActiveObjectScheduler, ActiveObject};

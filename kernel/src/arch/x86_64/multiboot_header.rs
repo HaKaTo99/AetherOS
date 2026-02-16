@@ -7,8 +7,8 @@ global_asm!(r#"
 header_start:
     .long 0xe85250d6                /* magic number (multiboot 2) */
     .long 0                         /* architecture 0 (protected mode i386) */
-    .long header_end - header_start /* header length */
-    .long 0x100000000 - (0xe85250d6 + 0 + (header_end - header_start)) /* checksum */
+    .long 24                        /* header length (16 + 8 for end tag) */
+    .long 0x17adaf12                /* checksum: -(0xe85250d6 + 0 + 24) */
 
     /* required end tag */
     .word 0    /* type */

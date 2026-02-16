@@ -7,7 +7,7 @@
 
 use alloc::vec::Vec;
 use alloc::string::String;
-use crate::security::capabilities::{SecurityContext, Capability};
+use crate::security::capabilities::SecurityContext;
 
 pub struct FileItem {
     pub name: String,

@@ -14,6 +14,7 @@ pub mod dvfs;
 pub mod power;
 
 pub mod input; // [NEW] Input Subsystem
+pub mod gpu;   // [NEW] Phase 21 (v5.2) GPU driver framework
 pub mod media; // [NEW] Media Subsystem (Phase 13.3)
 pub mod usb;   // [NEW] USB Subsystem (Phase 11)
 pub mod bci;   // [NEW] BCI Subsystem (Phase 19.4)

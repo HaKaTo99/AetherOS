@@ -1,5 +1,14 @@
 [build]
 target = "x86_64-unknown-none"
 
+[target.x86_64-unknown-none]
+runner = "qemu-system-x86_64 -m 512M -serial stdio -display none -kernel"
+rustflags = [
+    "-C", "relocation-model=static",
+    "-C", "code-model=kernel",
+    "-C", "link-arg=-Td:/GitHub/AetherOS/kernel/x86_64.ld",
+    "-C", "link-arg=-L.",
+]
+
 [target.aarch64-unknown-none]
 rustflags = ["-C", "link-arg=-Tlink.ld", "-C", "link-arg=-L."]

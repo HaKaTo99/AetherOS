@@ -20,34 +20,28 @@ pub mod scheduler;
 pub mod bus;
 pub mod oracle;
 pub mod ui;
-pub mod drivers; // [NEW] Driver framework
-pub mod ai; // [NEW] Phase 22 (v5.3)
-pub mod net; // [NEW] Phase 22 (v5.3)
-pub mod ecosystem; // [NEW] Phase 23 (v5.4)
-pub mod sdk;       // [NEW] Phase 23 (v5.4)Virtualization module
-pub mod arch; // [NEW] Architecture module
-pub mod panic; // [NEW] Panic handler
+pub mod drivers;
+pub mod ai;
+pub mod net;
+pub mod ecosystem;
+pub mod sdk;
+pub mod arch;
+pub mod panic;
 #[cfg(target_arch = "aarch64")]
-pub mod debug; // [NEW] Debug utilities (GDB stub)
-
+pub mod debug;
 pub mod hal;
-pub mod virt; // [NEW] Virtualization module
-pub mod testing; // [NEW] Test framework
-pub mod drivers; // [NEW] Driver framework
-pub mod loader; // [NEW] Binary loader (ELF)
-pub mod syscall; // [NEW] POSIX Syscall Layer
-pub mod runtime; // [NEW] High-level runtimes (WASM, ART)
-pub mod browser; // [NEW] Firefox Container (Phase 20.2)
-pub mod security; // [NEW] Capability & Security Model
-pub mod net;      // [NEW] Networking Stack (Phase 5)
-pub mod ipc;      // [NEW] IPC & RPC (Phase 5.2)
-pub mod ai;       // [NEW] AI Inference (Phase 5.4)
-pub mod distributed; // [NEW] Distributed Computing (Phase 8 & 17)
-pub mod enterprise;  // [NEW] Enterprise & Cloud (Phase 18)
-pub mod events;      // [NEW] Event Queue System (Phase 12.2)
-pub mod quantum;     // [NEW] Quantum Computing (Phase 19.3)
-
-pub mod tests;    // [NEW] Functional Test Suite (Phase 6.2)
+pub mod virt;
+pub mod testing;
+pub mod loader;
+pub mod syscall;
+pub mod runtime;
+pub mod security;
+pub mod ipc;
+pub mod distributed;
+pub mod enterprise;
+pub mod events;
+pub mod quantum;
+pub mod tests;
 
 use crate::memory::smme::SymbianModernMemoryEngine;
 
@@ -514,10 +508,7 @@ pub fn kernel_init(dtb_ptr: usize) {
 
                 // 2. File Manager
                 // Mock context
-                let context = SecurityContext { 
-                    process_id: 1, 
-                    capabilities: alloc::vec::Vec::new() 
-                };
+                let context = SecurityContext::new();
                 let mut fm = FileManager::new(context);
                 let _ = fm.list_dir("/home/user");
                 platform.puts("[FileManager] Secure View Initialized. Found 3 items.\r\n");
@@ -581,7 +572,6 @@ pub fn kernel_init(dtb_ptr: usize) {
             // 22.0 AI-Native Kernel Demo (v5.3)
             {
                 // 1. Oracle Engine Prediction
-                use crate::ai::oracle::ORACLE;
                 let mut oracle = ORACLE.lock();
                 let intent = oracle.predict_intent(10, true);
                 platform.puts("[Oracle] Predicted Intent: ");
@@ -720,7 +710,7 @@ pub fn kernel_tick() {
     {
         let mut network = NETWORK.lock();
         if let Some(stack) = network.as_mut() {
-            stack.poll(0i64);
+            stack.poll(0);
         }
     }
 

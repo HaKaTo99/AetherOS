@@ -1,11 +1,18 @@
-//! Oracle Engine - ML-based Predictive Allocation
-//! TinyML predictor for memory management
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum Intent {
+    HighPerformanceGaming,
+    PowerSaving,
+    Development,
+    Idle,
+}
 
 /// Simple decision tree for memory prediction
 pub struct TinyMLPredictor {
     // Historical allocation sizes
     history: [usize; 16],
     history_index: usize,
+    pub current_intent: Intent,
+    pub confidence: u8,
 }
 
 impl TinyMLPredictor {
@@ -13,6 +20,8 @@ impl TinyMLPredictor {
         Self {
             history: [0; 16],
             history_index: 0,
+            current_intent: Intent::Idle,
+            confidence: 99,
         }
     }
 
@@ -61,6 +70,30 @@ impl TinyMLPredictor {
         } else {
             // Lazy GC
             total * 90 / 100
+        }
+    }
+
+    /// Analyze system state and user behavior to predict intent
+    pub fn predict_intent(&mut self, active_processes: usize, user_activity: bool) -> Intent {
+        if active_processes > 50 {
+            self.current_intent = Intent::HighPerformanceGaming;
+            self.confidence = 90;
+        } else if user_activity {
+            self.current_intent = Intent::Development;
+            self.confidence = 75;
+        } else {
+            self.current_intent = Intent::Idle;
+            self.confidence = 99;
+        }
+        self.current_intent.clone()
+    }
+
+    pub fn get_recommendation(&self) -> &'static str {
+        match self.current_intent {
+            Intent::HighPerformanceGaming => "Boost GPU clocks, Disable background sync",
+            Intent::PowerSaving => "Throttle CPU, Dim Screen",
+            Intent::Development => "Enable Debug Symbols, High Priority for Compiler",
+            Intent::Idle => "Deep Sleep Candidate",
         }
     }
 }

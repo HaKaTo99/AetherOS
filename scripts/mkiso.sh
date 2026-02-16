@@ -30,9 +30,12 @@ cp "$KERNEL" "$tmpdir/vmlinuz"
 cp -r "$ROOTFS"/* "$tmpdir/"
 
 # Note: real implementation should add grub/shim and efi bootloader
-cat > "$tmpdir/EFI/BOOT/BOOTX64.cfg" <<'EOF'
+cat > "$tmpdir/EFI/BOOT/grub.cfg" <<'EOF'
+set timeout=0
+set default=0
 menuentry "AetherOS" {
-  linux /vmlinuz root=/dev/ram0
+  multiboot2 /vmlinuz
+  boot
 }
 EOF
 

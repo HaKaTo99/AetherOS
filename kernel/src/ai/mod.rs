@@ -1,3 +1,11 @@
-pub mod oracle; // [NEW] Phase 22 (v5.3) Oracle v2
 pub mod llm;    // [NEW] Phase 22 (v5.3) Local LLM
 pub mod genai;  // [NEW] Phase 22 (v5.3) Generative AI
+
+pub struct NpuDriver;
+impl NpuDriver {
+    pub fn new() -> Self { Self }
+    pub fn init(&mut self) -> Result<(), &'static str> { Ok(()) }
+    pub fn process_step(&mut self) -> Option<()> { None }
+}
+
+pub static GLOBAL_NPU: spin::Mutex<NpuDriver> = spin::Mutex::new(NpuDriver);
