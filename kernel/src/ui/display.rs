@@ -48,7 +48,12 @@ impl DistributedFramebuffer {
         self.remote_host = Some(device_id);
     }
 
-    pub fn push_update(&self, _update: UIUpdate) -> Result<(), ()> {
+    pub fn push_update(&self, update: UIUpdate) -> Result<(), &'static str> {
+        // [CON-04] Multi-monitor safety check
+        if update.x + update.width > self.width || update.y + update.height > self.height {
+             return Err("UI Update Out-of-Bounds");
+        }
+
         self.version.fetch_add(1, Ordering::SeqCst);
         
         if let Some(_host) = self.remote_host {

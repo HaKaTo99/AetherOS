@@ -1,0 +1,8 @@
+[package]
+name = "simple-cli"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+# Standard library for AetherOS apps (hypothetical)
+aether-std = { path = "../../sdk/std" }

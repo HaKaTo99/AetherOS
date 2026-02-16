@@ -11,6 +11,8 @@ pub mod ai_agent;     // [NEW] AI Agent Runtime (Phase 16.2)
 pub mod database;     // [NEW] Database Runtime (Phase 16.4)
 pub mod php;          // [NEW] PHP Runtime (Phase 16.5)
 pub mod media;        // [NEW] Media Runtime (Phase 16.6)
+pub mod browser; // [NEW] Firefox Container (Phase 20.2)
+pub mod gaming;  // [NEW] Phase 21 (v5.2) Gaming
 pub mod terminal;     // [NEW] Terminal Runtime (Phase 16.2)
 pub mod devtools;     // [NEW] DevTools Runtime (Phase 16.3)
 

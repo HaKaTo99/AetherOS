@@ -2,7 +2,9 @@
 //! 
 //! Simple test framework that works in no_std environment
 
-pub mod perf;      // [NEW] Performance Tuning & Bug Tracker (Phase 11.2/11.3)
+pub mod unit;
+pub mod integration;
+pub mod benchmarks; // [NEW] Phase 21
 pub mod benchmark; // [NEW] Benchmark Framework (Phase 13.4)
 
 /// Test result

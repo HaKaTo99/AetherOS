@@ -4,6 +4,7 @@
 mod parser;
 mod passes;
 mod codegen;
+mod debug; // [NEW] Phase 20.1 DX-05
 
 use std::env;
 use std::fs;
@@ -14,9 +15,10 @@ fn main() {
     
     if args.len() < 2 {
         eprintln!("AetherScript Compiler v1.0");
-        eprintln!("Usage: aetherc <input.aethersrc> [--output <file>]");
+        eprintln!("Usage: aetherc <input.aethersrc> [--output <file>] [--debug]");
         eprintln!("\nOptions:");
         eprintln!("  --output <file>    Output file (default: output.rs)");
+        eprintln!("  --debug            Generate DWARF debug symbols");
         eprintln!("  --verbose          Show compilation details");
         std::process::exit(1);
     }
@@ -24,6 +26,7 @@ fn main() {
     let input_file = &args[1];
     let mut output_file = "output.rs".to_string();
     let mut verbose = false;
+    let mut debug = false;
     
     // Parse arguments
     let mut i = 2;
@@ -37,6 +40,10 @@ fn main() {
                     eprintln!("Error: --output requires a filename");
                     std::process::exit(1);
                 }
+            }
+            "--debug" => { // [NEW] Phase 20.1 DX-05
+                debug = true;
+                i += 1;
             }
             "--verbose" => {
                 verbose = true;
@@ -106,6 +113,12 @@ fn main() {
             println!("✓ Compilation successful!");
             println!("  Output: {}", output_file);
             println!("  Size: {} bytes", rust_code.len());
+            
+            // [NEW] Phase 20.1 DX-05
+            if debug {
+                let debug_file = output_file.clone() + ".dwarf";
+                let _ = debug::generate_dwarf_info(&debug_file);
+            }
         }
         Err(e) => {
             eprintln!("Error writing output: {}", e);

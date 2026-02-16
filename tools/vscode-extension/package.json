@@ -1,0 +1,27 @@
+{
+  "name": "aetheros-vscode",
+  "displayName": "AetherOS Developer Tools",
+  "description": "Language support and debugging for AetherOS",
+  "version": "0.1.0",
+  "publisher": "aetheros",
+  "engines": {
+    "vscode": "^1.75.0"
+  },
+  "categories": [
+    "Programming Languages",
+    "Debuggers"
+  ],
+  "contributes": {
+    "languages": [{
+      "id": "aetherscript",
+      "aliases": ["AetherScript", "as"],
+      "extensions": [".as", ".aes"]
+    }],
+    "debuggers": [{
+      "type": "aether-debug",
+      "label": "AetherOS Debugger",
+      "program": "./out/debugAdapter.js",
+      "runtime": "node"
+    }]
+  }
+}
