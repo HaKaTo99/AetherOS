@@ -840,7 +840,7 @@
 
 **Timeline**: Maret - April 2026
 **Goal**: Menjadikan AetherOS siap pakai untuk audiens awal (Developer & Enthusiast).
-**Status**: ðŸš€ **IN PREPARATION**
+**Status**: ðŸš€ **IN PREPARATION** (Detailed tasks in [PHASE_20_TASK_BREAKDOWN.md](file:///C:/Users/hkris/.gemini/antigravity/brain/ced6031a-59f3-4e9d-82c2-75e3c7cc9550/PHASE_20_TASK_BREAKDOWN.md))
 
 #### 20.1 Developer Experience (DX)
 - [ ] **SDK v1.0 Stable**: Dokumentasi lengkap, template proyek, dan library inti.
