@@ -27,7 +27,14 @@ Desain antarmuka dibangun dengan prinsip "Apple-like Fluidity" dan "Cyberpunk Ae
 *   **Seamless Continuity**: P2P Mesh Sync memastikan file yang di-copy di Laptop (AetherOS) langsung tersedia di Tablet (AetherOS) via Quantum Bus.
 *   **Secure by Design**: "Gembok" keamanan tidak mengganggu. browser (Firefox Container) melakukan handshake PQC di background, memberikan keamanan militer dengan UX yang transparan/invisible.
 
-### ✅ C. Developer Experience (Professional)
+### ✅ C. Next-Gen Interface Support (Future-Ready)
+Sistem dirancang untuk mendukung spektrum antarmuka masa depan (sesuai roadmap v6.0):
+*   **BCI (Brain-Computer Interface)**: Driver `neural_link.rs` terintegrasi langsung ke kernel untuk input sinyal otak.
+*   **OUI (Organic UI)**: Mendukung display fleksibel via driver adaptif (Fase 25.4).
+*   **PUI (Perceptual UI)**: Integrasi Oracle Engine dengan sensor gesture (NUI) dan face recognition (VUI).
+*   **MMUI (Multimodal UI)**: Orchestration layer menangani input suara, sentuhan, dan teks secara simultan melalui `GlobalEventBus`.
+
+### ✅ D. Developer Experience (Professional)
 *   **Konsistensi SDK**: Syscall interface (`draw_window`, `print`) seragam, memudahkan developer pihak ketiga membuat aplikasi yang "terasa" native.
 
 ## Kesimpulan

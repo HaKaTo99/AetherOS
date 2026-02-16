@@ -12,6 +12,7 @@ spin = "0.9.8"
 
 [target.'cfg(target_arch = "x86_64")'.dependencies]
 bootloader = "0.9.8"
+x86_64 = "0.14.10"
 
 
 [features]

@@ -12,6 +12,7 @@
     Requires: qemu-system-x86_64 installed and in PATH.
 #>
 
+$ProjectRoot = Resolve-Path "$PSScriptRoot\.."
 $KernelPath = "$PSScriptRoot\..\target\x86_64-unknown-none\release\aetheros-kernel"
 if (-not (Test-Path $KernelPath)) {
     $KernelPath = "$PSScriptRoot\..\kernel\target\x86_64-unknown-none\release\aetheros-kernel"
@@ -41,8 +42,29 @@ if (-not (Get-Command $QemuExe -ErrorAction SilentlyContinue)) {
 }
 Write-Host "[OK] QEMU found." -ForegroundColor Green
 
-# 3. Run QEMU
-Write-Host "Launching AetherOS..." -ForegroundColor Magenta
-Write-Host "Command: $QemuExe -kernel aetheros-kernel -serial stdio"
+# 2. Build AetherOS
+Write-Host "Building AetherOS..." -ForegroundColor Cyan
+$ManifestPath = Join-Path $ProjectRoot "kernel\Cargo.toml"
+cargo build --release --target x86_64-unknown-none --manifest-path $ManifestPath
+if ($LASTEXITCODE -ne 0) { Write-Error "Build failed"; exit 1 }
 
-& $QemuExe -kernel $KernelPath -serial stdio -m 512M -display gtk
+# 3. Convert ELF to flat binary (bypasses PVH ELF Note error)
+$KernelBin = Join-Path $ProjectRoot "kernel.bin"
+Write-Host "Converting to flat binary..." -ForegroundColor Cyan
+$ObjCopy = "rust-objcopy"
+if (Get-Command $ObjCopy -ErrorAction SilentlyContinue) {
+    & $ObjCopy -O binary $KernelPath $KernelBin
+    if ($LASTEXITCODE -ne 0) {
+        Write-Warning "rust-objcopy failed. Falling back to ELF binary..."
+        $KernelBin = $KernelPath
+    }
+}
+else {
+    Write-Warning "rust-objcopy not found. Install: rustup component add llvm-tools && cargo install cargo-binutils"
+    Write-Warning "Falling back to ELF binary (may fail with PVH error)..."
+    $KernelBin = $KernelPath
+}
+
+# 4. Run QEMU with -kernel (works with both flat binary and ELF)
+Write-Host "Launching AetherOS..." -ForegroundColor Magenta
+& $QemuExe -kernel $KernelBin -serial stdio -m 512M -display gtk

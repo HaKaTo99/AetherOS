@@ -12,21 +12,33 @@ AetherOS is a microkernel operating system written in Rust, designed for the "In
 
 ---
 
-##  🚀 How to Run (Windows/x86_64)
+##  🚀 How to Run AetherOS (v6.0 Stable)
 
-I have prepared a one-click launcher script for the easiest experience.
+AetherOS v6.0 sekarang menggunakan metode boot ISO untuk stabilitas maksimal pada QEMU modern.
 
-1.  **Prerequisite**: Install QEMU
-    ```powershell
-    winget install -e --id SoftwareFreedomConservancy.QEMU
-    # Verify installation
-    qemu-system-x86_64 --version
-    ```
-2.  **Launch**:
-    ```powershell
-    .\scripts\run_aetheros_x86.ps1
-    ```
-    *(Note: If using CMD, remove the leading `.\`. See [QEMU Documentation](https://www.qemu.org/docs/master/) for troubleshooting)*
+### Prerequisites
+- **QEMU x86_64**: [Download QEMU](https://www.qemu.org/download/)
+- **WSL (untuk build ISO)**: Memerlukan `xorriso` dan `grub-common`.
+
+### 1. Build Kernel
+```powershell
+cargo build --release --target x86_64-unknown-none --manifest-path kernel/Cargo.toml
+```
+
+### 2. Prepare ISO (Windows/WSL)
+Gunakan script pembantu atau jalankan manual:
+```powershell
+# Copy kernel ke folder iso
+Copy-Item -Path target\x86_64-unknown-none\release\aetheros-kernel -Destination iso\boot\aetheros_kernel -Force
+
+# Jalankan grub-mkrescue via WSL
+wsl grub-mkrescue -o aetheros.iso iso
+```
+
+### 3. Launch with QEMU
+```powershell
+qemu-system-x86_64 -cdrom aetheros.iso -serial stdio -m 512M -display gtk
+```
 
 ---
 

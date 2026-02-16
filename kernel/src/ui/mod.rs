@@ -36,6 +36,7 @@ pub mod window; // [NEW] Window Manager (Phase 13.1)
 pub mod components; // [NEW] Menu, FilePicker, Notifications (Phase 13.1)
 pub mod toolkit; // [NEW] App UI Toolkit (Phase 14.2)
 pub mod file_manager; // [NEW] Secure FileManager (Phase 20.2)
+pub mod organic_ui; // [NEW] Organic UI Drivers (Phase 25.4)
 
 pub use display::*;
 pub use widget::*;

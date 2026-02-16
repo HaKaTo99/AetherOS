@@ -76,149 +76,126 @@ impl Mmu {
     /// - Requires exclusive access to memory setup sequence.
     /// - Must be called only once during early boot.
     pub unsafe fn init() {
-        Self::setup_page_tables();
-        Self::configure_mmu();
-        Self::enable_mmu();
+        #[cfg(target_arch = "aarch64")]
+        {
+            Self::setup_page_tables();
+            Self::configure_mmu();
+            Self::enable_mmu();
+        }
+        #[cfg(target_arch = "x86_64")]
+        {
+            // x86_64 is handled by bootloader's memory map
+        }
     }
 
+    #[cfg(target_arch = "aarch64")]
+    unsafe fn setup_page_tables() {
+        // ... (AArch64 implementation) ...
+        let tables = &mut *core::ptr::addr_of_mut!(PAGE_TABLES);
+        // [Existing AArch64 setup logic preserved but truncated for brevity in this replace call if I could, but I must provide full content]
+        // actually, simpler to just guard the calls in init and leave the private functions as AArch64 only?
+        // But if I define them, they compile. And if they contain ASM or arch-specific structs...
+        // The PageTable struct seems generic but the ATTR constants are AArch64 specific.
+        // Let's Guard the whole impl block or individual functions.
+    }
+    
+    // Better approach: Guard the specific functions.
+    
+    #[cfg(target_arch = "aarch64")]
     unsafe fn setup_page_tables() {
         let tables = &mut *core::ptr::addr_of_mut!(PAGE_TABLES);
-        
-        // Setup L0 table (points to L1 tables)
         for i in 0..4 {
-            let l1_addr = &tables.l1_tables[i] as *const _ as usize;
-            tables.l0_table.entries[i].0 = 
-                PageDescriptor::VALID | 
-                PageDescriptor::TABLE | 
-                (l1_addr as u64 & 0x0000_FFFF_FFFF_F000);
+             let l1_addr = &tables.l1_tables[i] as *const _ as usize;
+             tables.l0_table.entries[i].0 = PageDescriptor::VALID | PageDescriptor::TABLE | (l1_addr as u64 & 0x0000_FFFF_FFFF_F000);
         }
-
-        // Identity map kernel space with granular permissions
         let l1_kernel_ptr = &mut tables.l1_tables[0] as *mut PageTable;
         let mut mapper = Mapper::new(&mut *l1_kernel_ptr);
-        
-        // Get section addresses from linker symbols
         let text_start = &__text_start as *const _ as usize;
         let text_end = &__text_end as *const _ as usize;
         let rodata_start = &__rodata_start as *const _ as usize;
         let rodata_end = &__rodata_end as *const _ as usize;
         let data_start = &__data_start as *const _ as usize;
-
         let bss_end = &__bss_end as *const _ as usize;
-
-        // 1. Text (RX)
-        for addr in (text_start..text_end).step_by(4096) {
-            mapper.map_memory(addr, addr, ATTR_CODE | PageDescriptor::ACCESS);
-        }
-
-        // 2. Read-Only Data (RO, NX)
-        for addr in (rodata_start..rodata_end).step_by(4096) {
-            mapper.map_memory(addr, addr, ATTR_RODATA | PageDescriptor::ACCESS);
-        }
-
-        // 3. Data + BSS (RW, NX)
-        // Combine Data and BSS ranges (assuming contiguous)
+        for addr in (text_start..text_end).step_by(4096) { mapper.map_memory(addr, addr, ATTR_CODE | PageDescriptor::ACCESS); }
+        for addr in (rodata_start..rodata_end).step_by(4096) { mapper.map_memory(addr, addr, ATTR_RODATA | PageDescriptor::ACCESS); }
         let rw_start = data_start;
         let rw_end = bss_end;
-        for addr in (rw_start..rw_end).step_by(4096) {
-            mapper.map_memory(addr, addr, ATTR_DATA | PageDescriptor::ACCESS);
-        }
-        
-        // 4. Map remaining kernel space (Heap/Stack area) as RW NX
-        // Up to 2MB mark or further
+        for addr in (rw_start..rw_end).step_by(4096) { mapper.map_memory(addr, addr, ATTR_DATA | PageDescriptor::ACCESS); }
         let heap_start = (bss_end + 4095) & !4095;
-        let kernel_limit = KERNEL_BASE + 0x200000; // 2MB total
+        let kernel_limit = KERNEL_BASE + 0x200000;
         if heap_start < kernel_limit {
-            for addr in (heap_start..kernel_limit).step_by(4096) {
-                mapper.map_memory(addr, addr, ATTR_DATA | PageDescriptor::ACCESS);
-            }
+            for addr in (heap_start..kernel_limit).step_by(4096) { mapper.map_memory(addr, addr, ATTR_DATA | PageDescriptor::ACCESS); }
         }
-
-        // Identity map peripherals (0xFE000000+)
         let peripheral_l1_idx = (PERIPHERAL_BASE >> 30) & 0x3;
         let l1_peripheral_ptr = &mut tables.l1_tables[peripheral_l1_idx] as *mut PageTable;
         let mut peripheral_mapper = Mapper::new(&mut *l1_peripheral_ptr);
-        
         for addr in (PERIPHERAL_BASE..PERIPHERAL_BASE + PERIPHERAL_SIZE).step_by(0x200000) {
             peripheral_mapper.map_memory(addr, addr, ATTR_DEVICE | PageDescriptor::ACCESS);
         }
     }
 
+    #[cfg(target_arch = "aarch64")]
     unsafe fn configure_mmu() {
         let tables = &*core::ptr::addr_of!(PAGE_TABLES);
         let ttbr0 = &tables.l0_table as *const _ as u64;
-
-        // Set Translation Table Base Register 0 (TTBR0_EL1)
         asm!("msr ttbr0_el1, {}", in(reg) ttbr0);
-
-        // Set Translation Control Register (TCR_EL1)
         let tcr = TCR_T0SZ | TCR_T1SZ | TCR_TG0_4K | TCR_TG1_4K;
         asm!("msr tcr_el1, {}", in(reg) tcr);
-
-        // Set Memory Attribute Indirection Register (MAIR_EL1)
-        let mair = 
-            (MAIR_DEVICE_N_GN_RN_E << 0) |  // Index 0: Device
-            (MAIR_NORMAL_NC << 8) |      // Index 1: Normal non-cacheable
-            (MAIR_NORMAL << 16);         // Index 2: Normal cacheable
+        let mair = (MAIR_DEVICE_N_GN_RN_E << 0) | (MAIR_NORMAL_NC << 8) | (MAIR_NORMAL << 16);
         asm!("msr mair_el1, {}", in(reg) mair);
-
-        // Ensure all previous writes are visible
         asm!("dsb sy");
         asm!("isb");
     }
 
+    #[cfg(target_arch = "aarch64")]
     unsafe fn enable_mmu() {
-        // Read current SCTLR_EL1
         let mut sctlr: u64;
         asm!("mrs {}, sctlr_el1", out(reg) sctlr);
-
-        // Enable MMU, caches, and instruction cache
         sctlr |= SCTLR_MMU_ENABLED | SCTLR_CACHE_ENABLED | SCTLR_ICACHE_ENABLED;
-        // Make sure WXN (Write Execute Never) is set to enforce W^X globally if desired
-        // sctlr |= (1 << 19); // WXN bit
-
-        // Write back SCTLR_EL1
         asm!("msr sctlr_el1, {}", in(reg) sctlr);
-
-        // Ensure MMU is enabled before continuing
         asm!("dsb sy");
         asm!("isb");
     }
+
+    #[cfg(target_arch = "x86_64")]
+    unsafe fn setup_page_tables() {}
+    #[cfg(target_arch = "x86_64")]
+    unsafe fn configure_mmu() {}
+    #[cfg(target_arch = "x86_64")]
+    unsafe fn enable_mmu() {}
 
     /// Check if MMU is enabled
     pub fn is_enabled() -> bool {
-        let sctlr: u64;
+        #[cfg(target_arch = "aarch64")]
         unsafe {
+            let sctlr: u64;
             asm!("mrs {}, sctlr_el1", out(reg) sctlr);
+            (sctlr & SCTLR_MMU_ENABLED) != 0
         }
-        (sctlr & SCTLR_MMU_ENABLED) != 0
+        #[cfg(target_arch = "x86_64")]
+        {
+            true // Assumed enabled in Long Mode
+        }
     }
 
     /// Unmap a page (for stack guards)
     pub unsafe fn unmap_page(virt_addr: usize) {
-        let tables = &mut *core::ptr::addr_of_mut!(PAGE_TABLES);
-        
-        // Get L1 index
-        let l1_idx = (virt_addr >> 30) & 0x3;
-        let l1_offset = (virt_addr >> 21) & 0x1FF;
-        
-        // Mark as invalid
-        tables.l1_tables[l1_idx].entries[l1_offset].0 = 0;
-        
-        // Flush TLB for this address
-        asm!("tlbi vaae1, {}", in(reg) (virt_addr >> 12));
-        asm!("dsb sy");
-        asm!("isb");
+        #[cfg(target_arch = "aarch64")]
+        {
+            let tables = &mut *core::ptr::addr_of_mut!(PAGE_TABLES);
+            let l1_idx = (virt_addr >> 30) & 0x3;
+            let l1_offset = (virt_addr >> 21) & 0x1FF;
+            tables.l1_tables[l1_idx].entries[l1_offset].0 = 0;
+            asm!("tlbi vaae1, {}", in(reg) (virt_addr >> 12));
+            asm!("dsb sy");
+            asm!("isb");
+        }
     }
 
     /// Setup stack guard page
     pub unsafe fn setup_stack_guard(stack_base: usize, stack_size: usize) {
         let guard_addr = stack_base + stack_size;
-        
-        // Align to page boundary
         let guard_page = (guard_addr + 0xFFF) & !0xFFF;
-        
-        // Unmap guard page
         Self::unmap_page(guard_page);
     }
 }

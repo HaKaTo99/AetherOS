@@ -18,6 +18,8 @@ pub mod gpu;   // [NEW] Phase 21 (v5.2) GPU driver framework
 pub mod media; // [NEW] Media Subsystem (Phase 13.3)
 pub mod usb;   // [NEW] USB Subsystem (Phase 11)
 pub mod bci;   // [NEW] BCI Subsystem (Phase 19.4)
+#[cfg(target_arch = "x86_64")]
+pub mod debug_exit; // [NEW] Debug Exit Driver
 
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

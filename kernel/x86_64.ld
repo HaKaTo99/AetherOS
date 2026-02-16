@@ -4,28 +4,28 @@ SECTIONS
 {
     . = 1M;
 
-    .boot :
+    .text ALIGN(4K) :
     {
-        /* Ensure multiboot header is at the beginning */
         KEEP(*(.multiboot_header))
-    }
-
-    .text :
-    {
         *(.text .text.*)
     }
 
-    .rodata :
+    .rodata ALIGN(4K) :
     {
         *(.rodata .rodata.*)
     }
 
-    .data :
+    .got ALIGN(4K) :
+    {
+        *(.got .got.*)
+    }
+
+    .data ALIGN(4K) :
     {
         *(.data .data.*)
     }
 
-    .bss :
+    .bss ALIGN(4K) :
     {
         __bss_start = .;
         *(.bss .bss.*)
@@ -37,5 +37,6 @@ SECTIONS
         *(.comment)
         *(.eh_frame)
         *(.note.gnu.property)
+        *(.boot .boot.*)
     }
 }

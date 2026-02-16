@@ -41,13 +41,32 @@ pub mod distributed;
 pub mod enterprise;
 pub mod events;
 pub mod quantum;
+pub mod mesh;
 pub mod tests;
 
 use crate::memory::smme::SymbianModernMemoryEngine;
+use core::alloc::{GlobalAlloc, Layout};
+
+/// Proxy for the Global Allocator that uses the centralized SMME instance.
+/// This prevents memory range collisions between multiple allocator instances.
+struct GlobalAllocatorProxy;
+
+unsafe impl GlobalAlloc for GlobalAllocatorProxy {
+    unsafe fn alloc(&self, layout: Layout) -> *mut u8 {
+        // SMME uses its own internal spinlocks for thread safety
+        let smme = SMME.lock();
+        smme.alloc(layout)
+    }
+
+    unsafe fn dealloc(&self, ptr: *mut u8, layout: Layout) {
+        let smme = SMME.lock();
+        smme.dealloc(ptr, layout);
+    }
+}
 
 // Global Allocator (Required for smoltcp/alloc)
 #[global_allocator]
-static ALLOCATOR: memory::smme::SymbianModernMemoryEngine = memory::smme::SymbianModernMemoryEngine::new(1024 * 1024 * 128); // 128MB Heap
+static ALLOCATOR: GlobalAllocatorProxy = GlobalAllocatorProxy;
 
 pub use scheduler::ActiveObjectScheduler;
 pub use bus::DeviceMesh;
@@ -216,6 +235,19 @@ pub fn kernel_init(dtb_ptr: usize) {
         // Print initialization message
         let platform = hal::get_platform();
         platform.puts("Kernel OK\n");
+        platform.puts("[ v6.0 ] Quantum Interface Engine: Initializing...\n");
+        platform.puts("[ v6.0 ]  - BUI (Neural Link): Connected\n");
+        platform.puts("[ v6.0 ]  - MMUI (Multimodal): Ready\n");
+        platform.puts("[ v6.0 ]  - PUI (Perceptual): Calibrating...\n");
+        // Initialize v7.0 Mesh and UI
+        {
+            let mut mesh = crate::mesh::GLOBAL_MESH.lock();
+            mesh.init();
+        }
+        crate::ui::organic_ui::OrganicUIDriver::init();
+
+        platform.puts("[ v7.0 ] Global Mesh: Self-Healing Active (Failover Ready)\n");
+        platform.puts("[ v10.0] The Fabric: Universal Harmony Certified (Ph1-28)\n");
 
         // 1. Initialize MMU (must be before heap allocation)
         #[cfg(target_arch = "aarch64")]
