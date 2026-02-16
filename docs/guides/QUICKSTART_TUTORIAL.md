@@ -1,6 +1,6 @@
 # QUICKSTART TUTORIAL — Developer Guide
 
-> **✅ AetherScript SDK**: Available as of v3.0.0. The AetherScript compiler supports Lexer → Parser → AST → WASM codegen.  
+> **✅ AetherOS v7.0.0**: Distributed Intelligence Fabric. Features Self-Healing Mesh and Ability Market.
 > For kernel development instructions, see [DEVELOPER_GUIDE.md](DEVELOPER_GUIDE.md).
 
 ## 5-Minute Quick Start (Vision)

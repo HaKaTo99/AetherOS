@@ -1,7 +1,7 @@
 # AetherOS Developer Guide
 
-**Version:** 3.0.0  
-**Last Updated:** February 15, 2026
+**Version:** 7.0.0  
+**Last Updated:** February 16, 2026
 
 Welcome to the AetherOS Developer Guide! This document will help you understand, build, debug, and contribute to the AetherOS kernel.
 
@@ -13,8 +13,9 @@ Welcome to the AetherOS Developer Guide! This document will help you understand,
 2. [Getting Started](#getting-started)
 3. [Building from Source](#building-from-source)
 4. [Running in QEMU](#running-in-qemu)
-5. [Debugging Guide](#debugging-guide)
-6. [Contributing](#contributing)
+5. [The Fabric Paradigm (v7.0+)](#the-fabric-paradigm)
+6. [Debugging Guide](#debugging-guide)
+7. [Contributing](#contributing)
 
 ---
 
@@ -26,39 +27,22 @@ AetherOS is a microkernel operating system written in Rust, designed for distrib
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│                  AetherOS Kernel v3.0                    │
+│              xAetherOS: The Fabric v7.0+                │
 ├─────────────────────────────────────────────────────────┤
-│  Phase 1-2: Foundation                                  │
-│  ├─ SMME (Memory Allocator)                            │
-│  ├─ Active Object Scheduler (Priority-based)           │
-│  ├─ Synchronization Primitives (Mutex, RwLock, etc.)   │
-│  └─ IPC (Quantum Channel RPC + App Bindings)           │
+│  Phase 25-28: Universal Harmony                         │
+│  ├─ Global Mesh (Self-Healing, Geo-Routing)             │
+│  ├─ Ability Market (Autonomous Bidding)                 │
+│  └─ Swarm Intelligence & Spatial Mapping                │
 ├─────────────────────────────────────────────────────────┤
-│  Phase 3-5: Platform & Distribution                     │
-│  ├─ HAL (RPi4, x86_64, Android)                        │
-│  ├─ Network Stack (smoltcp + BCM GENET + VirtIO)       │
-│  ├─ Device Discovery (Beacon protocol)                  │
-│  └─ AI Inference (Oracle predictor)                     │
+│  Phase 24: Quantum Fortress Security                    │
+│  ├─ Immutable Core & Atomic Updates                     │
+│  └─ Post-Quantum Zero-Trust                             │
 ├─────────────────────────────────────────────────────────┤
-│  Phase 7-8, 13: Services & UX                           │
-│  ├─ Graphics (VGA, SimpleFB, WindowManager)             │
-│  ├─ UI Framework (Widget + FlexLayout + UI Toolkit)     │
-│  ├─ Input (USB HID + Multi-touch + IME)                 │
-│  ├─ Media (Video, Audio, Camera)                        │
-│  ├─ Task Migration & Load Balancing                     │
-│  └─ Distributed KV Store                                │
-├─────────────────────────────────────────────────────────┤
-│  Phase 14: Ecosystem                                    │
-│  ├─ AetherScript Compiler (Lexer→Parser→AST→WASM)      │
-│  ├─ Package Manager (apm / .apkg)                       │
-│  ├─ Developer Tools (LSP, Profiler)                     │
-│  └─ App Framework & UI Toolkit                          │
-├─────────────────────────────────────────────────────────┤
-│  Phase 15: Cross-Platform Bridge                        │
-│  ├─ POSIX Layer (syscall translation, VFS, pthreads)    │
-│  ├─ Android ART (Dalvik VM, APK, Binder)                │
-│  ├─ Container Runtime (OCI, cgroups, namespaces)        │
-│  └─ WASM Runtime (interpreter, WASI, app store)         │
+│  Phase 1-22: Core & Distribution                        │
+│  ├─ SMME (Unified Memory Singleton)                     │
+│  ├─ Oracle AI Engine v2                                 │
+│  ├─ Quantum Bus RPC                                     │
+│  └─ Multi-Arch HAL (x86, ARM, Android)                  │
 └─────────────────────────────────────────────────────────┘
 ```
 

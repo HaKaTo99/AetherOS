@@ -31,14 +31,29 @@ This will:
 - `SymbianModernMemoryEngine` - Main allocator struct
 - `allocate()` / `deallocate()` - Memory allocation API
 - `stats()` - Usage statistics
+- `GlobalAllocatorProxy` - Unified proxy for absolute stability
 
 **Example**:
 ```rust
 use aetheros_kernel::SMME;
 
-let ptr = unsafe { SMME.allocate(4096).unwrap() };
-// Use memory...
-unsafe { SMME.deallocate(ptr, 4096); }
+let ptr = unsafe { SMME.lock().allocate(4096).unwrap() };
+```
+
+---
+
+### Global Mesh (`mesh`)
+**AetherOS Fabric Protocol** - Self-healing and decentralized market
+
+- `self_healing::SELF_HEALING` - Automatic failover engine (<500ms)
+- `market::AbilityMarket` - Bidding engine for compute resources
+- `geo_routing::GeoRoutingEngine` - XOR-metric proximity routing
+
+**Example**:
+```rust
+use aetheros_kernel::mesh::market::AbilityMarket;
+
+AbilityMarket::advertise_ability(1, 100); // Resource type 1, price 100
 ```
 
 ---
@@ -98,17 +113,17 @@ let msg = RpcMessage {
 ---
 
 ### UI Framework (`ui`)
-**User Interface** - Widgets and layout
+**User Interface** - Widgets, layout, and Organic UI
 
 - `Widget` trait - Base widget interface
-- `Label`, `Button`, `Panel` - UI components
-- `FlexLayout` - Layout engine
+- `FlexLayout` - Responsive layout engine
+- `organic_ui::OrganicUIDriver` - Adaptive surface rendering for flexible hardware
 
 **Example**:
 ```rust
-use aetheros_kernel::ui::{Label, Rect};
+use aetheros_kernel::ui::organic_ui::OrganicUIDriver;
 
-let label = Label::new(Rect::new(0, 0, 100, 20), "Hello");
+OrganicUIDriver::init();
 ```
 
 ---
