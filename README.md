@@ -1,8 +1,8 @@
 # AetherOS
 
-**Version 6.0.0** - Quantum Fortress (Security & AI Release)
+**Version 7.0.0** - Self-Healing Mesh (Distributed Intelligence)
 
-![AetherOS](https://img.shields.io/badge/AetherOS-v6.0_Quantum_Fortress-blueviolet)
+![AetherOS](https://img.shields.io/badge/AetherOS-v7.0_Self--Healing_Mesh-blueviolet)
 ![Build](https://img.shields.io/badge/Build-Passing-brightgreen)
 ![Status](https://img.shields.io/badge/Status-Stable-green)
 [![Rust](https://img.shields.io/badge/rust-nightly-orange.svg)](https://www.rust-lang.org/)
