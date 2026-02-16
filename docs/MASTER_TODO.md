@@ -2,7 +2,7 @@
 
 **Current Version**: v5.0.0 ✅ **SINGULARITY RELEASE**  
 **Last Updated**: 2026-02-16  
-**Target Versi Akhir**: v8.0 "Universal" (Juli 2026)
+**Target Versi Akhir**: v9.0 "Omni-Intelligence" (Desember 2026)
 
 ---
 
@@ -39,6 +39,8 @@
 | 25 | Unity Release (v6.0) | 📅 Planned |
 | 26 | Enterprise (v7.0) | 📅 Planned |
 | 27 | Universal (v8.0) | 📅 Planned |
+| 28 | Creator & Education (v8.5) | 📅 Planned |
+| 29 | Omni-Intelligence (v9.0) | 📅 Planned |
 
 ---
 
@@ -760,6 +762,7 @@ Berikut adalah rincian fase pengembangan hingga Juli 2026. Setiap fase memiliki 
 | 21.5 | Profiler bawaan (perf-like) | Menampilkan hotspot | Sedang |
 | 21.6 | Benchmark suite terhadap Linux dan Zircon | Data tersedia | Sedang |
 | 21.7 | Dukungan GPU computing (OpenCL / CUDA via wrapper) | Stub | Rendah |
+| 21.8 | Real-time scheduler extensions (Hard real-time for IoT) | Latensi deterministik | Sedang |
 
 ---
 
@@ -775,6 +778,7 @@ Berikut adalah rincian fase pengembangan hingga Juli 2026. Setiap fase memiliki 
 | 22.4 | Peningkatan device discovery dan task migration | Migrasi otomatis | Tinggi |
 | 22.5 | Federated learning framework (dasar) | Simulasi | Sedang |
 | 22.6 | On-device ML training (NPU) | Contoh training | Sedang |
+| 22.7 | 5G/LTE Modem Support (Driver Quectel/Sierra) | Koneksi seluler aktif | Sedang |
 
 ---
 
@@ -791,6 +795,7 @@ Berikut adalah rincian fase pengembangan hingga Juli 2026. Setiap fase memiliki 
 | 23.5 | Community hub (rating, komentar) | Fitur dasar | Sedang |
 | 23.6 | SDK untuk aplikasi berbayar | Dokumentasi | Sedang |
 | 23.7 | Persiapan hackathon global | Pengumuman | Rendah |
+| 23.8 | i18n/l10n Framework (Support 10+ languages) | UI multi-bahasa | Sedang |
 
 ---
 
@@ -820,6 +825,7 @@ Berikut adalah rincian fase pengembangan hingga Juli 2026. Setiap fase memiliki 
 | 25.4 | Target 10.000 pengguna, 500 kontributor | Terlampaui | Tinggi |
 | 25.5 | Dokumentasi lengkap (termasuk whitepaper) | Semua dokumen | Tinggi |
 | 25.6 | Stabilitas dan performa siap produksi | Tidak ada bug P0 | 🔥 Tertinggi |
+| 25.7 | Accessibility Features (Screen Reader, High Contrast) | Aksesibilitas dasar | Sedang |
 
 ---
 
@@ -833,8 +839,9 @@ Berikut adalah rincian fase pengembangan hingga Juli 2026. Setiap fase memiliki 
 | 26.2 | Audit logging terpusat | Integrasi dengan SIEM | Tinggi |
 | 26.3 | Fleet management dashboard (web) | Monitor 1000 node | Tinggi |
 | 26.4 | OTA updates untuk seluruh mesh | Update otomatis | Tinggi |
-| 26.5 | Zero-trust networking (mTLS, identitas) | Semua komunikasi terverifikasi | Tinggi |
+| 26.5 | Zero-trust networking (mTLS, identitas) | Komunikasi terverifikasi | Tinggi |
 | 26.6 | Cloud integration (AWS, GCP, Azure) | Deploy via cloud-init | Sedang |
+| 26.7 | Security Certifications Prep (Common Criteria, FIPS) | Dokumen persiapan | Rendah |
 
 ---
 
@@ -851,6 +858,39 @@ Berikut adalah rincian fase pengembangan hingga Juli 2026. Setiap fase memiliki 
 | 27.5 | Global mesh dengan skala jutaan node (simulasi) | Protokol siap | Tinggi |
 | 27.6 | Dukungan arsitektur tambahan (RISC-V, ARM32) | Boot di QEMU | Sedang |
 | 27.7 | Custom silicon (AetherSoC) emulasi | Driver siap | Sedang |
+| 27.8 | Expanded IoT Support (STM32, Arduino, FPGA) | Driver/HAL tersedia | Sedang |
+| 27.9 | IoT Protocols (MQTT, CoAP, LwM2M) | Broker/Client berfungsi | Tinggi |
+
+---
+
+## 🚧 Fase 28: v8.5 "Creator & Education" (Agustus - September 2026)
+
+**Goal**: Memberdayakan kreator konten dan sektor pendidikan.
+
+| ID | Tugas | Kriteria Selesai | Prioritas |
+|----|-------|------------------|-----------|
+| 28.1 | Video Editor (Simple Connect/Cut/Effects) | Dapat mengedit video dasar | Sedang |
+| 28.2 | Audio Workstation (DAW - Multi-track) | Rekam dan edit audio | Sedang |
+| 28.3 | 3D Modeling & Rendering (Blender Port/Clone) | Render 3D dengan Vulkan | Rendah |
+| 28.4 | Offline Education Suite (Khan Academy, Wikipedia) | Konten dapat diakses offline | Tinggi |
+| 28.5 | Parental Control & Kids Mode | Batasi waktu dan konten | Tinggi |
+| 28.6 | AetherOS Developer Certification Program | Program ujian online | Sedang |
+
+---
+
+## 🚧 Fase 29: v9.0 "Omni-Intelligence" (Oktober - Desember 2026)
+
+**Goal**: Integrasi AI Produktivitas penuh dan OmniLang sebagai bahasa universal.
+
+| ID | Tugas | Kriteria Selesai | Prioritas |
+|----|-------|------------------|-----------|
+| 29.1 | AI Chat Assistant (Local LLM - LLaMA/Mistral) | Percakapan kontekstual | 🔥 Tertinggi |
+| 29.2 | AI Presentation Generator (Text-to-Slide) | Export PDF/PPT | Tinggi |
+| 29.3 | AI Image Generator (Stable Diffusion Integration) | Generate gambar dari teks | Tinggi |
+| 29.4 | OmniLang Specification (The "Universal" Language) | Spec v1.0 released | 🔥 Tertinggi |
+| 29.5 | OmniLang Compiler (Targets: Rust, WASM, AetherScript) | Compile Hello World | Tinggi |
+| 29.6 | OmniLang IDE Integration | LSP & Debugger support | Tinggi |
+| 29.7 | Omni-Kernel v2 (Self-optimizing with AI) | Kernel menstabilkan diri | Sedang |
 
 ---
 
@@ -866,6 +906,8 @@ Berikut adalah rincian fase pengembangan hingga Juli 2026. Setiap fase memiliki 
 | v6.0 | Juli 2026 | Peluncuran "Unity", kampanye global |
 | v7.0 | Juli 2026 | Enterprise, cloud, fleet management |
 | v8.0 | Juli 2026 | Universal OS, multi-platform, AI-native |
+| v8.5 | Sep 2026 | Creator tools, Education suite |
+| v9.0 | Des 2026 | Omni-Intelligence, OmniLang, Full AI Suite |
 
 ---
 
@@ -876,5 +918,6 @@ Berikut adalah rincian fase pengembangan hingga Juli 2026. Setiap fase memiliki 
 - **Gunakan GitHub Projects** untuk memantau progres setiap fase.
 - **Rilis secara iteratif** setiap 2-4 minggu untuk mendapatkan umpan balik cepat.
 - **Dokumentasi dan komunikasi** yang baik agar komunitas tetap termotivasi.
+- **Fokus jangka panjang**: Bangun fondasi modular agar fitur masa depan (v9.0+) mudah diintegrasikan tanpa menulis ulang kernel.
 
-Dengan rencana ini, AetherOS dapat mencapai versi 8.0 pada akhir Juli 2026, mewujudkan visi sebagai sistem operasi universal yang menyatukan semua perangkat dan aplikasi. 💪 (Singularity Release v5.0.0 sudah tercapai ✅)
+Dengan rencana ini, AetherOS dapat mencapai visi besarnya pada akhir 2026, menjadi sistem operasi universal yang tidak hanya menghubungkan perangkat, tetapi juga memberdayakan penciptaan dan kecerdasan. (Singularity Release v5.0.0 sudah tercapai ✅)
