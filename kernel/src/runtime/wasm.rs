@@ -85,13 +85,20 @@ pub struct WasmInterpreter {
 }
 
 impl WasmInterpreter {
-    pub fn new(memory_pages: u32) -> Self {
-        Self {
+    pub fn new(memory_pages: u32) -> Result<Self, &'static str> {
+        let size = memory_pages as usize * 65536;
+        
+        // Use fallible allocation for the memory buffer if possible, or check bounds
+        if size > 128 * 1024 * 1024 {
+            return Err("Requested WASM memory exceeds 128MB safety limit");
+        }
+
+        Ok(Self {
             stack: Vec::new(),
             locals: Vec::new(),
-            memory: alloc::vec![0u8; memory_pages as usize * 65536],
+            memory: alloc::vec![0u8; size],
             gas: 1_000_000,
-        }
+        })
     }
 
     pub fn execute(&mut self, func: &WasmFunc) -> Result<Option<WasmValue>, &'static str> {
@@ -243,7 +250,7 @@ impl WasmRuntime {
     pub fn new() -> Self { Self }
     pub fn execute(&self, binary: &[u8]) -> Result<(), &'static str> {
         let module = WasmModule::from_bytes(binary)?;
-        let mut interp = WasmInterpreter::new(module.memory_pages);
+        let mut interp = WasmInterpreter::new(module.memory_pages)?;
         if let Some(func) = module.functions.first() {
             interp.execute(func)?;
         }

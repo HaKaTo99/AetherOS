@@ -12,15 +12,15 @@ pub struct QuickJsRuntime {
 
 impl QuickJsRuntime {
     /// Initialize the QuickJS runtime (loads the WASM engine)
-    pub fn new() -> Self {
+    pub fn new() -> Result<Self, &'static str> {
         // In a real implementation, this would load `quickjs.wasm` updates from disk.
         // For Phase 16.1, we construct a minimal WASM module that simulates the JS engine.
         // This "mock" engine accepts a string pointer and prints it.
         
         let module = Self::create_mock_quickjs_wasm();
-        let interpreter = WasmInterpreter::new(module.memory_pages);
+        let interpreter = WasmInterpreter::new(module.memory_pages)?;
         
-        Self { interpreter }
+        Ok(Self { interpreter })
     }
 
     /// Execute a JavaScript code string

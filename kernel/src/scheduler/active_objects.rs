@@ -321,13 +321,24 @@ impl ActiveObjectScheduler {
         }
         
         let id = self.object_count as u32;
+        
+        // Add to ready queue FIRST to ensure stability
+        if !self.ready_queue.insert(id, priority) {
+            crate::enterprise::audit::log_security(
+                crate::enterprise::audit::AuditSeverity::Critical,
+                "Scheduler", "Failed to queue new task: Priority level full."
+            );
+            return Err(());
+        }
+        
         let task = ActiveObject::new_with_stack(id, priority, 0, entry_point);
-        
-        // Add to ready queue
-        self.ready_queue.insert(id, priority);
-        
         self.objects[self.object_count] = Some(task);
         self.object_count += 1;
+        
+        crate::enterprise::audit::log_security(
+            crate::enterprise::audit::AuditSeverity::Info,
+            "Scheduler", &format!("System task created: ID {}, Priority {}", id, priority)
+        );
         
         Ok(id)
     }

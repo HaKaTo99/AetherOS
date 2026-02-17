@@ -7,6 +7,7 @@ pub mod geo_routing;
 
 use spin::Mutex;
 use alloc::vec::Vec;
+use crate::hal;
 
 /// Global Mesh Controller
 pub struct GlobalMeshController {

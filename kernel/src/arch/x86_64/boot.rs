@@ -4,11 +4,29 @@
 use core::arch::global_asm;
 
 global_asm!(r#"
-.section .text
+.section .multiboot_header
 .global _start
 .code32
 
-/* ---- Multiboot 2 Header (supports 64-bit kernels) ---- */
+/* ---- PVH ELF Note (Modern 64-bit Direct Boot) ---- */
+.section .note.pvh, "a"
+.align 4
+pvh_note_start:
+    .long 4                      /* namesz */
+    .long 4                      /* descsz */
+    .long 18                     /* type: XEN_ELFNOTE_PHYS32_ENTRY */
+    .ascii "Xen\0"               /* name */
+    .long _start                 /* desc: physical entry point */
+
+.section .multiboot_header
+/* ---- Multiboot 1 Header (for maximum compatibility) ---- */
+.align 4
+mb1_header_start:
+    .long 0x1BADB002                       /* magic */
+    .long 0x01                             /* flags: align modules */
+    .long -(0x1BADB002 + 0x01)             /* checksum */
+
+/* ---- Multiboot 2 Header ---- */
 .align 8
 mb2_header_start:
     .long 0xe85250d6                              /* magic */
@@ -30,9 +48,25 @@ mb2_header_start:
     .long 8
 mb2_header_end:
 
+.section .text
+
 _start:
     /* Setup stack */
     mov esp, offset stack_top
+
+    /* Zero the BSS (v7.9 Stability Fix - Full Range) */
+    mov edi, offset __bss_start
+    mov ecx, offset __bss_end
+    sub ecx, edi
+    xor eax, eax
+    rep stosb
+
+    /* Zero the start of the Heap (v7.9 Emergency Fix) */
+    /* VirtualBox memory at 64MB might contain junk */
+    mov edi, 0x04000000
+    mov ecx, 1024 * 1024 * 32 /* Zero first 32MB of L0 pool */
+    xor eax, eax
+    rep stosb
 
     /* 1. Check if CPU supports Long Mode */
     call check_cpuid
@@ -90,15 +124,20 @@ setup_page_tables:
     mov eax, offset p3_table
     or eax, 0b11
     mov [p4_table], eax
+    mov dword ptr [p4_table + 4], 0
+
     mov eax, offset p2_table
     or eax, 0b11
     mov [p3_table], eax
+    mov dword ptr [p3_table + 4], 0
+
     mov ecx, 0
 .map_p2_table:
     mov eax, 0x200000
     mul ecx
     or eax, 0b10000011
     mov [p2_table + ecx * 8], eax
+    mov dword ptr [p2_table + ecx * 8 + 4], 0
     inc ecx
     cmp ecx, 512
     jne .map_p2_table
@@ -117,6 +156,16 @@ enable_paging:
     mov eax, cr0
     or eax, 1 << 31
     mov cr0, eax
+    
+    /* SSE/FPU initialization for improved compatibility (v7.8) */
+    mov eax, cr0
+    and ax, 0xFFFB      /* clear Coprocessor Monitoring (MP) and Emulation (EM) */
+    or ax, 0x2          /* set MP */
+    mov cr0, eax
+    mov eax, cr4
+    or ax, 3 << 9       /* set OSFXSR and OSXMMEXCPT */
+    mov cr4, eax
+    
     ret
 
 /* --- 64-bit Long Mode Entry --- */
@@ -139,14 +188,19 @@ long_mode_start:
 /* --- Data Section (BSS) --- */
 .section .bss
 .align 4096
+/* Critical Page Tables MUST be zeroed first */
 p4_table:
     .skip 4096
 p3_table:
     .skip 4096
 p2_table:
     .skip 4096
+
+/* Guard space and Stack */
+.align 4096
+.skip 4096 /* Bottom Guard */
 stack_bottom:
-    .skip 4096 * 4
+    .skip 4096 * 32
 stack_top:
 
 /* --- GDT (Read Only) --- */

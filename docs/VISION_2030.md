@@ -52,11 +52,18 @@ xAetherOS dibangun di atas prinsip keamanan mutlak untuk era pasca-kuantum:
 
 ---
 
-## 🎯 Visi Akhir "The Last OS"
+## 🎯 Strategi Tiga Tahap Menuju 2030
 
-Dalam dekade mendatang, konsep "sistem operasi" tradisional akan menghilang, digantikan oleh lapisan komputasi yang ada di mana-mana ("ubiquitous computing layer").
+Untuk mencapai visi ini, xAetherOS mengikuti peta jalan strategis yang adaptif terhadap hardware:
 
-xAetherOS dirancang untuk menjadi lapisan tersebut:
+1.  **Tahap 1: Infiltrasi (2026)**: Optimalisasi pada x86_64 dan ARM64. Membangun basis "Self-Healing Mesh" pada hardware yang ada sekarang.
+2.  **Tahap 2: Akselerasi (2027-2028)**: Adopsi NPU dan RISC-V secara masif. Integrasi akselerasi AI native untuk Oracle Engine v2.0.
+3.  **Tahap 3: Dominasi (2029-2030)**: Implementasi Full 'The Fabric'. Integrasi BCI dan Ubiquitous Computing sebagai standar de facto.
+
+---
+
+## 📈 Perkembangan v10.0: The Last OS
+v10.0 bukan lagi sekadar software, melainkan lapisan infrastruktur yang menyelimuti realitas. Antarmuka organik, keamanan tanpa kompromi, dan distribusi kecerdasan universal adalah pilar utamanya.
 *   **Invisible**: Tidak perlu diinstal/diupdate manual.
 *   **Resilient**: Tidak bisa dimatikan oleh satu entitas.
 *   **Sovereign**: Memberikan kendali data kembali ke pengguna.

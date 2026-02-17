@@ -91,19 +91,12 @@ flash-android: android-image
 
 # x86_64 ISO Image Target (GRUB)
 iso-image:
-	@echo "=== Building x86_64 ISO Image ==="
+	@echo "=== Building x86_64 ISO Image v7.9 ==="
 	cd kernel && cargo build --release --target x86_64-unknown-none
-	@mkdir -p isofiles/boot/grub
-	@cp kernel/target/x86_64-unknown-none/release/aetheros-kernel isofiles/boot/kernel.bin
-	@echo "set timeout=0" > isofiles/boot/grub/grub.cfg
-	@echo "set default=0" >> isofiles/boot/grub/grub.cfg
-	@echo "" >> isofiles/boot/grub/grub.cfg
-	@echo "menuentry \"AetherOS\" {" >> isofiles/boot/grub/grub.cfg
-	@echo "    multiboot2 /boot/kernel.bin" >> isofiles/boot/grub/grub.cfg
-	@echo "    boot" >> isofiles/boot/grub/grub.cfg
-	@echo "}" >> isofiles/boot/grub/grub.cfg
-	@grub-mkrescue -o aetheros.iso isofiles 2> /dev/null || \
-		echo "WARNING: grub-mkrescue not found. ISO not created. (Install mtools & xorriso)"
+	@mkdir -p iso/boot/grub
+	@cp kernel/target/x86_64-unknown-none/release/aetheros-kernel iso/boot/aetheros_kernel
+	@grub-mkrescue -o aetheros.iso iso 2> /dev/null || \
+		echo "WARNING: grub-mkrescue not found locally. Please run: wsl grub-mkrescue -o aetheros.iso iso"
 
 # Clean
 clean:

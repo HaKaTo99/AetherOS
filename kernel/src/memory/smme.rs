@@ -334,9 +334,9 @@ impl SymbianModernMemoryEngine {
         
         Self {
             // Quantum Fortress v6.0 Stability: Massive 400MB+ Aggregated Heap
-            l0_pool: MemoryPool::new(0x0400_0000, 16 * 1024 * 1024),      // 16MB fast pool
-            l1_pool: MemoryPool::new(0x0500_0000, 128 * 1024 * 1024),     // 128MB general pool
-            l2_pool: MemoryPool::new(0x0D00_0000, 256 * 1024 * 1024),    // 256MB large pool
+            l0_pool: MemoryPool::new(0x0400_0000, 32 * 1024 * 1024),      // Increased to 32MB (v7.7)
+            l1_pool: MemoryPool::new(0x0600_0000, 128 * 1024 * 1024),     // Shifted base to 0x0600_0000
+            l2_pool: MemoryPool::new(0x0E00_0000, 256 * 1024 * 1024),     // Shifted base to 0x0E00_0000
             allocation_history: [ATOMIC_ZERO; 16],
             history_index: AtomicUsize::new(0),
             distributed_enabled: false,
@@ -345,11 +345,11 @@ impl SymbianModernMemoryEngine {
 
     /// Get pool for a given address
     fn get_pool_for_address(&self, addr: usize) -> Option<&MemoryPool> {
-        if addr >= 0x0400_0000 && addr < 0x0500_0000 {
+        if addr >= 0x0400_0000 && addr < 0x0600_0000 {
             Some(&self.l0_pool)
-        } else if addr >= 0x0500_0000 && addr < 0x0D00_0000 {
+        } else if addr >= 0x0600_0000 && addr < 0x0E00_0000 {
             Some(&self.l1_pool)
-        } else if addr >= 0x0D00_0000 && addr < 0x1D00_0000 {
+        } else if addr >= 0x0E00_0000 && addr < 0x1E00_0000 {
             Some(&self.l2_pool)
         } else {
             None
@@ -358,7 +358,7 @@ impl SymbianModernMemoryEngine {
 
     /// Get pool for a given size
     fn get_pool_for_size(&self, size: usize) -> &MemoryPool {
-        if size <= 16 * 1024 * 1024 {
+        if size <= 4 * 1024 * 1024 {
             &self.l0_pool
         } else if size <= 128 * 1024 * 1024 {
             &self.l1_pool

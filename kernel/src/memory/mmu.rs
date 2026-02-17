@@ -90,19 +90,6 @@ impl Mmu {
 
     #[cfg(target_arch = "aarch64")]
     unsafe fn setup_page_tables() {
-        // ... (AArch64 implementation) ...
-        let tables = &mut *core::ptr::addr_of_mut!(PAGE_TABLES);
-        // [Existing AArch64 setup logic preserved but truncated for brevity in this replace call if I could, but I must provide full content]
-        // actually, simpler to just guard the calls in init and leave the private functions as AArch64 only?
-        // But if I define them, they compile. And if they contain ASM or arch-specific structs...
-        // The PageTable struct seems generic but the ATTR constants are AArch64 specific.
-        // Let's Guard the whole impl block or individual functions.
-    }
-    
-    // Better approach: Guard the specific functions.
-    
-    #[cfg(target_arch = "aarch64")]
-    unsafe fn setup_page_tables() {
         let tables = &mut *core::ptr::addr_of_mut!(PAGE_TABLES);
         for i in 0..4 {
              let l1_addr = &tables.l1_tables[i] as *const _ as usize;

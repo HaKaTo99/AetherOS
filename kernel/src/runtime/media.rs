@@ -13,16 +13,16 @@ pub struct MediaRuntime {
 
 impl MediaRuntime {
     /// Initialize the Media runtime with a specific resource/codec
-    pub fn new(resource: &str) -> Self {
+    pub fn new(resource: &str) -> Result<Self, &'static str> {
         // In a real implementation, this would load `ffmpeg.wasm` or `opencv.wasm`
         
         let module = Self::create_mock_media_wasm();
-        let interpreter = WasmInterpreter::new(module.memory_pages);
+        let interpreter = WasmInterpreter::new(module.memory_pages)?;
         
-        Self { 
+        Ok(Self { 
             interpreter,
             resource: String::from(resource),
-        }
+        })
     }
 
     /// Play media (Video/Audio)
@@ -69,7 +69,7 @@ impl MediaRuntime {
         // A minimal WASM module
         WasmModule {
             name: String::from("media-core"),
-            memory_pages: 128, // 8MB heap (large buffers)
+            memory_pages: 64, // 4MB heap (optimized for stability v7.7)
             exports: alloc::collections::BTreeMap::new(),
             functions: alloc::vec![
                 WasmFunc {

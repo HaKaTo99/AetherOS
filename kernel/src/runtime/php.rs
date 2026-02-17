@@ -13,17 +13,17 @@ pub struct PhpRuntime {
 
 impl PhpRuntime {
     /// Initialize the PHP runtime with a specific script
-    pub fn new(script_path: &str) -> Self {
+    pub fn new(script_path: &str) -> Result<Self, &'static str> {
         // In a real implementation, this would load `php-cgi.wasm`
         // For Phase 16.5, we construct a mock WASM module that simulates PHP.
         
         let module = Self::create_mock_php_wasm();
-        let interpreter = WasmInterpreter::new(module.memory_pages);
+        let interpreter = WasmInterpreter::new(module.memory_pages)?;
         
-        Self { 
+        Ok(Self { 
             interpreter,
             script_path: String::from(script_path),
-        }
+        })
     }
 
     /// Execute the PHP script

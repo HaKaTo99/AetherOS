@@ -3,8 +3,12 @@ ENTRY(_start)
 SECTIONS
 {
     . = 1M;
+    
+    .notes : {
+        KEEP(*(.note.pvh))
+    }
 
-    .text ALIGN(4K) :
+    .text :
     {
         KEEP(*(.multiboot_header))
         *(.text .text.*)

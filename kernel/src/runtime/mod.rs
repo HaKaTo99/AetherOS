@@ -2,7 +2,7 @@ pub mod wasm;
 pub mod art;
 pub mod apm;          // Package Manager (Phase 14.1)
 pub mod appframework; // Application Framework (Phase 14.2)
-pub mod aetherscript; // [NEW] AetherScript Compiler (Phase 14.4)
+pub mod omnilang;     // [NEW] OmniLang Native Runtime (Source: HaKaTo99/OmniLang)
 pub mod posix;        // [NEW] POSIX Compatibility Layer (Phase 15.1)
 pub mod android;      // [NEW] Android ART Runtime (Phase 15.2)
 pub mod container;    // [NEW] Container Runtime (Phase 15.3)
@@ -28,3 +28,4 @@ pub use php::PhpRuntime;
 pub use media::MediaRuntime;
 pub use terminal::TerminalRuntime;
 pub use devtools::DevTools;
+pub use omnilang::OmniRuntime;

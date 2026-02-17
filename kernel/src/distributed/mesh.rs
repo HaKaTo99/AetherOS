@@ -24,6 +24,8 @@ pub struct MeshNetwork {
     routes: BTreeMap<u64, Vec<u64>>, // Dest ID -> Path
 }
 
+use crate::enterprise::audit::{AuditSeverity, log_security};
+
 impl MeshNetwork {
     pub const fn new() -> Self {
         Self {
@@ -43,11 +45,12 @@ impl MeshNetwork {
         self.local_node.capabilities.push(String::from("compute"));
         self.local_node.capabilities.push(String::from("storage"));
         
-        crate::println!("[Mesh] Network Initialized. Node ID: {}", self.local_node.id);
+        log_security(AuditSeverity::Info, "System", "Mesh Network stack initialized.");
     }
 
     /// Simulate discovery of nearby devices
     pub fn discover(&mut self) -> usize {
+        log_security(AuditSeverity::Info, "System", "Mesh neighbor discovery started.");
         // Simulation: Add fake neighbors
         let node2 = MeshNode {
             id: 2,

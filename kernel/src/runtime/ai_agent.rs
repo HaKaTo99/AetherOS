@@ -13,17 +13,17 @@ pub struct AiAgentRuntime {
 
 impl AiAgentRuntime {
     /// Initialize the AI Agent runtime with a specific model
-    pub fn new(model_name: &str) -> Self {
+    pub fn new(model_name: &str) -> Result<Self, &'static str> {
         // In a real implementation, this would load `llama.wasm` and the model weights.
         // For Phase 16.2, we construct a mock WASM module that simulates an AI Agent.
         
         let module = Self::create_mock_ai_agent_wasm();
-        let interpreter = WasmInterpreter::new(module.memory_pages);
+        let interpreter = WasmInterpreter::new(module.memory_pages)?;
         
-        Self { 
+        Ok(Self { 
             interpreter,
             model_name: String::from(model_name),
-        }
+        })
     }
 
     /// Run inference (chat) with the AI Agent

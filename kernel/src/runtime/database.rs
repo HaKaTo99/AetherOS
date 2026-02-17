@@ -13,17 +13,17 @@ pub struct DatabaseRuntime {
 
 impl DatabaseRuntime {
     /// Initialize the Database runtime with a specific DB file
-    pub fn new(db_name: &str) -> Self {
+    pub fn new(db_name: &str) -> Result<Self, &'static str> {
         // In a real implementation, this would load `sqlite.wasm` and open the DB file.
         // For Phase 16.4, we construct a mock WASM module that simulates SQLite.
         
         let module = Self::create_mock_sqlite_wasm();
-        let interpreter = WasmInterpreter::new(module.memory_pages);
+        let interpreter = WasmInterpreter::new(module.memory_pages)?;
         
-        Self { 
+        Ok(Self { 
             interpreter,
             db_name: String::from(db_name),
-        }
+        })
     }
 
     /// Execute a SQL query
@@ -53,7 +53,17 @@ impl DatabaseRuntime {
              results.push(String::from("Query executed"));
         }
 
-        crate::println!("[Database] Result: {:?}", results);
+        crate::println!("[Database] Result size: {}", results.len());
+        
+        // Debug: Safeguard against corruption
+        for (i, r) in results.iter().enumerate() {
+            let ptr = r.as_ptr() as usize;
+            if ptr == 0 || ptr == !0 {
+                 crate::println!("[Database] CRITICAL: Row {} pointer is INVALID (0x{:X})", i, ptr);
+                 continue;
+            }
+            crate::println!("[Database] Row {}: {}", i, r);
+        }
 
         Ok(results)
     }

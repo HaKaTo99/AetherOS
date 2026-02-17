@@ -1,8 +1,9 @@
-//! AetherScript Compiler (Phase 14.4)
-//! Front-end (lexer/parser), Middle-end (optimizer), Back-end (codegen)
+//! OmniLang Native Runtime (Source: https://github.com/HaKaTo99/OmniLang)
+//! Official Integration Layer for AetherOS v7.0 Kernel
 
 use alloc::string::String;
 use alloc::vec::Vec;
+use alloc::format;
 
 // ===========================
 // Lexer
@@ -95,6 +96,10 @@ impl Lexer {
                         _ => tokens.push(Token::Ident(word)),
                     }
                 }
+                Some(b'"') => {
+                    let s = self.read_string();
+                    tokens.push(Token::StringLit(s));
+                }
                 Some(ch) if ch.is_ascii_digit() => {
                     let n = self.read_number();
                     tokens.push(Token::IntLit(n));
@@ -140,6 +145,20 @@ impl Lexer {
         }
         n
     }
+
+    fn read_string(&mut self) -> String {
+        self.advance(); // skip opening quote
+        let mut s = String::new();
+        while let Some(ch) = self.peek() {
+            if ch == b'"' {
+                self.advance();
+                break;
+            }
+            s.push(ch as char);
+            self.advance();
+        }
+        s
+    }
 }
 
 // ===========================
@@ -149,6 +168,7 @@ impl Lexer {
 #[derive(Debug, Clone)]
 pub enum Expr {
     IntLit(i64),
+    StringLit(String),
     Ident(String),
     BinOp(Vec<Expr>, BinOp, Vec<Expr>), // Vec<Expr> with 1 element instead of Box
     Call(String, Vec<Expr>),
@@ -262,36 +282,178 @@ impl Parser {
             }
         } else { None };
 
-        // Body (simplified: skip to matching brace)
+        // Body (simplified: parse until matching brace)
         if *self.peek() == Token::LBrace { self.advance(); }
-        let body = Vec::new(); // Full parser would parse statements
-        let mut depth = 1;
-        while depth > 0 && *self.peek() != Token::Eof {
-            match self.advance() {
-                Token::LBrace => depth += 1,
-                Token::RBrace => depth -= 1,
-                _ => {}
-            }
+        
+        // Very simplified body parsing for demo
+        // In a real implementation, we would call parse_stmt recursively
+        let mut body = Vec::new();
+        
+        while *self.peek() != Token::RBrace && *self.peek() != Token::Eof {
+             if let Some(stmt) = self.parse_stmt() {
+                 body.push(stmt);
+             } else {
+                 self.advance(); // Skip to next
+             }
         }
+        
+        if *self.peek() == Token::RBrace { self.advance(); }
 
         Some(Function { name, params, return_type, body, annotations })
+    }
+
+    fn parse_stmt(&mut self) -> Option<Stmt> {
+        match self.peek() {
+            Token::Let => {
+                self.advance();
+                let name = match self.advance() {
+                    Token::Ident(n) => n,
+                    _ => return None,
+                };
+                if *self.peek() == Token::Eq { self.advance(); }
+                let expr = self.parse_expr()?;
+                if *self.peek() == Token::Semi { self.advance(); }
+                Some(Stmt::Let(name, expr))
+            },
+            Token::Return => {
+                self.advance();
+                let expr = self.parse_expr()?;
+                if *self.peek() == Token::Semi { self.advance(); }
+                Some(Stmt::Return(expr))
+            },
+             Token::Ident(_) => {
+                // assume expression statement
+                let expr = self.parse_expr()?;
+                if *self.peek() == Token::Semi { self.advance(); }
+                Some(Stmt::Expr(expr))
+             }
+            _ => None
+        }
+    }
+
+    fn parse_expr(&mut self) -> Option<Expr> {
+        self.parse_primary()
+    }
+
+    fn parse_primary(&mut self) -> Option<Expr> {
+        match self.peek() {
+            Token::IntLit(n) => {
+                let val = *n;
+                self.advance();
+                Some(Expr::IntLit(val))
+            },
+            Token::StringLit(s) => {
+                 let val = s.clone();
+                 self.advance();
+                 Some(Expr::StringLit(val))
+            }
+            Token::Ident(name) => {
+                let n = name.clone();
+                self.advance();
+                if *self.peek() == Token::LParen {
+                    self.advance();
+                    // Parse args
+                    let mut args = Vec::new();
+                    while *self.peek() != Token::RParen {
+                         if let Some(arg) = self.parse_expr() {
+                             args.push(arg);
+                         }
+                         if *self.peek() == Token::Comma { self.advance(); }
+                         else { break; }
+                    }
+                    if *self.peek() == Token::RParen { self.advance(); }
+                    Some(Expr::Call(n, args))
+                } else {
+                    Some(Expr::Ident(n))
+                }
+            },
+            _ => None
+        }
     }
 }
 
 // ===========================
-// Code Generator (WASM target stub)
+// Runtime (Interpreter)
 // ===========================
 
-pub struct CodeGen;
+pub struct OmniRuntime {
+    pub last_output: String,
+}
 
-impl CodeGen {
-    /// Generate WASM bytecode from module AST
-    pub fn emit_wasm(_module: &Module) -> Vec<u8> {
-        let mut wasm = Vec::new();
-        // WASM magic number + version
-        wasm.extend_from_slice(&[0x00, 0x61, 0x73, 0x6d]); // \0asm
-        wasm.extend_from_slice(&[0x01, 0x00, 0x00, 0x00]); // version 1
-        // Type section, function section, etc. would follow
-        wasm
+impl OmniRuntime {
+    pub fn new() -> Self {
+        Self { last_output: String::new() }
+    }
+
+    pub fn execute(&mut self, source: &str) -> String {
+        let mut lexer = Lexer::new(source);
+        let tokens = lexer.tokenize();
+        let mut parser = Parser::new(tokens);
+        let module = parser.parse_module();
+
+        self.last_output.clear();
+
+        // Interpreter
+        for func in module.functions {
+            if func.name == "main" {
+                self.eval_body(&func.body);
+            }
+        }
+
+        if self.last_output.is_empty() {
+            String::from("Success (No Output)")
+        } else {
+            self.last_output.clone()
+        }
+    }
+
+    fn eval_body(&mut self, body: &[Stmt]) {
+        for stmt in body {
+            match stmt {
+                Stmt::Expr(expr) => {
+                    self.eval_expr(expr);
+                },
+                Stmt::Let(_, expr) => {
+                    self.eval_expr(expr);
+                },
+                _ => {}
+            }
+        }
+    }
+
+    fn eval_expr(&mut self, expr: &Expr) -> i64 {
+        match expr {
+            Expr::IntLit(n) => *n,
+            Expr::StringLit(_) => 0, // Strings are 0 for now in this toy interpreter
+            Expr::Call(name, args) => {
+                if name == "print" {
+                    if let Some(first) = args.first() {
+                        match first {
+                            Expr::StringLit(s) => self.last_output.push_str(s),
+                            Expr::IntLit(n) => self.last_output.push_str(&format!("{}", n)),
+                             _ => {}
+                        }
+                    }
+                    0
+                } else if name == "version" {
+                     100 // v1.0.0
+                } else if name == "System.shutdown" {
+                    crate::enterprise::lifecycle::shutdown();
+                    0
+                } else if name == "System.logout" {
+                    // Simulation of logout
+                    self.last_output = String::from("User logged out.");
+                    0
+                } else if name == "System.input" {
+                    // In a real environment, this would wait for keyboard input.
+                    // For the kernel boot simulation, we return a mock value.
+                    self.last_output = String::from("root"); 
+                    0
+                } else {
+                    0
+                }
+            },
+            _ => 0,
+        }
     }
 }

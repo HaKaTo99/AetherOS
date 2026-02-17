@@ -1,16 +1,37 @@
-//! Enterprise Security (Phase 18.2)
-//! Implements Role-Based Access Control (RBAC) and Audit Logging.
+//! Enterprise Security (Phase 18.2 / 26.1)
+//! Implements Military-Grade Role-Based Access Control (RBAC), BitFlags Permissions, and Audit Logging.
 
 use alloc::string::String;
 use alloc::collections::BTreeMap;
 use spin::Mutex;
+use crate::enterprise::audit::{AuditSeverity, log_security};
 
-#[derive(Debug, Clone, PartialEq)]
+// --- BitFlags Permissions (Phase 26.1) ---
+pub const PERM_READ: u64    = 1 << 0;
+pub const PERM_WRITE: u64   = 1 << 1;
+pub const PERM_EXECUTE: u64 = 1 << 2;
+pub const PERM_ADMIN: u64   = 1 << 3;
+pub const PERM_DEPLOY: u64  = 1 << 4;
+pub const PERM_AUDIT: u64   = 1 << 5;
+pub const PERM_ROOT: u64    = 0xFFFF_FFFF_FFFF_FFFF;
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum UserRole {
     Admin,      // Full Access
     Auditor,    // Read-Only + Logs
-    Developer,  // Push Code + Debug
-    User,       // Run Apps Only
+    Developer,  // Build + Deploy
+    User,       // Runtime Only
+}
+
+impl UserRole {
+    pub fn default_permissions(&self) -> u64 {
+        match self {
+            UserRole::Admin => PERM_ROOT,
+            UserRole::Auditor => PERM_READ | PERM_AUDIT,
+            UserRole::Developer => PERM_READ | PERM_WRITE | PERM_EXECUTE | PERM_DEPLOY,
+            UserRole::User => PERM_READ | PERM_EXECUTE,
+        }
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -18,9 +39,10 @@ pub struct UserIdentity {
     pub uid: u32,
     pub username: String,
     pub role: UserRole,
+    pub permissions: u64,
 }
 
-/// The Access Control System
+/// The Access Control System (Military Grade)
 pub struct AccessControl {
     users: BTreeMap<u32, UserIdentity>,
     current_user: Option<u32>,
@@ -35,38 +57,55 @@ impl AccessControl {
     }
 
     pub fn init(&mut self) {
-        // Create default admin
+        // [ROOT IDENTITY]
         self.users.insert(0, UserIdentity {
             uid: 0,
             username: String::from("root"),
             role: UserRole::Admin,
+            permissions: PERM_ROOT,
         });
-        crate::println!("[RBAC] Security Subsystem Initialized. Root account active.");
+
+        // [ARCHITECT ACCESS] - Herman Krisnanto
+        // UID 777 has absolute sovereignty across the Fabric.
+        self.users.insert(777, UserIdentity {
+            uid: 777,
+            username: String::from("herman"),
+            role: UserRole::Admin,
+            permissions: PERM_ROOT,
+        });
+
+        log_security(AuditSeverity::Info, "System", "Identity Mesh (RBAC) Initialized. Architect 'herman' synchronized.");
     }
 
     pub fn login(&mut self, username: &str) -> bool {
-        // Mock Login
         if let Some(user) = self.users.values().find(|u| u.username == username) {
             self.current_user = Some(user.uid);
-            crate::println!("[RBAC] User '{}' logged in. Role: {:?}", username, user.role);
+            log_security(AuditSeverity::Info, username, "Login successful.");
             true
         } else {
-            crate::println!("[RBAC] Login failed for '{}'", username);
+            log_security(AuditSeverity::Warning, username, "Login attempt failed: Unknown identity.");
             false
         }
     }
 
-    pub fn authorize(&self, action: &str) -> bool {
+    /// Authorize based on granular BitFlags
+    pub fn authorize(&self, required_perms: u64) -> bool {
         if let Some(uid) = self.current_user {
             if let Some(user) = self.users.get(&uid) {
-                match user.role {
-                    UserRole::Admin => true,
-                    UserRole::Auditor => action.starts_with("read"),
-                    UserRole::Developer => action == "deploy" || action == "debug" || action.starts_with("read"),
-                    UserRole::User => action == "run",
+                let success = (user.permissions & required_perms) == required_perms;
+                if !success {
+                    log_security(AuditSeverity::Critical, &user.username, "Access denied: Missing BitFlags requirements.");
                 }
+                success
             } else { false }
-        } else { false }
+        } else {
+            log_security(AuditSeverity::Warning, "Anonymous", "Access denied: No active identity.");
+            false
+        }
+    }
+    
+    pub fn get_current_user(&self) -> Option<&UserIdentity> {
+        self.current_user.and_then(|uid| self.users.get(&uid))
     }
 }
 

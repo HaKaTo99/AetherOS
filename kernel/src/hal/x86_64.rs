@@ -12,6 +12,7 @@ const VGA_HEIGHT: usize = 25;
 pub struct VgaWriter {
     column_position: usize,
     buffer: *mut u16,
+    pub color_attribute: u8,
 }
 
 impl VgaWriter {
@@ -19,6 +20,7 @@ impl VgaWriter {
         Self {
             column_position: 0,
             buffer: VGA_BUFFER as *mut u16,
+            color_attribute: 0x0F, // Default: White on Black
         }
     }
 
@@ -32,7 +34,7 @@ impl VgaWriter {
 
                 let row = VGA_HEIGHT - 1;
                 let col = self.column_position;
-                let color_byte = 0x0F; // White on Black
+                let color_byte = self.color_attribute;
                 
                 unsafe {
                     *self.buffer.add(row * VGA_WIDTH + col) = 
@@ -58,12 +60,22 @@ impl VgaWriter {
     }
 
     fn clear_row(&mut self, row: usize) {
-        let blank = 0x0F00u16 | (b' ' as u16);
+        let blank = (self.color_attribute as u16) << 8 | (b' ' as u16);
         for col in 0..VGA_WIDTH {
             unsafe {
                 *self.buffer.add(row * VGA_WIDTH + col) = blank;
             }
         }
+    }
+
+    pub fn clear_with_color(&mut self, attribute: u8) {
+        let blank = (attribute as u16) << 8 | (b' ' as u16);
+        for i in 0..(VGA_WIDTH * VGA_HEIGHT) {
+            unsafe {
+                *self.buffer.add(i) = blank;
+            }
+        }
+        self.column_position = 0;
     }
 }
 
@@ -108,7 +120,7 @@ pub struct X86Platform {
     // internally would be cleaner, but let's stick to the pattern.
 }
 
-static mut VGA: VgaWriter = VgaWriter::new();
+pub static mut VGA: VgaWriter = VgaWriter::new();
 static SERIAL: SerialPort = SerialPort::new();
 
 impl X86Platform {
@@ -133,7 +145,7 @@ unsafe fn inb(port: u16) -> u8 {
 impl Platform for X86Platform {
     fn init(&self) {
         SERIAL.init();
-        self.puts("X86_64 HAL Initialized\n");
+        self.puts("X86_64 HAL Initialized (v7.9 Diamond Grade)\n");
     }
 
     fn shutdown(&self) {
@@ -155,7 +167,8 @@ impl Platform for X86Platform {
     fn sleep_ms(&self, ms: u64) {
         // Very rough busy loop approximation
         // 1ms ~ 1000000 cycles on modern CPU?
-        let steps = ms * 1000000;
+        // v7.9: Reduced cycle count for faster VM simulation
+        let steps = ms * 100000;
         let start = self.get_ticks();
         while self.get_ticks() - start < steps {
             core::hint::spin_loop();

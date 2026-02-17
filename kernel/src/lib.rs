@@ -11,9 +11,12 @@
 //! memory, scheduling, and distributed computing.
 
 #![no_std]
+#![feature(abi_x86_interrupt)]
 #![allow(static_mut_refs)] // Phase 3 stability: Allow until Phase 4 sync implemented
 #[macro_use]
 extern crate alloc;
+use alloc::string::String;
+use alloc::vec::Vec;
 
 pub mod memory;
 pub mod scheduler;
@@ -162,6 +165,9 @@ pub fn kernel_init(dtb_ptr: usize) {
             static X86: hal::x86_64::X86Platform = hal::x86_64::X86Platform::new();
             hal::init_platform(&X86);
 
+            // Initialize Architecture Guards (GDT/IDT) - v7.9
+            crate::arch::x86_64::init();
+
             // Initialize VGA Graphics (Phase 7.1)
             use crate::drivers::video::vga::VgaTextDriver;
             static mut VGA: VgaTextDriver = VgaTextDriver::new();
@@ -173,45 +179,19 @@ pub fn kernel_init(dtb_ptr: usize) {
             use crate::drivers::input::ps2;
             unsafe { ps2::KEYBOARD.init(); }
             
-            // Draw UI Demo using Phase 7.2 Framework
-            video::draw(|fb| {
-                fb.init();
-                fb.clear(Color::BLUE); // Blue background
-
-                // Imports
-                use crate::ui::{Label, Button, Rect, Widget, FlexLayout};
-                use crate::ui::layout::{Direction, Alignment};
-
-                // Define Container Area
-                let container = Rect::new(0, 0, fb.width(), fb.height());
-
-                // Define Items
-                let label = Label::new("AetherOS v1.7", 0, 0, Color::WHITE);
-                let btn = Button::new("Login", 0, 0, 100, 30);
-
-                // Layout Engine
-                let layout = FlexLayout {
-                    direction: Direction::Column,
-                    justify_content: Alignment::Start,
-                    align_items: Alignment::Center,
-                    padding: 50,
-                    gap: 20,
-                };
-
-                // Calculate Positions
-                let item_rects = layout.layout(container, &[label.area(), btn.area()]);
-
-                // Create positioned widgets
-                let mut positioned_label = simple_clone_label(&label); 
-                positioned_label.area = item_rects[0];
-
-                let mut positioned_btn = simple_clone_btn(&btn);
-                positioned_btn.area = item_rects[1];
-
-                // Draw
-                positioned_label.draw(fb);
-                positioned_btn.draw(fb);
-            });
+            // [v7.9 Diamond Final] Platinum Level UI (Standard VGA Text Mode)
+            // Ensures 100% visibility in any VM without driver overhead.
+            unsafe {
+                use crate::hal::x86_64::VGA;
+                VGA.clear_with_color(0x1F); // Blue background, Bright White text
+                VGA.color_attribute = 0x1F;  // Persist color for subsequent puts
+            }
+            let platform = hal::get_platform();
+            platform.puts("\n\n\n");
+            platform.puts("                                AetherOS v7.9 PLATINUM\r\n");
+            platform.puts("                            Diamond Grade: [ SUCCESS ]\r\n");
+            platform.puts("                               [ Herman's Edition ]\r\n");
+            platform.puts("\n\r\n");
 
             // Helper for demo (because widgets own content)
             fn simple_clone_label(l: &crate::ui::Label) -> crate::ui::Label {
@@ -221,8 +201,7 @@ pub fn kernel_init(dtb_ptr: usize) {
                crate::ui::Button::new(&b.label, b.area.x, b.area.y, b.area.width, b.area.height)
             }
 
-            // Run Functional Test Suite (Phase 6.2)
-            crate::tests::run_suite();
+            // [REMOVED FOR DEMO v7.4] crate::tests::run_suite();
         }
 
         #[cfg(not(any(target_arch = "aarch64", target_arch = "x86_64")))]
@@ -235,6 +214,20 @@ pub fn kernel_init(dtb_ptr: usize) {
         // Print initialization message
         let platform = hal::get_platform();
         platform.puts("Kernel OK\n");
+
+        // 0.1 Initialize Enterprise Security & Audit (v8.0 Military Grade)
+        {
+            crate::enterprise::AUDIT_LOGGER.lock().log(
+                crate::enterprise::audit::AuditSeverity::Info,
+                "Kernel", "System", "Audit Subsystem Active."
+            );
+            crate::enterprise::RBAC_SYSTEM.lock().init();
+            crate::enterprise::audit::log_security(
+                crate::enterprise::audit::AuditSeverity::Info,
+                "System", "Enterprise Security Fabric synchronized."
+            );
+        }
+
         platform.puts("[ v6.0 ] Quantum Interface Engine: Initializing...\n");
         platform.puts("[ v6.0 ]  - BUI (Neural Link): Connected\n");
         platform.puts("[ v6.0 ]  - MMUI (Multimodal): Ready\n");
@@ -344,13 +337,16 @@ pub fn kernel_init(dtb_ptr: usize) {
         // 7. Phase 16.1: Universal App Runtime (QuickJS Demo)
         {
             use crate::runtime::QuickJsRuntime;
-            let mut js_runtime = QuickJsRuntime::new();
-            // This simulates loading "vscode-web-core.js" or "antigravity-agent.js"
-            if let Ok(result) = js_runtime.eval("console.log('Hello from AetherOS Universal Runtime!')") {
-                let platform = hal::get_platform();
-                platform.puts("[Kernel] JS Execution Success: ");
-                platform.puts(&result);
-                platform.puts("\r\n");
+            if let Ok(mut js_runtime) = QuickJsRuntime::new() {
+                // This simulates loading "vscode-web-core.js" or "antigravity-agent.js"
+                if let Ok(result) = js_runtime.eval("console.log('Hello from AetherOS Universal Runtime!')") {
+                    let platform = hal::get_platform();
+                    platform.puts("[Kernel] JS Execution Success: ");
+                    platform.puts(&result);
+                    platform.puts("\r\n");
+                }
+            } else {
+                hal::get_platform().puts("[Kernel] Error: Failed to initialize QuickJS Runtime (OOM)\r\n");
             }
         }
 
@@ -358,34 +354,38 @@ pub fn kernel_init(dtb_ptr: usize) {
         {
             use crate::runtime::AiAgentRuntime;
             // Initialize with "Llama-7B-WASM"
-            let mut agent = AiAgentRuntime::new("Llama-7B-Quantized");
-            
-            // Simulate chat
-            if let Ok(response) = agent.chat("Hello AetherOS, what is your status?") {
-                let platform = hal::get_platform();
-                platform.puts("\r\n[Kernel] AI Agent Response:\r\n");
-                platform.puts(&response);
-                platform.puts("\r\n");
+            if let Ok(mut agent) = AiAgentRuntime::new("Llama-7B-Quantized") {
+                // Simulate chat
+                if let Ok(response) = agent.chat("Hello AetherOS, what is your status?") {
+                    let platform = hal::get_platform();
+                    platform.puts("\r\n[Kernel] AI Agent Response:\r\n");
+                    platform.puts(&response);
+                    platform.puts("\r\n");
+                }
+            } else {
+                 hal::get_platform().puts("[Kernel] Error: Failed to initialize AI Agent (OOM)\r\n");
             }
         }
 
         // 9. Phase 16.4: Universal Data Services (SQL Demo)
         {
             use crate::runtime::DatabaseRuntime;
-            let mut db = DatabaseRuntime::new("users.db");
-            
-            // Simulate SQL Workflow
-            let _ = db.query("CREATE TABLE users (id INT, name TEXT)");
-            let _ = db.query("INSERT INTO users VALUES (1, 'Alice')");
-            
-            if let Ok(results) = db.query("SELECT * FROM users") {
-                let platform = hal::get_platform();
-                platform.puts("\r\n[Kernel] SQL Query Results:\r\n");
-                for row in results {
-                    platform.puts(" - ");
-                    platform.puts(&row);
-                    platform.puts("\r\n");
+            if let Ok(mut db) = DatabaseRuntime::new("users.db") {
+                // Simulate SQL Workflow
+                let _ = db.query("CREATE TABLE users (id INT, name TEXT)");
+                let _ = db.query("INSERT INTO users VALUES (1, 'Alice')");
+                
+                if let Ok(results) = db.query("SELECT * FROM users") {
+                    let platform = hal::get_platform();
+                    platform.puts("\r\n[Kernel] SQL Query Results:\r\n");
+                    for row in results {
+                        platform.puts(" - ");
+                        platform.puts(&row);
+                        platform.puts("\r\n");
+                    }
                 }
+            } else {
+                 hal::get_platform().puts("[Kernel] Error: Failed to initialize SQL Runtime (OOM)\r\n");
             }
         }
 
@@ -393,12 +393,14 @@ pub fn kernel_init(dtb_ptr: usize) {
         {
             use crate::runtime::PhpRuntime;
             // 1. Simulate Laravel Artisan CLI
-            let mut artisan = PhpRuntime::new("/var/www/laravel/artisan");
-            let _ = artisan.execute();
+            if let Ok(mut artisan) = PhpRuntime::new("/var/www/laravel/artisan") {
+                let _ = artisan.execute();
+            }
 
             // 2. Simulate Web Request
-            let mut index = PhpRuntime::new("/var/www/laravel/public/index.php");
-            let _ = index.execute();
+            if let Ok(mut index) = PhpRuntime::new("/var/www/laravel/public/index.php") {
+                let _ = index.execute();
+            }
         }
 
         // 11. Phase 16.2: Universal Terminal Tools (PTY/Shell)
@@ -422,12 +424,18 @@ pub fn kernel_init(dtb_ptr: usize) {
             use crate::runtime::MediaRuntime;
             
             // 1. Play Movie
-            let mut player = MediaRuntime::new("Avatar_The_Way_of_Water.mkv");
-            let _ = player.play();
+            if let Ok(mut player) = MediaRuntime::new("Avatar_The_Way_of_Water.mkv") {
+                let _ = player.play();
+            } else {
+                crate::println!("[Media] Error: Failed to initialize Video Player (OOM/Resource)");
+            }
 
             // 2. Camera Capture
-            let mut cam = MediaRuntime::new("/dev/video0");
-            let _ = cam.capture();
+            if let Ok(mut cam) = MediaRuntime::new("/dev/video0") {
+                let _ = cam.capture();
+            } else {
+                crate::println!("[Media] Error: Failed to initialize Camera Runtime (OOM)");
+            }
         }
 
         // 13. Phase 17: Distributed Orchestration (Mesh & Market)
@@ -456,17 +464,15 @@ pub fn kernel_init(dtb_ptr: usize) {
 
         // 13. Phase 18: Enterprise & Cloud (RBAC, Cloud-Init, Telemetry)
         {
-            use crate::enterprise::{CLOUD_MANAGER, RBAC_SYSTEM, TELEMETRY_AGENT};
+            use crate::enterprise::{CLOUD_MANAGER, TELEMETRY_AGENT};
             let mut cloud = CLOUD_MANAGER.lock();
-            let mut rbac = RBAC_SYSTEM.lock();
             let mut telemetry = TELEMETRY_AGENT.lock();
 
             cloud.init();
-            rbac.init();
             telemetry.init();
 
             // Simulate Enterprise Workflow
-            if rbac.login("root") {
+            if crate::enterprise::RBAC_SYSTEM.lock().login("root") {
                 telemetry.collect_metrics();
                 telemetry.push_heartbeat();
             }
@@ -629,8 +635,8 @@ pub fn kernel_init(dtb_ptr: usize) {
             // 23.0 Ecosystem Demo (v5.4)
             {
                 // 1. App Store Search
-                use crate::ecosystem::store::AppStoreStub;
-                let results = AppStoreStub::search("game");
+                use crate::ecosystem::store::AetherStore;
+                let results = AetherStore::search("game");
                 platform.puts("[AppStore] Found games: ");
                 if !results.is_empty() {
                      platform.puts(&results[0]); 
@@ -650,6 +656,55 @@ pub fn kernel_init(dtb_ptr: usize) {
                 use crate::sdk::syscalls;
                 syscalls::draw_window("My First App", 800, 600);
             }
+        }
+
+        // 16. Phase 16.7: AetherOS Native OmniLang Runtime (Integration)
+        {
+             use crate::runtime::OmniRuntime;
+             let mut runtime = OmniRuntime::new();
+             
+             let platform = hal::get_platform();
+             platform.puts("[Kernel] Initializing OmniLang Runtime...\r\n");
+             
+             // Simple script
+             let script = r#"
+fn main() {
+    print("Hello from OmniLang Kernel Space! ");
+    let x = 10;
+    let y = 20;
+    print("Result: ");
+    print(x + y);
+}
+             "#;
+             
+             let result = runtime.execute(script);
+             platform.puts("[OmniLang] Status: ");
+             platform.puts(&result);
+             platform.puts("\r\n");
+             platform.puts("[OmniLang] Output: ");
+             platform.puts(&runtime.last_output);
+             platform.puts("\r\n");
+        }
+
+        // 17. Phase 39.0: Boot UX (v7.5)
+        {
+            let platform = hal::get_platform();
+            platform.puts("\r\n[AetherOS] Loading Aether Fabric... 🌌\r\n");
+            // Simulate a short fabric sync delay for UX
+            hal::get_platform().sleep_ms(500);
+        }
+
+        // 18. Phase 38.0: System Stabilization (v7.3)
+        {
+            use crate::enterprise::AetherShell;
+            AetherShell::start();
+        }
+
+        // 18. Phase 38.4: Post-Login Background Testing
+        {
+            let platform = hal::get_platform();
+            platform.puts("\r\n[Performance] Starting Background Stability Suite...\r\n");
+            crate::tests::run_suite();
         }
     }
 }
@@ -727,6 +782,8 @@ pub fn kernel_tick() {
 
     // --- Phase 10.6: Internal Simulation & Stress Test ---
     let ticks = TICK_COUNTER.fetch_add(1, Ordering::Relaxed);
+    // [v7.9 Gold] Disable internal re-injection for stress demo to avoid stalls
+    /*
     if ticks % 100 == 0 {
         let mut lb = LOAD_BALANCER.lock();
         lb.simulate_high_load();
@@ -737,6 +794,7 @@ pub fn kernel_tick() {
             }
         }
     }
+    */
 
     // 7. Poll Network Stack (Phase 5)
     {

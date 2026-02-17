@@ -15,11 +15,13 @@ pub struct Tensor {
 
 impl Tensor {
     /// Create new tensor with given shape and data
-    pub fn new(shape: Vec<usize>, data: Vec<f32>) -> Self {
+    pub fn new(shape: Vec<usize>, data: Vec<f32>) -> Result<Self, &'static str> {
         let total_size: usize = shape.iter().product();
-        assert_eq!(data.len(), total_size, "Data length must match shape");
+        if data.len() != total_size {
+            return Err("Data length must match shape");
+        }
         
-        Self { shape, data }
+        Ok(Self { shape, data })
     }
     
     /// Create tensor filled with zeros
@@ -91,7 +93,7 @@ impl Tensor {
             .map(|(a, b)| a + b)
             .collect();
         
-        Ok(Tensor::new(self.shape.clone(), data))
+        Ok(Self { shape: self.shape.clone(), data })
     }
     
     /// Element-wise multiplication
@@ -105,13 +107,13 @@ impl Tensor {
             .map(|(a, b)| a * b)
             .collect();
         
-        Ok(Tensor::new(self.shape.clone(), data))
+        Ok(Self { shape: self.shape.clone(), data })
     }
     
     /// Scalar multiplication
     pub fn scale(&self, scalar: f32) -> Tensor {
         let data: Vec<f32> = self.data.iter().map(|x| x * scalar).collect();
-        Tensor::new(self.shape.clone(), data)
+        Self { shape: self.shape.clone(), data }
     }
     
     /// Find maximum value
@@ -139,7 +141,7 @@ mod tests {
     
     #[test]
     fn test_tensor_creation() {
-        let tensor = Tensor::new(vec![2, 3], vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0]);
+        let tensor = Tensor::new(vec![2, 3], vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0]).unwrap();
         assert_eq!(tensor.shape(), &[2, 3]);
         assert_eq!(tensor.len(), 6);
     }

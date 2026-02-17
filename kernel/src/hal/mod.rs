@@ -92,3 +92,21 @@ impl core::fmt::Write for ConsoleWriter {
         Ok(())
     }
 }
+
+/// Renders an ASCII progress bar to the console.
+pub fn print_boot_progress(current: usize, total: usize) {
+    use core::fmt::Write;
+    let mut writer = ConsoleWriter;
+    let percentage = (current * 100) / total;
+    let width = 40;
+    let filled = (current * width) / total;
+
+    let _ = write!(writer, "\r\x1B[36m[AetherOS Loading] [");
+    for _ in 0..filled { let _ = writer.write_str("="); }
+    for _ in filled..width { let _ = writer.write_str("-"); }
+    let _ = write!(writer, "] {}%\x1B[0m", percentage);
+    
+    if current == total {
+        let _ = writer.write_str("\r\n");
+    }
+}

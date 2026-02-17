@@ -9,6 +9,9 @@ pub use x86_64::*;
 #[cfg(target_arch = "aarch64")]
 pub use aarch64::*;
 
+pub mod universal_hal;
+pub use universal_hal::{UniversalHAL, UNIVERSAL_HAL};
+
 #[cfg(not(any(target_arch = "aarch64", target_arch = "x86_64")))]
 pub mod context {
     #[derive(Debug, Clone, Copy, Default)]

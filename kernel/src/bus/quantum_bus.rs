@@ -64,6 +64,8 @@ pub struct DeviceMesh {
     // local_device_id: AtomicU32,
 }
 
+use crate::enterprise::audit::{AuditSeverity, log_security};
+
 impl DeviceMesh {
     pub const fn new() -> Self {
         const NONE: Option<Device> = None;
@@ -76,6 +78,7 @@ impl DeviceMesh {
 
     /// Discover devices in the mesh
     pub fn discover(&mut self) -> usize {
+        log_security(AuditSeverity::Info, "System", "QuantumBus device discovery logic engaged.");
         // In real impl: Use Bluetooth LE, WiFi Direct, etc.
         // For now: Simulate discovery
         
@@ -95,12 +98,14 @@ impl DeviceMesh {
     /// Register a remote device
     pub fn register_device(&mut self, device: Device) -> Result<(), ()> {
         if self.device_count >= MAX_DEVICES {
+            log_security(AuditSeverity::Warning, "System", "QuantumBus: Device registration rejected (Mesh Full).");
             return Err(());
         }
         
         self.devices[self.device_count] = Some(device);
         self.device_count += 1;
         
+        log_security(AuditSeverity::Info, "System", "QuantumBus: New device registered in Fabric mesh.");
         Ok(())
     }
 

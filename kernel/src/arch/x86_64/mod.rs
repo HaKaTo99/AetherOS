@@ -1,6 +1,8 @@
 pub mod context;
 pub mod boot;
 pub mod multiboot_header;
+pub mod gdt;
+pub mod interrupts;
 
 use core::arch::global_asm;
 
@@ -41,3 +43,10 @@ global_asm!(
     // Return to new context
     "   ret"
 );
+
+/// Initialize architecture-specific features for x86_64
+pub fn init() {
+    gdt::init();
+    interrupts::init();
+    crate::println!("[x86_64] GDT/IDT Initialized. Stability Guard Active.");
+}
