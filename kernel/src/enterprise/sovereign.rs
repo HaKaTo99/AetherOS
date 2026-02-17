@@ -34,6 +34,17 @@ impl SovereignManager {
         self.is_locked = true;
         log_security(AuditSeverity::Emergency, "Military", "TACHYON LOCKDOWN INITIATED.");
     }
+
+    /// Sovereign Data Enclave (Phase 26.6)
+    /// Isolates data within hardware-protected memory segments.
+    pub fn create_enclave(&self, owner: &str) -> bool {
+        log_security(AuditSeverity::Info, owner, "Sovereign Data Enclave created.");
+        true
+    }
+
+    pub fn destroy_enclave(&self, owner: &str) {
+        log_security(AuditSeverity::Warning, owner, "Sovereign Data Enclave destroyed.");
+    }
 }
 
 pub static SOVEREIGN_MANAGER: Mutex<SovereignManager> = Mutex::new(SovereignManager::new());

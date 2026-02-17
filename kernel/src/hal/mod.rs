@@ -2,6 +2,7 @@
 //! Dynamic Trait-based abstraction for multi-platform support
 
 pub mod stub;
+pub mod neural_v2; // [NEW] Phase 27.7
 #[cfg(target_arch = "aarch64")]
 pub mod rpi;
 #[cfg(target_arch = "x86_64")]

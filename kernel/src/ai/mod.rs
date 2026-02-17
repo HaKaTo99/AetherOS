@@ -1,5 +1,6 @@
 pub mod llm;    // [NEW] Phase 22 (v5.3) Local LLM
 pub mod genai;  // [NEW] Phase 22 (v5.3) Generative AI
+pub mod intent; // [NEW] Phase 27.5 Cognitive Intent Parser
 
 pub struct NpuDriver;
 impl NpuDriver {

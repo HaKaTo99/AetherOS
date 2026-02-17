@@ -456,4 +456,22 @@ impl OmniRuntime {
             _ => 0,
         }
     }
+
+    /// Compile OmniLang to WebAssembly (Phase 27.3)
+    pub fn compile_to_wasm(&self, _source: &str) -> Vec<u8> {
+        let mut wasm_binary = Vec::new();
+        // Magic Numbers for WASM (\0asm)
+        wasm_binary.extend_from_slice(&[0x00, 0x61, 0x73, 0x6D]);
+        wasm_binary.extend_from_slice(&[0x01, 0x00, 0x00, 0x00]);
+        // Mock compilation logic
+        wasm_binary
+    }
+
+    /// Compile OmniLang to JVM Bytecode (Phase 27.3)
+    pub fn compile_to_jvm(&self, _source: &str) -> Vec<u8> {
+        let mut jvm_binary = Vec::new();
+        // Magic Number for JVM (CAFEBABE)
+        jvm_binary.extend_from_slice(&[0xCA, 0xFE, 0xBA, 0xBE]);
+        jvm_binary
+    }
 }

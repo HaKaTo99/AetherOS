@@ -21,15 +21,31 @@ pub fn syscall_handler(call_num: usize, arg1: usize, arg2: usize, arg3: usize) -
 
 /// write(fd, buf, count)
 fn sys_write(fd: usize, buf_ptr: usize, count: usize) -> isize {
+    use crate::enterprise::rbac::{RBAC_SYSTEM, PERM_WRITE};
+    use crate::enterprise::audit::{AuditSeverity, log_security};
+
+    // RBAC Enforcement (Phase 26.1)
+    let rbac = RBAC_SYSTEM.lock();
+    if let Err(e) = rbac.check_permission(PERM_WRITE) {
+        log_security(AuditSeverity::Critical, "Syscall", e);
+        return -13; // EACCES
+    }
+    let username = rbac.get_current_user().map(|u| u.username.as_str()).unwrap_or("Unknown");
+
     // For now, assume fd 1 (stdout) and 2 (stderr) go to serial console
     if fd == 1 || fd == 2 {
         unsafe {
             if let Some(platform) = hal::try_get_platform() {
                 let slice = core::slice::from_raw_parts(buf_ptr as *const u8, count);
-                // We can't easily print slice directly without string conversion or loop
                 for &b in slice {
                     platform.put_char(b);
                 }
+                
+                // Optional: Log large writes for audit
+                if count > 256 {
+                    log_security(AuditSeverity::Info, username, "Large buffer write to console.");
+                }
+                
                 return count as isize;
             }
         }

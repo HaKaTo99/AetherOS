@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>xAetherOS | Fleet Management Dashboard</title>
+    <style>
+        :root {
+            --bg-color: #0d0e12;
+            --card-bg: rgba(25, 27, 34, 0.7);
+            --accent-cyan: #00f2ff;
+            --accent-purple: #bc13fe;
+            --text-primary: #e0e0e0;
+            --text-secondary: #a0a0a0;
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+
+        .background-blob {
+            position: fixed;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(188, 19, 254, 0.2) 0%, rgba(0, 0, 0, 0) 70%);
+            z-index: -1;
+            filter: blur(80px);
+        }
+
+        .blob-1 {
+            top: -100px;
+            right: -100px;
+        }
+
+        .blob-2 {
+            bottom: -100px;
+            left: -100px;
+        }
+
+        header {
+            padding: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--glass-border);
+            backdrop-filter: blur(10px);
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            letter-spacing: 2px;
+            background: linear-gradient(90deg, var(--accent-cyan), var(--accent-purple));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .status-badge {
+            background: rgba(0, 242, 255, 0.1);
+            color: var(--accent-cyan);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            border: 1px solid var(--accent-cyan);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        main {
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            backdrop-filter: blur(12px);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            border-color: rgba(0, 242, 255, 0.3);
+        }
+
+        .card h3 {
+            margin-top: 0;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .metric-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin: 1rem 0;
+            display: flex;
+            align-items: baseline;
+            gap: 0.5rem;
+        }
+
+        .metric-unit {
+            font-size: 1rem;
+            color: var(--text-secondary);
+        }
+
+        .progress-container {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 3px;
+            margin-top: 1rem;
+        }
+
+        .progress-bar {
+            height: 100%;
+            border-radius: 3px;
+            background: linear-gradient(90deg, var(--accent-cyan), var(--accent-purple));
+        }
+
+        .node-list {
+            margin-top: 2rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        th {
+            text-align: left;
+            color: var(--text-secondary);
+            padding: 1rem;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .node-online {
+            color: #00ff88;
+        }
+
+        .node-offline {
+            color: #ff4444;
+        }
+
+        footer {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="background-blob blob-1"></div>
+    <div class="background-blob blob-2"></div>
+
+    <header>
+        <div class="logo">xAetherOS FABRIC</div>
+        <div class="status-badge">Fleet Live: v8.0.0-Ent</div>
+    </header>
+
+    <main>
+        <h1>Fleet Dashboard</h1>
+        <p style="color: var(--text-secondary);">Enterprise Intelligence Monitoring | Mesh Status: Healthy</p>
+
+        <div class="grid">
+            <div class="card">
+                <h3>Total Active Nodes</h3>
+                <div class="metric-value">1,248 <span class="metric-unit">Units</span></div>
+                <div class="progress-container">
+                    <div class="progress-bar" style="width: 85%;"></div>
+                </div>
+            </div>
+            <div class="card">
+                <h3>Avg. CPU Load</h3>
+                <div class="metric-value">42.8 <span class="metric-unit">%</span></div>
+                <div class="progress-container">
+                    <div class="progress-bar" style="width: 42%;"></div>
+                </div>
+            </div>
+            <div class="card">
+                <h3>Collective Memory</h3>
+                <div class="metric-value">16.4 <span class="metric-unit">TB</span></div>
+                <div class="progress-container">
+                    <div class="progress-bar" style="width: 68%;"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="node-list">
+            <h2>Critical Nodes</h2>
+            <div class="card" style="padding: 0;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Node ID</th>
+                            <th>Status</th>
+                            <th>Load</th>
+                            <th>Identity</th>
+                            <th>Uptime</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>ENT-NODE-001</td>
+                            <td class="node-online">● Online</td>
+                            <td>12%</td>
+                            <td>Root_Enclave</td>
+                            <td>42d 12h</td>
+                        </tr>
+                        <tr>
+                            <td>ENT-NODE-002</td>
+                            <td class="node-online">● Online</td>
+                            <td>88%</td>
+                            <td>Neural_Compute</td>
+                            <td>12d 05h</td>
+                        </tr>
+                        <tr>
+                            <td>ENT-NODE-077</td>
+                            <td class="node-online">● Online</td>
+                            <td>05%</td>
+                            <td>Architect_Herman</td>
+                            <td>312d 18h</td>
+                        </tr>
+                        <tr>
+                            <td>AWS-US-EAST-12</td>
+                            <td class="node-offline">○ Offline</td>
+                            <td>0%</td>
+                            <td>Cloud_Bridge</td>
+                            <td>-</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        &copy; 2030 Aether Technologies. Secure Distributed Intelligence Fabric.
+    </footer>
+</body>
+
+</html>

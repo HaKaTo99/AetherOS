@@ -37,8 +37,9 @@ impl AuditLogger {
     }
 
     pub fn log(&mut self, severity: AuditSeverity, component: &str, user: &str, message: &str) {
+        let timestamp = crate::hal::get_platform().get_ticks();
         let event = AuditEvent {
-            timestamp: 0, // In real implementation, get from HAL Timer
+            timestamp,
             severity,
             component: String::from(component),
             user: String::from(user),

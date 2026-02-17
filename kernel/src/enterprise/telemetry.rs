@@ -53,6 +53,34 @@ impl TelemetryAgent {
             crate::println!("[Telemetry] Heartbeat ACK.");
         }
     }
+
+    /// Export metrics as JSON (Phase 26.2)
+    pub fn get_metrics_json(&self) -> String {
+        let mut json = String::from("{ \"metrics\": [");
+        for (i, m) in self.metrics_buffer.iter().enumerate() {
+            json.push_str(&String::from("{ \"name\": \""));
+            json.push_str(&m.name);
+            json.push_str(&String::from("\", \"value\": "));
+            
+            // Simple f64 to string conversion (no_std compatible)
+            let val = m.value as i64;
+            let frac = ((m.value - val as f64) * 100.0).abs() as i64;
+            
+            json.push_str(&val.to_string());
+            json.push_str(&String::from("."));
+            if frac < 10 {
+                json.push_str(&String::from("0"));
+            }
+            json.push_str(&frac.to_string());
+            
+            json.push_str(&String::from(" }"));
+            if i < self.metrics_buffer.len() - 1 {
+                json.push_str(&String::from(", "));
+            }
+        }
+        json.push_str(&String::from("] }"));
+        json
+    }
 }
 
 pub static TELEMETRY_AGENT: Mutex<TelemetryAgent> = Mutex::new(TelemetryAgent::new());

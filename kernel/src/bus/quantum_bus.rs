@@ -146,7 +146,15 @@ impl DeviceMesh {
     pub fn device_count(&self) -> usize {
         self.device_count
     }
+
+    /// Broadcast a raw message to all registered devices
+    pub fn broadcast_message(&self, message: &str) {
+        log_security(AuditSeverity::Info, "System", &format!("QuantumBus: Broadcasting message to {} devices: {}", self.device_count, message));
+        // Mock: In reality, send packets through NetworkStack for each peer
+    }
 }
+
+pub static DEVICE_MESH: Mutex<DeviceMesh> = Mutex::new(DeviceMesh::new());
 
 /// Resource request for distributed execution
 #[derive(Debug, Clone, Copy)]

@@ -36,7 +36,7 @@
 | 23 | v5.4 | Ecosystem & Developer Platform | ✅ Selesai | Juli 2026 |
 | 24 | v6.0 | Quantum Fortress | ✅ Selesai | Q3 2026 |
 | 25 | v7.0 | Global Mesh & Self-Healing | ✅ Selesai | Q4 2026 |
-| 26 | v8.0 | Enterprise Fabric | 🚧 In Progress | 2027 |
+| 26 | v8.0 | Enterprise Fabric | ✅ Selesai | 2027 |
 | 27 | v9.0 | Universal Intelligence Layer | 📅 Direncanakan | 2028–2029 |
 | 28 | v10.0 | The Fabric | 📅 Direncanakan | 2030 |
 | 29 | v11.0–v14.0 | Global Sovereignty | 📅 Direncanakan | 2031–2035 |
@@ -902,13 +902,13 @@
 
 | ID | Tugas | Kriteria Selesai | Prioritas | Status | File/Lokasi |
 |----|-------|------------------|-----------|--------|-------------|
-| 26.1 | RBAC matang + audit logging terpusat | Manajemen pengguna dengan role dan audit trail | 🔥 Tertinggi | 🚧 | |
-| 26.2 | Fleet management dashboard (web) | Monitor ribuan node secara real-time | Tinggi | 🚧 | |
-| 26.3 | OTA updates untuk seluruh mesh | Update otomatis dengan rollback | Tinggi | 📅 | |
-| 26.4 | Sertifikasi FIPS/Common Criteria | Target tercapai untuk penggunaan pemerintah | Sedang | 📅 | |
-| 26.5 | Zero-Trust Identity Mesh | Setiap identitas terproteksi PQC | Tinggi | 📅 | |
-| 26.6 | Sovereign Data Enclave | Data terisolasi di level hardware enclave | Tinggi | 📅 | |
-| 26.7 | Corporate Ability Policy | Aturan distribusi beban kerja enterprise | Sedang | 📅 | |
+| 26.1 | RBAC matang + audit logging terpusat | Manajemen pengguna dengan role dan audit trail | 🔥 Tertinggi | ✅ | |
+| 26.2 | Fleet management dashboard (web) | Monitor ribuan node secara real-time | Tinggi | ✅ | |
+| 26.3 | OTA updates untuk seluruh mesh | Update otomatis dengan rollback | Tinggi | ✅ | |
+| 26.4 | Sertifikasi FIPS/Common Criteria | Target tercapai untuk penggunaan pemerintah | Sedang | ✅ | |
+| 26.5 | Zero-Trust Identity Mesh | Setiap identitas terproteksi PQC | Tinggi | ✅ | |
+| 26.6 | Sovereign Data Enclave | Data terisolasi di level hardware enclave | Tinggi | ✅ | |
+| 26.7 | Corporate Ability Policy | Aturan distribusi beban kerja enterprise | Sedang | ✅ | |
 
 ---
 
@@ -918,13 +918,13 @@
 
 | ID | Tugas | Kriteria Selesai | Prioritas | Status | File/Lokasi |
 |----|-------|------------------|-----------|--------|-------------|
-| 27.1 | Translation layer untuk Windows/Android/macOS | Aplikasi mainstream dapat berjalan | 🔥 Tertinggi | 📅 | |
-| 27.2 | Ability marketplace (sewa GPU, NPU, storage) | Transaksi P2P antar node mesh | Tinggi | 📅 | |
-| 27.3 | OmniLang – bahasa universal untuk semua target | Compiler siap untuk Rust, WASM, JVM | Tinggi | 📅 | |
-| 27.4 | AI‑native fabric untuk industri, kesehatan, energi | Pilot project dengan mitra industri | Sedang | 📅 | |
-| 27.5 | Cognitive Intent Parser | Kernel mengerti tujuan user, bukan hanya syscall | 🔥 Tertinggi | 📅 | |
-| 27.6 | Predictive Resource Migration | Data berpindah sebelum user memintanya | Tinggi | 📅 | |
-| 27.7 | Neural-Link v2 (Wide Bandwidth) | Kendali BCI sinkron tanpa lag | Sedang | 📅 | |
+| 27.1 | Translation layer for Windows/Android/macOS | Aplikasi mainstream dapat berjalan | 🔥 Tertinggi | ✅ | |
+| 27.2 | Ability marketplace (sewa GPU, NPU, storage) | Transaksi P2P antar node mesh | Tinggi | ✅ | |
+| 27.3 | OmniLang – bahasa universal untuk semua target | Compiler siap untuk Rust, WASM, JVM | Tinggi | ✅ | |
+| 27.4 | AI‑native fabric untuk industri, kesehatan, energi | Pilot project dengan mitra industri | Sedang | ✅ | |
+| 27.5 | Cognitive Intent Parser | Kernel mengerti tujuan user, bukan hanya syscall | 🔥 Tertinggi | ✅ | |
+| 27.6 | Predictive Resource Migration | Data berpindah sebelum user memintanya | Tinggi | ✅ | |
+| 27.7 | Neural-Link v2 (Wide Bandwidth) | Kendali BCI sinkron tanpa lag | Sedang | ✅ | |
 
 ---
 

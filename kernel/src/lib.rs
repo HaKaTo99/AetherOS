@@ -1,4 +1,4 @@
-//! # xAetherOS Quantum Microkernel v5.1 "Foundation"
+//! # xAetherOS Quantum Microkernel v8.0 "Enterprise Fabric"
 //! 
 //! The core kernel of the Secure Distributed Intelligence Fabric.
 //! Built on three pillars:
@@ -45,6 +45,7 @@ pub mod enterprise;
 pub mod events;
 pub mod quantum;
 pub mod mesh;
+pub mod compat; // [NEW] Phase 27.1
 pub mod tests;
 
 use crate::memory::smme::SymbianModernMemoryEngine;
