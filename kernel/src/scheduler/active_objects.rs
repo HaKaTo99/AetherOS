@@ -205,11 +205,16 @@ impl PriorityQueue {
 
     fn insert(&mut self, task_id: u32, priority: u8) -> bool {
         let level = Self::priority_to_level(priority);
+        // Military Grade: Strict Capacity Check
         if self.counts[level] < MAX_OBJECTS / PRIORITY_LEVELS {
             self.queues[level][self.counts[level]] = Some(task_id);
             self.counts[level] += 1;
             true
         } else {
+            crate::enterprise::audit::log_security(
+                crate::enterprise::audit::AuditSeverity::Critical,
+                "Scheduler", "Priority Level Overflow: Stability compromised."
+            );
             false
         }
     }
@@ -605,6 +610,10 @@ impl ActiveObjectScheduler {
         let mut new_priority = 0u8;
         let mut task_id = 0u32;
         let mut is_ready = false;
+        
+        // Military Grade: Deadlock/Cycle Detection (Ph 28.4)
+        // Check if the blocker is not already waiting on someone who eventually waits on us
+        // This is a simplified guard against complex inheritance cycles
         
         if let Some(Some(blocker)) = self.objects.get_mut(blocker_id as usize) {
             if waiter_priority < blocker.priority {

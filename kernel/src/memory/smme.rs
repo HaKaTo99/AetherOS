@@ -257,9 +257,53 @@ impl MemoryPool {
         }
         
         self.free_count.fetch_add(1, Ordering::Relaxed);
-        self.unlock();
         
+        // Military Grade: Memory Poisoning (0xDEADBEEF) - PHASE 28.4
+        // Scrub the memory after the header to catch use-after-free
+        let start_pos = addr + core::mem::size_of::<FreeBlock>();
+        let scrub_size = aligned_size.saturating_sub(core::mem::size_of::<FreeBlock>());
+        unsafe {
+            ptr::write_bytes(start_pos as *mut u8, 0xDE, scrub_size);
+        }
+        
+        self.unlock();
         Ok(())
+    }
+
+    /// Military Grade Health Audit (Sync-Align-Harmony)
+    pub fn audit_health(&self) -> bool {
+        self.lock();
+        let mut head = self.free_list_head.load(Ordering::Acquire) as *mut FreeBlock;
+        let mut prev_addr = 0usize;
+        
+        while !head.is_null() {
+            let current_addr = head as usize;
+            
+            // 1. Check if blocks are within bounds
+            if current_addr < self.base || current_addr >= self.base + self.size {
+                self.unlock();
+                return false;
+            }
+            
+            // 2. Check for sorted order (prevent loops/corruption)
+            if prev_addr != 0 && current_addr <= prev_addr {
+                self.unlock();
+                return false;
+            }
+            
+            // 3. Check for overlapping or invalid size
+            let current = unsafe { &*head };
+            if current.size == 0 || current_addr + current.size > self.base + self.size {
+                self.unlock();
+                return false;
+            }
+            
+            prev_addr = current_addr;
+            head = current.next;
+        }
+        
+        self.unlock();
+        true
     }
 
     pub fn usage(&self) -> (usize, usize) {
@@ -457,6 +501,13 @@ impl SymbianModernMemoryEngine {
         } else {
             4096 // Default 4KB
         }
+    }
+
+    /// Perform a full health audit of all pools
+    pub fn audit_all_health(&self) -> bool {
+        self.l0_pool.audit_health() && 
+        self.l1_pool.audit_health() && 
+        self.l2_pool.audit_health()
     }
 }
 

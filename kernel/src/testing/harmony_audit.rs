@@ -26,9 +26,16 @@ impl HarmonyAudit {
         // 2. Layer: Kernel Core & Memory
         {
             log_security(AuditSeverity::Info, "Audit", "Verifying Kernel Core & SMME...");
-            // Simulate stack canary and memory alignment check
+            
+            // SMME Deep Audit - Phase 28.4
+            if crate::SMME.lock().audit_all_health() {
+                log_security(AuditSeverity::Info, "Audit", " -> [ SMME ]: Memory Integrity [ VALIDATED ].");
+            } else {
+                log_security(AuditSeverity::Critical, "Audit", " -> [ SMME ]: Memory Corruption Detected!");
+                success = false;
+            }
+
             log_security(AuditSeverity::Info, "Audit", " -> [ KERNEL ]: Scheduler Balanced (Cooperative).");
-            log_security(AuditSeverity::Info, "Audit", " -> [ SMME ]: Memory Alignment v10.0 Validated.");
         }
 
         // 3. Layer: AI & Cognitive Intent
