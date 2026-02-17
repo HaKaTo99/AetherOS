@@ -246,7 +246,9 @@ pub fn kernel_init(dtb_ptr: usize) {
         crate::ai::init_intelligence();
         platform.puts("[ v9.0 ] Intelligence Layer: Professional Harmony [ OK ]\n");
 
-        platform.puts("[ v10.0] The Fabric: Universal Harmony Certified (Ph1-28)\n");
+        // --- Phase 28.4: Military Grade Harmony Certification ---
+        crate::testing::harmony_audit::HarmonyAudit::perform_full_audit();
+        platform.puts("[ v10.0] The Fabric: Military Grade Harmony [ CERTIFIED ]\n");
 
         // 1. Initialize MMU (must be before heap allocation)
         #[cfg(target_arch = "aarch64")]

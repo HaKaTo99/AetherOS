@@ -4,6 +4,7 @@
 pub mod self_healing;
 pub mod market;
 pub mod geo_routing;
+pub mod swarm; // [NEW] Phase 28.1 Autonomous Swarm Governance
 
 use spin::Mutex;
 use alloc::vec::Vec;
@@ -34,6 +35,9 @@ impl GlobalMeshController {
         
         // Phase 25.2: Sync Market listings
         market::AbilityMarket::advertise_ability(1, 100);
+
+        // Phase 28.1: Autonomous Swarm Governance
+        swarm::SWARM_GOVERNANCE.lock().init();
         
         platform.puts("[ v7.0 ] Global Mesh: Harmony Baseline Stable.\n");
     }

@@ -6,6 +6,7 @@ pub mod unit;
 pub mod integration;
 pub mod benchmarks; // [NEW] Phase 21
 pub mod benchmark; // [NEW] Benchmark Framework (Phase 13.4)
+pub mod harmony_audit; // [NEW] Phase 28.4 Certification
 
 /// Test result
 #[derive(Debug, PartialEq)]

@@ -111,3 +111,5 @@ pub fn print_boot_progress(current: usize, total: usize) {
         let _ = writer.write_str("\r\n");
     }
 }
+
+pub mod spatial; // [NEW] Phase 28.3 Holographic Mapping
