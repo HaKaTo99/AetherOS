@@ -443,7 +443,7 @@
 | CORE-03 | Harmonize Kernel Initialization | Inisialisasi kernel terstruktur | - | ✅ |
 
 #### 10.6 Internal Simulation (Stress Test)
-| ID | Tugas | Kriteria Selesai | Prioritas | Status |
+| ID | Tugas | Kriteria Selesai | Prioritas | Status | File/Lokasi |
 |----|-------|------------------|-----------|--------|-------------|
 | SIM-01 | Implement Load Simulation in `kernel_tick` | Beban simulasi berjalan | - | ✅ |
 | SIM-02 | Verify Distributed Migration Logic (Compile-Time) | Logika migrasi diverifikasi | - | ✅ |
@@ -454,7 +454,7 @@
 
 #### 11.1 Extended Testing
 | ID | Tugas | Kriteria Selesai | Prioritas | Status |
-|----|-------|------------------|-----------|--------|
+|----|-------|------------------|-----------|--------|-------------|
 | EXT-01 | 24+ hour uptime test (Accelerated Simulation) | 50k tick lulus | - | ✅ |
 | EXT-02 | Multi-device distributed testing (3+ nodes) | Simulasi RPC injection | - | ✅ |
 | EXT-03 | Network stress testing (TCP/UDP throughput) | Simulasi loopback flood | - | ✅ |
@@ -803,25 +803,25 @@
 #### 20.1 Developer Experience
 | ID | Tugas | Kriteria Selesai | Prioritas | Status |
 |----|-------|------------------|-----------|--------|
-| DX-01 | Dokumentasi API lengkap + contoh | 100% public API punya contoh | 🔥 Tertinggi | ✅ |
-| DX-02 | DEVELOPER_GUIDE.md v2 + Quickstart | Mudah diikuti pemula | Tinggi | ✅ |
-| DX-03 | Template proyek (CLI, GUI, Distributed) | Langsung bisa di-build | Tinggi | ✅ |
-| DX-04 | VS Code Extension + LSP stabil | Syntax + "Run on Mesh" | Tinggi | ✅ |
-| DX-05 | AetherScript compiler dengan DWARF debug | Debug GDB berfungsi | Tinggi | ✅ |
+| DX-01 | Dokumentasi API lengkap + contoh | 100% public API punya contoh | 🔥 Tertinggi | ✅ | |
+| DX-02 | DEVELOPER_GUIDE.md v2 + Quickstart | Mudah diikuti pemula | Tinggi | ✅ | |
+| DX-03 | Template proyek (CLI, GUI, Distributed) | Langsung bisa di-build | Tinggi | ✅ | |
+| DX-04 | VS Code Extension + LSP stabil | Syntax + "Run on Mesh" | Tinggi | ✅ | |
+| DX-05 | AetherScript compiler dengan DWARF debug | Debug GDB berfungsi | Tinggi | ✅ | |
 
 #### 20.2 Consumer & Stability
 | ID | Tugas | Kriteria Selesai | Prioritas | Status |
 |----|-------|------------------|-----------|--------|
-| CON-01 | Browser container (Firefox) stabil | Bisa buka situs modern | 🔥 Tertinggi | ✅ |
-| CON-02 | File Manager + drag & drop | Fungsional penuh | Tinggi | ✅ |
-| CON-03 | RPi4 & x86_64 image resmi | Boot dengan UI | Tinggi | ✅ |
-| CON-04 | Bug UI cleanup + multi-monitor | Tidak ada lag/redraw | Tinggi | ✅ |
+| CON-01 | Browser container (Firefox) stabil | Bisa buka situs modern | 🔥 Tertinggi | ✅ | |
+| CON-02 | File Manager + drag & drop | Fungsional penuh | Tinggi | ✅ | |
+| CON-03 | RPi4 & x86_64 image resmi | Boot dengan UI | Tinggi | ✅ | |
+| CON-04 | Bug UI cleanup + multi-monitor | Tidak ada lag/redraw | Tinggi | ✅ | |
 
 #### 20.3 Security & Release
 | ID | Tugas | Kriteria Selesai | Prioritas | Status |
 |----|-------|------------------|-----------|--------|
-| SEC-01 | Full PQC migration (Kyber + Dilithium) | Default di Quantum Bus | Tinggi | ✅ |
-| REL-01 | v5.1-rc1 + changelog | Siap publik | 🔥 Tertinggi | ✅ |
+| SEC-01 | Full PQC migration (Kyber + Dilithium) | Default di Quantum Bus | Tinggi | ✅ | |
+| REL-01 | v5.1-rc1 + changelog | Siap publik | 🔥 Tertinggi | ✅ | |
 
 ---
 
@@ -900,8 +900,8 @@
 
 **Goal**: Enterprise readiness: RBAC, fleet management, sovereign cloud, sertifikasi.
 
-| ID | Tugas | Kriteria Selesai | Prioritas | Status |
-|----|-------|------------------|-----------|--------|
+| ID | Tugas | Kriteria Selesai | Prioritas | Status | File/Lokasi |
+|----|-------|------------------|-----------|--------|-------------|
 | 26.1 | RBAC matang + audit logging terpusat | Manajemen pengguna dengan role dan audit trail | 🔥 Tertinggi | 🚧 | |
 | 26.2 | Fleet management dashboard (web) | Monitor ribuan node secara real-time | Tinggi | 🚧 | |
 | 26.3 | OTA updates untuk seluruh mesh | Update otomatis dengan rollback | Tinggi | 📅 | |
@@ -916,8 +916,8 @@
 
 **Goal**: Menjadi lapisan di atas semua OS, ability marketplace, AI‑native fabric untuk critical infrastructure.
 
-| ID | Tugas | Kriteria Selesai | Prioritas | Status |
-|----|-------|------------------|-----------|--------|
+| ID | Tugas | Kriteria Selesai | Prioritas | Status | File/Lokasi |
+|----|-------|------------------|-----------|--------|-------------|
 | 27.1 | Translation layer untuk Windows/Android/macOS | Aplikasi mainstream dapat berjalan | 🔥 Tertinggi | 📅 | |
 | 27.2 | Ability marketplace (sewa GPU, NPU, storage) | Transaksi P2P antar node mesh | Tinggi | 📅 | |
 | 27.3 | OmniLang – bahasa universal untuk semua target | Compiler siap untuk Rust, WASM, JVM | Tinggi | 📅 | |
@@ -932,8 +932,8 @@
 
 **Goal**: OS menghilang menjadi infrastruktur global yang menyelimuti realitas. Dominasi hardware 100%.
 
-| ID | Tugas | Kriteria Selesai | Prioritas | Status |
-|----|-------|------------------|-----------|--------|
+| ID | Tugas | Kriteria Selesai | Prioritas | Status | File/Lokasi |
+|----|-------|------------------|-----------|--------|-------------|
 | 28.1 | Autonomous Swarm Governance | Mesh dikelola oleh konsensus AI otonom | 🔥 Tertinggi | 📅 | |
 | 28.2 | Universal Data Sovereignty (SSI) | Identitas berdaulat penuh di seluruh mesh | Tinggi | 📅 | |
 | 28.3 | Holographic Space Mapping | Integrasi XR dalam kernel-space world modeling | Tinggi | 📅 | |
@@ -945,8 +945,8 @@
 
 **Goal**: Kedaulatan data penuh bagi manusia, dominasi militer taktis, adopsi massal 5 miliar+ pengguna.
 
-| ID | Tugas | Kriteria Selesai | Prioritas | Status |
-|----|-------|------------------|-----------|--------|
+| ID | Tugas | Kriteria Selesai | Prioritas | Status | File/Lokasi |
+|----|-------|------------------|-----------|--------|-------------|
 | 29.1 | Military Tactical Dominance | Standar OS untuk seluruh aliansi pertahanan global | 🔥 Tertinggi | 📅 | |
 | 29.2 | Global Ability Economy | Transaksi kapabilitas P2P menjadi standar ekonomi baru | Tinggi | 📅 | |
 | 29.3 | Neural-Link Immersion | Interaksi BCI tanpa latensi (Direct Neural Input) | Sedang | 📅 | |
@@ -957,8 +957,8 @@
 
 **Goal**: AetherOS berevolusi menjadi Kecerdasan Universal Terdistribusi yang tak terhentikan.
 
-| ID | Tugas | Kriteria Selesai | Prioritas | Status |
-|----|-------|------------------|-----------|--------|
+| ID | Tugas | Kriteria Selesai | Prioritas | Status | File/Lokasi |
+|----|-------|------------------|-----------|--------|-------------|
 | 30.1 | Autonomous Evolution Core | Kernel menulis ulang dirinya sendiri untuk hardware baru | 🔥 Tertinggi | 📅 | |
 | 30.2 | Universal Intelligence Fabric | Integrasi total kesadaran mesin dan data global | Tinggi | 📅 | |
 | 30.3 | Planetary Survival Mode | Protokol pemulihan peradaban otomatis jika terjadi anomali | Tinggi | 📅 | |
