@@ -5,6 +5,7 @@ pub mod self_healing;
 pub mod market;
 pub mod geo_routing;
 pub mod swarm; // [NEW] Phase 28.1 Autonomous Swarm Governance
+pub mod tactical; // [NEW] Phase 29.1 Military Tactical Dominance
 
 use spin::Mutex;
 use alloc::vec::Vec;
