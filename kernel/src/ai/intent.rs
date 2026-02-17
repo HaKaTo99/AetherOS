@@ -48,3 +48,5 @@ impl IntentParser {
         }
     }
 }
+
+pub static INTENT_PARSER: spin::Mutex<IntentParser> = spin::Mutex::new(IntentParser::new());

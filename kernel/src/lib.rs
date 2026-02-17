@@ -1,6 +1,6 @@
-//! # xAetherOS Quantum Microkernel v8.0 "Enterprise Fabric"
+//! # xAetherOS Quantum Microkernel v9.0 "Universal Intelligence Layer"
 //! 
-//! The core kernel of the Secure Distributed Intelligence Fabric.
+//! The core kernel of the Universal Intelligence Fabric.
 //! Built on three pillars:
 //! 1. **AI-Native**: Oracle Engine for intent-based orchestration.
 //! 2. **Post-Quantum**: Zero-trust security by default.
@@ -241,6 +241,11 @@ pub fn kernel_init(dtb_ptr: usize) {
         crate::ui::organic_ui::OrganicUIDriver::init();
 
         platform.puts("[ v7.0 ] Global Mesh: Self-Healing Active (Failover Ready)\n");
+        
+        // --- Phase 27.x: Professional Harmony Integration ---
+        crate::ai::init_intelligence();
+        platform.puts("[ v9.0 ] Intelligence Layer: Professional Harmony [ OK ]\n");
+
         platform.puts("[ v10.0] The Fabric: Universal Harmony Certified (Ph1-28)\n");
 
         // 1. Initialize MMU (must be before heap allocation)

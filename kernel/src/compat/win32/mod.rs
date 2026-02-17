@@ -20,6 +20,11 @@ impl Win32Loader {
     pub fn resolve_imports(&self) {
         log_security(AuditSeverity::Info, "Win32", "PE Loader: Resolving KERNEL32.DLL imports.");
     }
+
+    pub fn execute(&self, entry_point: usize) {
+        log_security(AuditSeverity::Critical, "Win32", &format!("Win32: Jumping to PE entry point at 0x{:X}.", entry_point));
+        // In a real kernel, this would perform a context switch to ring 3
+    }
 }
 
 pub fn sys_win32_create_process(app_name: &str) -> bool {

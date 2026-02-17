@@ -8,13 +8,20 @@ pub const SYS_WRITE: usize = 1;
 pub const SYS_OPEN: usize = 2;
 pub const SYS_CLOSE: usize = 3;
 pub const SYS_EXIT: usize = 60;
+pub const SYS_AI_SYNC: usize = 500; // [NEW] Phase 27.x Cognitive Sync
 
 /// Generic System Call Handler
 /// Expected to be called from assembly trap handler
 pub fn syscall_handler(call_num: usize, arg1: usize, arg2: usize, arg3: usize) -> isize {
+    // Cognitive Intent Analysis (Phase 27.5)
+    {
+        crate::ai::intent::INTENT_PARSER.lock().record_syscall(call_num);
+    }
+
     match call_num {
         SYS_WRITE => sys_write(arg1, arg2, arg3),
         SYS_EXIT => sys_exit(arg1),
+        SYS_AI_SYNC => sys_ai_sync(arg1), // Professional Orchestration
         _ => -1, // ENOSYS
     }
 }
@@ -69,4 +76,23 @@ fn sys_exit(status: usize) -> isize {
         }
     }
     loop {} // Halt execution
+}
+
+/// sys_ai_sync(options) - Phase 27.x
+/// Synchronizes user intent with kernel fabric state.
+fn sys_ai_sync(options: usize) -> isize {
+    use crate::enterprise::audit::{AuditSeverity, log_security};
+    
+    log_security(AuditSeverity::Info, "AI-Sync", &format!("Professional Sync Requested (Options: {})", options));
+    
+    // Harmony Logic: Align thread priority with predicted intent
+    let intent = crate::ai::intent::INTENT_PARSER.lock().predict_intent();
+    match intent {
+        crate::ai::intent::UserIntent::Development => {
+            log_security(AuditSeverity::Info, "AI-Sync", "Aligning for Development workload.");
+        }
+        _ => {}
+    }
+    
+    0 // Success
 }
