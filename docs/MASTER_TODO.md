@@ -420,31 +420,31 @@
 | SEC-HARD-04 | Third-party security review | Ditunda | - | ✅ |
 
 #### 10.3 Bug Fixes
-| ID | Tugas | Kriteria Selesai | Prioritas | Status |
-|----|-------|------------------|-----------|--------|
+| ID | Tugas | Kriteria Selesai | Prioritas | Status | File/Lokasi |
+|----|-------|------------------|-----------|--------|-------------|
 | BUG-01 | Triage all known issues | Dokumentasi di CHANGELOG | - | ✅ |
 | BUG-02 | Fix P0 (critical) bugs | Tidak ada | - | ✅ |
 | BUG-03 | Fix P1 (high) bugs | Tidak ada yang menghalangi | - | ✅ |
 | BUG-04 | Address user feedback | N/A (first release) | - | ✅ |
 
 #### 10.4 Release Preparation
-| ID | Tugas | Kriteria Selesai | Prioritas | Status |
-|----|-------|------------------|-----------|--------|
+| ID | Tugas | Kriteria Selesai | Prioritas | Status | File/Lokasi |
+|----|-------|------------------|-----------|--------|-------------|
 | REL-01 | Write release notes (`CHANGELOG.md`) | Release notes siap | - | ✅ |
 | REL-02 | Create demo video | Ditunda | - | ✅ |
 | REL-03 | Prepare launch announcement | Cukup dari changelog | - | ✅ |
 | REL-04 | Tag v2.0 release | Tag siap di GitHub | - | ✅ |
 
 #### 10.5 Core Stabilization (Harmonization)
-| ID | Tugas | Kriteria Selesai | Prioritas | Status |
-|----|-------|------------------|-----------|--------|
+| ID | Tugas | Kriteria Selesai | Prioritas | Status | File/Lokasi |
+|----|-------|------------------|-----------|--------|-------------|
 | CORE-01 | Verify User Mode Execution | Syscall dari user mode berhasil | - | ✅ |
 | CORE-02 | Stabilize Kernel Globals (Safe Concurrency) | Semua global menggunakan sync primitive | - | ✅ |
 | CORE-03 | Harmonize Kernel Initialization | Inisialisasi kernel terstruktur | - | ✅ |
 
 #### 10.6 Internal Simulation (Stress Test)
 | ID | Tugas | Kriteria Selesai | Prioritas | Status |
-|----|-------|------------------|-----------|--------|
+|----|-------|------------------|-----------|--------|-------------|
 | SIM-01 | Implement Load Simulation in `kernel_tick` | Beban simulasi berjalan | - | ✅ |
 | SIM-02 | Verify Distributed Migration Logic (Compile-Time) | Logika migrasi diverifikasi | - | ✅ |
 
