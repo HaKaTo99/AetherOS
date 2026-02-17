@@ -7,6 +7,7 @@ pub mod integration;
 pub mod benchmarks; // [NEW] Phase 21
 pub mod benchmark; // [NEW] Benchmark Framework (Phase 13.4)
 pub mod harmony_audit; // [NEW] Phase 28.4 Certification
+pub mod app_verification; // [NEW] v10.0 Golden App Verification
 
 /// Test result
 #[derive(Debug, PartialEq)]

@@ -66,6 +66,11 @@ impl HarmonyAudit {
             log_security(AuditSeverity::Info, "Audit", " -> [ SECURITY ]: PQC Enclave Verified.");
         }
 
+        // 5. Layer: Final App Verification (v10.0 Golden)
+        {
+            crate::testing::app_verification::AppVerification::run_comprehensive_test();
+        }
+
         log_security(AuditSeverity::Info, "Audit", "--- HARMONY AUDIT COMPLETE: MILITARY GRADE CERTIFIED ---");
         success
     }
