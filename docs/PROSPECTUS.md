@@ -19,7 +19,7 @@ Di era di mana data dan privasi sering kali dikompromikan, AetherOS lahir sebaga
 Semua yang ada di AetherOS berdiri di atas tiga landasan utama:
 
 1.  **AI-Native Distributed Kernel (Oracle Engine)**
-    Sistem kami tidak menunggu perintah; ia memahami niat. Inti sistem (kernel) dibangun dengan kecerdasan buatan tersemat yang mampu memprediksi beban kerja dan mengoptimalkan dirinya sendiri secara real-time.
+    Sistem kami tidak menunggu perintah; ia memahami niat. Inti sistem (kernel) dibangun dengan kecerdasan buatan tersemat yang mampu memprediksi beban kerja dan mengoptimalkan dirinya sendiri secara real-time. [Baca Detail Strategi AI Kami](AI_STRATEGY.md).
 2.  **Post-Quantum Zero-Trust Security**
     Keamanan bukan sekadar fitur, melainkan identitas. AetherOS menggunakan standar kriptografi pasca-kuantum (PQC) untuk melindungi data dari ancaman komputer masa depan, menjamin identitas berdaulat Anda (SSI) tetap aman selamanya.
 3.  **Self-Healing Global Mesh**
