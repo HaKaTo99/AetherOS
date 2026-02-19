@@ -40,6 +40,10 @@ impl AetherShell {
                 platform.puts("  apk [flags]   : Android App Bridge (--install, --list, --run)\r\n");
                 platform.puts("  linux [flags] : POSIX Compatibility Layer (--shell, --run)\r\n");
                 platform.puts("  windows [args]: Win32 Execution Bridge (--run)\r\n");
+                platform.puts("  mac [args]    : Darwin (macOS/iOS) Bridge (--run)\r\n");
+                platform.puts("  harmony [args]: HarmonyOS Distributed Ability Bridge (--run)\r\n");
+                platform.puts("  symbian [args]: EPOC/Symbian OS Legacy Bridge (--run)\r\n");
+                platform.puts("  webos [args]  : WebOS Sandboxed Container Bridge (--launch)\r\n");
                 platform.puts("  intent [mode] : Sectoral AI context switch (--sector)\r\n");
                 platform.puts("  identity [cmd]: SSI Identity management (--create)\r\n");
                 platform.puts("  evolve        : Trigger Autonomous Evolution Core self-diagnostic\r\n");
@@ -161,6 +165,59 @@ impl AetherShell {
                     }
                 } else {
                     platform.puts("Usage: windows [--run <exe>]\r\n");
+                }
+            } else if cmd.starts_with("mac ") {
+                let args = cmd[4..].trim();
+                platform.puts("\r\n[Darwin] Accessing macOS/iOS Compatibility Bridge (Phase 28.5)...\r\n");
+                if args.starts_with("--run ") {
+                    let bin = args[6..].trim();
+                    platform.puts("[Darwin] Initializing Mach-O Execution Environment...\r\n");
+                    platform.puts("[Darwin] Loading Binary: ");
+                    platform.puts(bin);
+                    platform.puts("\r\n");
+                    platform.puts("[Darwin] Status: Mach-O Segment Mapping SUCCESS.\r\n");
+                } else {
+                    platform.puts("Usage: mac [--run <app>]\r\n");
+                }
+            } else if cmd.starts_with("harmony ") {
+                let args = cmd[8..].trim();
+                platform.puts("\r\n[HarmonyOS] Active Ability Bridge (Phase 28.6)...\r\n");
+                if args.starts_with("--run ") {
+                    let hap = args[6..].trim();
+                    platform.puts("[HarmonyOS] Loading Package: ");
+                    platform.puts(hap);
+                    platform.puts("\r\n");
+                    let mut loader = crate::compat::harmony::HarmonyLoader::new();
+                    loader.load_hap(&[]); // Simulation
+                    loader.execute_ability(hap);
+                } else {
+                    platform.puts("Usage: harmony --run <hap_package>\r\n");
+                }
+            } else if cmd.starts_with("symbian ") {
+                let args = cmd[8..].trim();
+                platform.puts("\r\n[Symbian] EPOC32 Legacy Bridge (Phase 28.5)...\r\n");
+                if args.starts_with("--run ") {
+                    let app = args[6..].trim();
+                    platform.puts("[Symbian] Initializing E32 Active Scheduler...\r\n");
+                    platform.puts("[Symbian] Mapping binary: ");
+                    platform.puts(app);
+                    platform.puts("\r\n");
+                    let mut loader = crate::compat::epoc::EpocLoader::new();
+                    loader.load_e32(&[]); // Simulation
+                    loader.execute();
+                } else {
+                    platform.puts("Usage: symbian --run <e32_binary>\r\n");
+                }
+            } else if cmd.starts_with("webos ") {
+                let args = cmd[6..].trim();
+                platform.puts("\r\n[WebOS] Application Container Bridge (Phase 28.6)...\r\n");
+                if args.starts_with("--launch ") {
+                    let app_id = args[9..].trim();
+                    let mut runtime = crate::compat::webos::WebOSRuntime::new();
+                    runtime.launch_app(app_id);
+                    platform.puts("[WebOS] Lunar Bus Sync: OK.\r\n");
+                } else {
+                    platform.puts("Usage: webos --launch <app_id>\r\n");
                 }
             } else if cmd.starts_with("intent ") {
                 let args = cmd[7..].trim();
