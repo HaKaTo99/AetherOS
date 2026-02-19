@@ -57,8 +57,8 @@ impl HarmonyAudit {
         // 5. Layer: Security & Sovereignty
         {
             log_security(AuditSeverity::Info, "Audit", "Validating SSI & Post-Quantum Security...");
-            let ssi = security::ssi::SSI_MANAGER.lock();
-            if ssi.current_did.is_some() {
+            let ssi = security::identity::ssi::SSI_MANAGER.lock();
+            if ssi.local_did.is_some() {
                 log_security(AuditSeverity::Info, "Audit", " -> [ SSI ]: Sovereign Identity ACTIVE.");
             } else {
                 log_security(AuditSeverity::Info, "Audit", " -> [ SSI ]: Identity Staged.");

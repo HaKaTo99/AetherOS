@@ -211,11 +211,11 @@ Semua pengembangan wajib selaras dengan standar **Diamond Grade** berikut:
 
 | ID | Tugas | Kriteria Selesai | Status |
 |----|-------|------------------|--------|
-| 26.1 | **Military RBAC** | BitFlags-based permission (Admin, Auditor, etc.) | ? |
-| 26.2 | **Audit Logging** | Microsecond precision via HAL Timer | ? |
+| 26.1 | **Military RBAC** | BitFlags-based permission (Admin, Auditor, etc.) | [x] |
+| 26.2 | **Audit Logging** | Microsecond precision via HAL Timer | [x] |
 | 26.3 | **Fleet Monitor** | Neo-Vision Dashboard (Glassmorphism web UI) | [x] |
-| 26.4 | **Sovereign Cloud** | Data Enclave isolation in hardware enclave | ? |
-| 26.5 | **Zero-Panic Audit** | Removal of all `panic!` from Memory/AI/Mesh paths | ? |
+| 26.4 | **Sovereign Cloud** | Data Enclave isolation in hardware enclave | [x] |
+| 26.5 | **Zero-Panic Audit** | Removal of all `panic!` from Memory/AI/Mesh paths | [x] |
 
 ---
 
@@ -224,10 +224,10 @@ Semua pengembangan wajib selaras dengan standar **Diamond Grade** berikut:
 
 | ID | Tugas | Kriteria Selesai | Status |
 |----|-------|------------------|--------|
-| 27.1 | **Cognitive Intent Parser** | Kernel predicts workload from syscall patterns | ?? |
-| 27.2 | **sys_ai_sync** | Manual AI-Kernel synchronization (Syscall 500) | ?? |
-| 27.3 | **Sectoral Fabric** | Industrial/Health/Military execution modes | ?? |
-| 27.4 | **Llama-7B Edge** | On-device quantized local assistant (AetherAI) | ? |
+| 27.1 | **Cognitive Intent Parser** | Kernel predicts workload from syscall patterns | [x] |
+| 27.2 | **sys_ai_sync** | Manual AI-Kernel synchronization (Syscall 500) | [x] |
+| 27.3 | **Sectoral Fabric** | Industrial/Health/Military execution modes | [x] |
+| 27.4 | **Llama-7B Edge** | On-device quantized local assistant (AetherAI) | [x] |
 
 ---
 

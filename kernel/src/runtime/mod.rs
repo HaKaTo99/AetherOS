@@ -1,4 +1,5 @@
 pub mod wasm;
+pub mod ai;
 pub mod art;
 pub mod apm;          // Package Manager (Phase 14.1)
 pub mod appframework; // Application Framework (Phase 14.2)

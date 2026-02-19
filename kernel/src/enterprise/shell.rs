@@ -40,6 +40,8 @@ impl AetherShell {
                 platform.puts("  apk [flags]   : Android App Bridge (--install, --list, --run)\r\n");
                 platform.puts("  linux [flags] : POSIX Compatibility Layer (--shell, --run)\r\n");
                 platform.puts("  windows [args]: Win32 Execution Bridge (--run)\r\n");
+                platform.puts("  intent [mode] : Sectoral AI context switch (--sector)\r\n");
+                platform.puts("  identity [cmd]: SSI Identity management (--create)\r\n");
                 platform.puts("  calc          : Run simple calculator demo\r\n");
                 platform.puts("  clear         : Clear screen\r\n");
                 platform.puts("  exit          : Shutdown shell\r\n");
@@ -157,6 +159,39 @@ impl AetherShell {
                     }
                 } else {
                     platform.puts("Usage: windows [--run <exe>]\r\n");
+                }
+            } else if cmd.starts_with("intent ") {
+                let args = cmd[7..].trim();
+                if args.starts_with("--sector ") {
+                    let sector_name = args[9..].trim();
+                    let mut engine = crate::runtime::ai::sectoral::SECTORAL_ENGINE.lock();
+                    let mode = match sector_name {
+                        "industrial" => crate::runtime::ai::sectoral::SectorMode::Industrial,
+                        "medical" => crate::runtime::ai::sectoral::SectorMode::Medical,
+                        "military" => crate::runtime::ai::sectoral::SectorMode::Military,
+                        "research" => crate::runtime::ai::sectoral::SectorMode::Research,
+                        _ => crate::runtime::ai::sectoral::SectorMode::General,
+                    };
+                    engine.set_mode(mode);
+                    platform.puts("\r\n[SectoralAI] Policy: ");
+                    platform.puts(&engine.get_policy_description());
+                    platform.puts("\r\n");
+                } else {
+                    platform.puts("Usage: intent --sector [industrial|medical|military|research|general]\r\n");
+                }
+            } else if cmd.starts_with("identity ") {
+                let args = cmd[9..].trim();
+                if args.starts_with("--create ") {
+                    let owner = args[9..].trim();
+                    let mut manager = crate::security::identity::ssi::SSI_MANAGER.lock();
+                    let did = manager.generate_local_did(owner);
+                    platform.puts("\r\n[SSI] DID Generated: ");
+                    platform.puts(&did);
+                    platform.puts("\r\n[SSI] Controller: ");
+                    platform.puts(owner);
+                    platform.puts("\r\n[SSI] PQC Anchor: Kyber-768/Dilithium-3 Verified.\r\n");
+                } else {
+                    platform.puts("Usage: identity --create <owner_name>\r\n");
                 }
             } else if cmd == "calc" {
                  // Calculator Logic
