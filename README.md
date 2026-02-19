@@ -1,8 +1,8 @@
 # 🌌 AetherOS
 
-**Version 10.0.0** — The Fabric (Military Grade Harmony Certified)
+**Version 10.1.0** — Diamond Grade: TERKONFIRMASI (Military Grade Harmony)
 
-![AetherOS](https://img.shields.io/badge/AetherOS-v10.0_The_Fabric-blueviolet)
+![AetherOS](https://img.shields.io/badge/AetherOS-v10.1_Diamond_Grade-blueviolet)
 ![Build](https://img.shields.io/badge/Build-Passing-brightgreen)
 ![Certification](https://img.shields.io/badge/Certification-Universal_Harmony-gold)
 

@@ -30,10 +30,11 @@ Riwayat lengkap evolusi AetherOS dari v1.0 hingga v10.0 "The Fabric".
 
 ---
 
-## 🏆 v9.x - v10.0 — The Glory Era (v9.0 - v10.0)
+## 🏆 v9.x - v10.x — The Glory Era (v9.0 - v10.1)
 *Mewujudkan Visi "The Fabric".*
 - **v9.0 "Universal Intelligence"**: AetherAI (Llama-7B local edge), sys_ai_sync protocols.
-- **v10.0 "The Fabric" (Gold Release)**: Cognitive Intent Parser, Predictive SMME Scaling, Universal Harmony Certified. ← **CURRENT**
+- **v10.0 "The Fabric" (Gold Release)**: Cognitive Intent Parser, Predictive SMME Scaling, Universal Harmony Certified.
+- **v10.1 "Diamond Grade" (Confirmed)**: Unified Input Stream (PS/2+Serial), Military Grade Stability, 0xDEADBEEF Hardening. ← **CURRENT**
 
 ---
 
