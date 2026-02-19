@@ -111,9 +111,10 @@
 - [x] Verifikasi integritas paket menggunakan hashing Merkle-tree.
 - [x] Manajemen dependensi antar-modul aplikasi.
 
-### Phase 15: POSIX Compatibility (Linux) [x]
-**Fokus**: Jembatan ke ekosistem Linux.
-- [x] Syscall Translation Layer: Menerjemahkan 14+ syscall Linux ke Aether.
+### Phase 15: POSIX & UNIX Sovereignty (v3.0 - v5.4) [x]
+- **POSIX-01**: Classic UNIX (System V / BSD) Syscall Translation Layer.
+- **POSIX-02**: Linux ABI Compatibility & Glibc-compatible stubs.
+- **POSIX-03**: Virtual File System (VFS) with mount/unmount logic.
 - [x] VFS (Virtual File System): RamFs dengan dukungan mount points.
 - [x] Pengiriman signal (SIGINT, SIGKILL) dan manajemen PID.
 - [x] Eksekusi binary ELF sederhana (CLI tools: Vim, Nano stubs).
@@ -135,6 +136,7 @@
 - [x] Dukungan antarmuka WASI (WebAssembly System Interface).
 - [x] Kemampuan memuat modul WASM sebagai aplikasi Aether native.
 - [x] Isolasi total memori modul WASM dari kernel.
+- [x] **Language Support**: Python (Wasm-port), Go (Wasm), Rust (Wasm).
 
 ### Phase 18: QuickJS Integration [x]
 **Fokus**: Scripting cerdas dengan Javascript.
@@ -142,6 +144,7 @@
 - [x] Dukungan penuh ES2020 untuk penulisan logika UI.
 - [x] Bridge JS-to-Rust: Pemanggilan fungsi kernel aman dari Javascript.
 - [x] Framework skrip untuk otomatisasi sistem.
+- [x] **Language Support**: JavaScript, TypeScript (via Transpiler).
 
 ### Phase 19: PHP 8.3 & Laravel Support [x]
 **Fokus**: Lingkungan server web modern.

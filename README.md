@@ -8,6 +8,11 @@
 
 ---
 
+### 📖 **[BACA DULU: PROSPEKTUS UNIVERSAL AETHEROS](docs/PROSPECTUS.md)**
+**Manifesto Kedaulatan Digital untuk Seluruh Umat Manusia.**
+
+---
+
 ## 🚀 How to Run AetherOS (v10.0 Gold)
 
 AetherOS v10.0 menggunakan **Cognitive Boot Sequence** yang dioptimalkan untuk QEMU, Raspberry Pi 4, dan hardware native.
