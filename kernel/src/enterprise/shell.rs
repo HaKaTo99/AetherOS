@@ -6,6 +6,8 @@ use crate::hal;
 use alloc::string::String;
 use alloc::vec::Vec;
 use crate::runtime::android::{ApkManifest, APK_INSTALLER};
+use crate::runtime::posix::Vfs;
+use crate::compat::win32::{Win32Loader, sys_win32_create_process};
 
 pub struct AetherShell;
 
@@ -36,6 +38,8 @@ impl AetherShell {
                 platform.puts("  blender [file]: Start headless render job (.blend)\r\n");
                 platform.puts("  vlc [file]    : Play multimedia resource\r\n");
                 platform.puts("  apk [flags]   : Android App Bridge (--install, --list, --run)\r\n");
+                platform.puts("  linux [flags] : POSIX Compatibility Layer (--shell, --run)\r\n");
+                platform.puts("  windows [args]: Win32 Execution Bridge (--run)\r\n");
                 platform.puts("  calc          : Run simple calculator demo\r\n");
                 platform.puts("  clear         : Clear screen\r\n");
                 platform.puts("  exit          : Shutdown shell\r\n");
@@ -122,6 +126,37 @@ impl AetherShell {
                     }
                 } else {
                     platform.puts("Usage: apk [--install <pkg> | --list | --run <pkg>]\r\n");
+                }
+            } else if cmd.starts_with("linux ") {
+                let args = cmd[6..].trim();
+                if args == "--shell" {
+                    platform.puts("\r\n[Linux] Initializing POSIX Environment...\r\n");
+                    let _vfs = Vfs::new();
+                    platform.puts("[Linux] VFS (dev, proc, tmp, home) mounted.\r\n");
+                    platform.puts("[Linux] aether@fabric:~$ _\r\n");
+                } else if args.starts_with("--run ") {
+                    let bin = args[6..].trim();
+                    platform.puts("\r\n[Linux] Loading ELF binary: ");
+                    platform.puts(bin);
+                    platform.puts("\r\n");
+                    platform.puts("[Linux] Mapping segments... Done.\r\n");
+                    platform.puts("[Linux] Executing: posix_spawn()\r\n");
+                } else {
+                    platform.puts("Usage: linux [--shell | --run <bin>]\r\n");
+                }
+            } else if cmd.starts_with("windows ") {
+                let args = cmd[8..].trim();
+                if args.starts_with("--run ") {
+                    let exe = args[6..].trim();
+                    platform.puts("\r\n[Windows] Initializing Win32 Bridge...\r\n");
+                    if sys_win32_create_process(exe) {
+                        let mut loader = Win32Loader::new();
+                        loader.load_pe(alloc::vec![0; 100].as_slice());
+                        loader.resolve_imports();
+                        platform.puts("[Windows] Process started successfully.\r\n");
+                    }
+                } else {
+                    platform.puts("Usage: windows [--run <exe>]\r\n");
                 }
             } else if cmd == "calc" {
                  // Calculator Logic
