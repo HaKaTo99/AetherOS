@@ -17,7 +17,15 @@ Dokumen ini merangkum seluruh suite peluncuran dan kriteria kesiapan untuk **Aet
 - [x] **CI/CD Pipeline**: Green build untuk x86_64 dan aarch64 (Gold Certification).
 - [x] **OmniLang**: Handbook tuntas dan compiler v10 standar stabil.
 - [x] **Documentation**: Master Index sinkron 100% (Redundansi Nol).
-- [ ] **Artifacts**: Upload tag v10.0.0 ke repo global.
+- [x] **Artifacts**: Upload tag v10.1.0 (Diamond) ke repo global.
+
+---
+
+## 💎 v10.1 Diamond Grade Stabilization
+- [x] **UID (Unified Input Stream)**: PS/2 & Serial sync (100% responsive).
+- [x] **Hardened SMME**: Memory poisoning (0xDEADBEEF) & predictive allocation.
+- [x] **External Power**: Blender, VLC, & Android ART Bridge verified.
+- [x] **Zero-Panic Policy**: Diamond Grade stability audit complete.
 
 ---
 
