@@ -42,6 +42,8 @@ impl AetherShell {
                 platform.puts("  windows [args]: Win32 Execution Bridge (--run)\r\n");
                 platform.puts("  intent [mode] : Sectoral AI context switch (--sector)\r\n");
                 platform.puts("  identity [cmd]: SSI Identity management (--create)\r\n");
+                platform.puts("  evolve        : Trigger Autonomous Evolution Core self-diagnostic\r\n");
+                platform.puts("  tactical [cmd]: Military-Grade Mesh Controller (--stealth, --flash)\r\n");
                 platform.puts("  calc          : Run simple calculator demo\r\n");
                 platform.puts("  clear         : Clear screen\r\n");
                 platform.puts("  exit          : Shutdown shell\r\n");
@@ -192,6 +194,37 @@ impl AetherShell {
                     platform.puts("\r\n[SSI] PQC Anchor: Kyber-768/Dilithium-3 Verified.\r\n");
                 } else {
                     platform.puts("Usage: identity --create <owner_name>\r\n");
+                }
+            } else if cmd == "evolve" {
+                platform.puts("\r\n[Evolution] Accessing Singularity Era Core (Phase 30.1)...\r\n");
+                let mut core = crate::runtime::ai::evolution::EVOLUTION_CORE.lock();
+                platform.puts("[Evolution] Running Diagnostic: ");
+                platform.puts(&core.run_self_diagnostic());
+                platform.puts("\r\n");
+                
+                platform.puts("[Evolution] Generation: ");
+                let gen_str = format!("{}", core.generation);
+                platform.puts(&gen_str);
+                platform.puts("\r\n");
+                
+                platform.puts("[Evolution] Triggering adaptation in background...\r\n");
+                core.trigger_adaptation();
+                platform.puts("[Evolution] Status: ASCENDING.\r\n");
+            } else if cmd.starts_with("tactical ") {
+                let args = cmd[9..].trim();
+                platform.puts("\r\n[Tactical] Accessing Sovereign Tactical Mesh (Phase 29.1)...\r\n");
+                let mut controller = crate::mesh::tactical::TACTICAL_CONTROLLER.lock();
+                if args == "--stealth" {
+                    controller.enable_stealth_mode();
+                    platform.puts("[Tactical] Stealth Mode: ACTIVE (Radio Silence).\r\n");
+                } else if args.starts_with("--flash ") {
+                    let msg = args[8..].trim();
+                    controller.send_secure_flash(msg.as_bytes());
+                    platform.puts("[Tactical] FLASH SENT: ");
+                    platform.puts(msg);
+                    platform.puts("\r\n");
+                } else {
+                    platform.puts("Usage: tactical [--stealth | --flash <msg>]\r\n");
                 }
             } else if cmd == "calc" {
                  // Calculator Logic

@@ -146,11 +146,7 @@ Semua pengembangan wajib selaras dengan standar **Diamond Grade** berikut:
 - [x] 28.3: **Spatial UI**: Holographic world modeling engine
 - [x] 28.4: **Universal Harmony Audit**: Certification of v10.2 Supreme Grade
 
-#### Fase 29-30: The Singularity (2031-2035+)
-- [ ] 29.1: **Military Tactical Dominance Standard**
-- [ ] 29.2: **Global Ability Economy** (P2P Resource Markets)
-- [ ] 30.1: **Autonomous Evolution Core** (Self-Writing Kernel)
-- [ ] 30.3: **Civilization Restoration Protocols** (Planetary Survival)
+
 
 ### 5.3 Distributed Storage & Migration
 - [x] MIG-01: Serialization of Task Context for migration
@@ -247,12 +243,12 @@ Semua pengembangan wajib selaras dengan standar **Diamond Grade** berikut:
 **Goal**: Post-Human Computing and Planetary Stability.
 
 ### Fase 29: Global Sovereignty
-- [ ] 29.1: **Military Tactical Dominance**: Standard OS for global defense.
+- [/] 29.1: **Military Tactical Dominance**: Standard OS for global defense.
 - [ ] 29.2: **Global Ability Economy**: CapTrade as a global currency base.
 - [ ] 29.3: **BCI Direct Link**: Neural interface with wide-bandwidth sync.
 
 ### Fase 30: The Singularity (v15.0+)
-- [ ] 30.1: **Autonomous Evolution**: Kernel self-writing for new silicon.
+- [/] 30.1: **Autonomous Evolution**: Kernel self-writing for new silicon.
 - [ ] 30.2: **Universal Intelligence**: Integration of machine & human data.
 - [ ] 30.3: **Planetary Recovery**: Automatic civilization restoration protocols.
 
