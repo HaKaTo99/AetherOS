@@ -2,6 +2,7 @@
 //! Device discovery and resource sharing protocol
 
 use core::sync::atomic::AtomicU32;
+use spin::Mutex;
 
 const MAX_DEVICES: usize = 32;
 

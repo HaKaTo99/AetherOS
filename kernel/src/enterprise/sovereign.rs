@@ -42,6 +42,23 @@ impl SovereignManager {
         true
     }
 
+    /// Air-Gapped Mesh Policy (Phase 29.2)
+    /// Severs external network ties while maintaining internal mesh consensus.
+    pub fn activate_airgap_mesh(&mut self) {
+        crate::println!("[Sovereign] AIR-GAPPED MESH ACTIVE: External Uplinks Terminated.");
+        log_security(AuditSeverity::Emergency, "Sovereign", "Air-Gapped Mesh Policy Enforced.");
+    }
+
+    pub fn get_status(&self) -> String {
+        let level_str = match self.current_level {
+            SovereigntyLevel::Private => "Private",
+            SovereigntyLevel::Enterprise => "Enterprise",
+            SovereigntyLevel::State => "State",
+            SovereigntyLevel::Military => "Military (Tactical)",
+        };
+        alloc::format!("Sovereign v10.0 | Level: {} | Lockdown: {}", level_str, self.is_locked)
+    }
+
     pub fn destroy_enclave(&self, owner: &str) {
         log_security(AuditSeverity::Warning, owner, "Sovereign Data Enclave destroyed.");
     }

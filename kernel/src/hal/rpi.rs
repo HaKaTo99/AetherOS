@@ -82,6 +82,25 @@ impl Platform for RPiPlatform {
         self.uart.put_char(c);
     }
 
+    fn get_char(&self) -> u8 {
+        loop {
+            if let Some(c) = self.uart.get_char() {
+                return c;
+            }
+            core::hint::spin_loop();
+        }
+    }
+
+    fn has_data(&self) -> bool {
+        self.uart.get_char().is_some()
+    }
+
+    fn clear(&self) {
+        while self.has_data() {
+            let _ = self.get_char();
+        }
+    }
+
     fn cpu_relax(&self) {
         // WFE: Wait For Event - low power state until event
         unsafe { core::arch::asm!("wfe") };

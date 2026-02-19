@@ -1,0 +1,8 @@
+[package]
+name = "booter"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+bootloader = "0.11.9"
+aetheros-kernel = { path = "../kernel" }

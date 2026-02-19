@@ -6,7 +6,7 @@ fn main() {
     let arch = env::var("CARGO_CFG_TARGET_ARCH").unwrap();
 
     let link_script = if arch == "x86_64" {
-        PathBuf::from(manifest_dir).join("src/arch/x86_64/linker.ld")
+        PathBuf::from(manifest_dir).join("src/arch/x86_64/fabric_v10_gold.ld")
     } else {
         // Default to aarch64 / RPi4
         PathBuf::from(manifest_dir).join("link.ld")
@@ -19,5 +19,5 @@ fn main() {
     
     // Tell cargo to rerun if link.ld changes
     println!("cargo:rerun-if-changed={}", link_script.display());
-    println!("cargo:rustc-link-arg=-T{}", link_script.file_name().unwrap().to_str().unwrap());
+    println!("cargo:rustc-link-arg=-T{}", link_script.display());
 }

@@ -24,13 +24,19 @@ impl Platform for StubPlatform {
     }
 
     fn put_char(&self, _c: u8) {
-        // Write to UART0 for QEMU
-        // Safety: In real impl this writes to 0x09000000
-        // unsafe {
-            // Simulated MMIO for example purposes
-            // core::ptr::write_volatile(0x09000000 as *mut u8, c);
-        // }
+        // Mock output
     }
+
+    fn get_char(&self) -> u8 {
+        // Mock input
+        0
+    }
+
+    fn has_data(&self) -> bool {
+        false
+    }
+
+    fn clear(&self) {}
 }
 
 // Marker for Sync since it's a stateless stub

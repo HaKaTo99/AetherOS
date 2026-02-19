@@ -1,6 +1,7 @@
 pub mod llm;    // [NEW] Phase 22 (v5.3) Local LLM
 pub mod genai;  // [NEW] Phase 22 (v5.3) Generative AI
 pub mod intent; // [NEW] Phase 27.5 Cognitive Intent Parser
+pub mod intent_model; // [NEW] Priority #2 TinyML Model
 pub mod fabric; // [NEW] Phase 27.4 AI-Native Industrial Fabric
 
 pub struct NpuDriver;
@@ -30,6 +31,12 @@ pub fn init_intelligence() {
     {
         let mut npu = GLOBAL_NPU.lock();
         let _ = npu.init();
+    }
+
+    // 3. Initialize Intent Parser (Phase 27.5)
+    {
+        let mut _intent = intent::INTENT_PARSER.lock();
+        crate::println!("[Intent] Cognitive Listener Active.");
     }
 
     log_security(AuditSeverity::Info, "AI", "Cognitive Sync-Align-Harmony: [ ACTIVE ]");

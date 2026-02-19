@@ -33,7 +33,7 @@ aether --help
 aether doctor
 ```
 
-### Create your first AetherScript app
+### Create your first OmniLang app
 
 ```bash
 aether new hello-world --template=distributed

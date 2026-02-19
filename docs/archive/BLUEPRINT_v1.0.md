@@ -8,7 +8,7 @@ Last updated: 2026-01-02
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │ AETHEROS v1.0 ARCHITECTURE │
 ├─────────────────────────────────────────────────────────────────────────────┤
-│ LAYER 4: UNIVERSAL APPLICATIONS (AetherScript Runtime) │
+│ LAYER 4: UNIVERSAL APPLICATIONS (OmniLang Runtime) │
 │ ├─ Cross-platform binaries (.aether format) │
 │ ├─ Adaptive UI Engine (React Native + Flutter hybrid) │
 │ └─ Distributed App Coordinator │

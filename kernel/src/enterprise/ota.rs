@@ -28,7 +28,7 @@ pub struct OTAManager {
 impl OTAManager {
     pub const fn new() -> Self {
         Self {
-            current_version: String::from("7.9.0"),
+            current_version: String::new(), // Initialized as empty in const context
             target_version: None,
             state: UpdateState::Idle,
             update_buffer: Vec::new(),

@@ -377,10 +377,11 @@ impl SymbianModernMemoryEngine {
         const ATOMIC_ZERO: AtomicUsize = AtomicUsize::new(0);
         
         Self {
-            // Quantum Fortress v6.0 Stability: Massive 400MB+ Aggregated Heap
-            l0_pool: MemoryPool::new(0x0400_0000, 32 * 1024 * 1024),      // Increased to 32MB (v7.7)
-            l1_pool: MemoryPool::new(0x0600_0000, 128 * 1024 * 1024),     // Shifted base to 0x0600_0000
-            l2_pool: MemoryPool::new(0x0E00_0000, 256 * 1024 * 1024),     // Shifted base to 0x0E00_0000
+            // Quantum Fortress v10.0: Localized Heap for Harmony Mapping
+            // Starting at 16MB to avoid conflict with kernel (1MB-2MB) and low memory
+            l0_pool: MemoryPool::new(0x0100_0000, 16 * 1024 * 1024),      
+            l1_pool: MemoryPool::new(0x0200_0000, 32 * 1024 * 1024),     
+            l2_pool: MemoryPool::new(0x0400_0000, 64 * 1024 * 1024),     
             allocation_history: [ATOMIC_ZERO; 16],
             history_index: AtomicUsize::new(0),
             distributed_enabled: false,
@@ -389,31 +390,46 @@ impl SymbianModernMemoryEngine {
 
     /// Get pool for a given address
     fn get_pool_for_address(&self, addr: usize) -> Option<&MemoryPool> {
-        if addr >= 0x0400_0000 && addr < 0x0600_0000 {
+        if addr >= 0x0100_0000 && addr < 0x0200_0000 {
             Some(&self.l0_pool)
-        } else if addr >= 0x0600_0000 && addr < 0x0E00_0000 {
+        } else if addr >= 0x0200_0000 && addr < 0x0400_0000 {
             Some(&self.l1_pool)
-        } else if addr >= 0x0E00_0000 && addr < 0x1E00_0000 {
+        } else if addr >= 0x0400_0000 && addr < 0x0800_0000 {
             Some(&self.l2_pool)
         } else {
             None
         }
     }
 
-    /// Get pool for a given size
-    fn get_pool_for_size(&self, size: usize) -> &MemoryPool {
-        if size <= 4 * 1024 * 1024 {
-            &self.l0_pool
-        } else if size <= 128 * 1024 * 1024 {
-            &self.l1_pool
-        } else {
-            &self.l2_pool
+    /// Get pool for a given size and intent (Phase 10.0 Harmony)
+    fn get_pool_for_size_and_intent(&self, size: usize, intent: crate::ai::intent::UserIntent) -> &MemoryPool {
+        use crate::ai::intent::UserIntent;
+        
+        match intent {
+            UserIntent::Development => {
+                // For Development, prioritize L1 pool for compiler-like workloads
+                if size <= 128 * 1024 { &self.l1_pool }
+                else { &self.l2_pool }
+            },
+            UserIntent::Multimedia => {
+                // For Multimedia, use L0 for many small objects
+                if size <= 64 * 1024 { &self.l0_pool }
+                else { &self.l1_pool }
+            },
+            _ => {
+                // Standard logic
+                if size <= 64 * 1024 { &self.l0_pool }
+                else if size <= 2 * 1024 * 1024 { &self.l1_pool }
+                else { &self.l2_pool }
+            }
         }
     }
 
-    /// Smart allocation with pool selection
+    /// Smart allocation with pool selection and intent awareness
     pub fn allocate(&self, size: usize) -> Result<usize, AllocationError> {
-        let pool = self.get_pool_for_size(size);
+        // Fetch current user intent
+        let intent = crate::ai::intent::INTENT_PARSER.lock().get_intent();
+        let pool = self.get_pool_for_size_and_intent(size, intent);
 
         // Two-phase allocation
         let addr = pool.reserve(size)?;
@@ -435,7 +451,7 @@ impl SymbianModernMemoryEngine {
         }
     }
 
-    /// Predictive cleanup (Oracle Engine integration point)
+    /// Predictive cleanup (Oracle Engine integration point) - Phase 10.0 Harmony
     pub fn predictive_cleanup(&self) -> usize {
         let (_reserved, committed) = self.l1_pool.usage();
         let utilization = if self.l1_pool.size > 0 {
@@ -444,7 +460,15 @@ impl SymbianModernMemoryEngine {
             0
         };
         
-        if utilization > 80 {
+        // Fetch intent for threshold adjustment
+        let intent = crate::ai::intent::INTENT_PARSER.lock().get_intent();
+        let threshold = match intent {
+            crate::ai::intent::UserIntent::HighPerformanceGaming | crate::ai::intent::UserIntent::DistributedCompute => 70, // Aggressive
+            crate::ai::intent::UserIntent::Development => 90, // Lazy/Development
+            _ => 80, // Default
+        };
+
+        if utilization > threshold {
             self.emergency_cleanup()
         } else {
             0

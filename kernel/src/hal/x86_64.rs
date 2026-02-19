@@ -87,19 +87,28 @@ impl SerialPort {
 
     pub fn init(&self) {
         unsafe {
-            // Disable interrupts
+            // Disable interrupts (Important for Military Grade Polling)
             outb(0x3F8 + 1, 0x00);
             // Enable DLAB (set baud rate divisor)
             outb(0x3F8 + 3, 0x80);
-            // Set divisor to 3 (lo byte) 38400 baud
-            outb(0x3F8 + 0, 0x03);
+            // Set divisor to 1 (lo byte) 115200 baud
+            outb(0x3F8 + 0, 0x01);
             outb(0x3F8 + 1, 0x00);
             // 8 bits, no parity, one stop bit
             outb(0x3F8 + 3, 0x03);
-            // Enable FIFO, clear them, with 14-byte threshold
+            // Enable FIFO, clear them, with 14-byte threshold (Optimum for Mesh Latency)
             outb(0x3F8 + 2, 0xC7);
-            // IRQs enabled, RTS/DSR set
-            outb(0x3F8 + 4, 0x0B);
+            // RTS/DSR set
+            outb(0x3F8 + 4, 0x03);
+        }
+    }
+
+    pub fn clear(&self) {
+        unsafe {
+            // Drain receiver
+            while (inb(0x3F8 + 5) & 1) != 0 {
+                let _ = inb(0x3F8);
+            }
         }
     }
 
@@ -112,13 +121,52 @@ impl SerialPort {
     }
 }
 
-// --- Platform Implementation ---
-pub struct X86Platform {
-    // We use UnsafeCell/Mutex in real code, but for single-threaded init this is "ok" 
-    // for MVP. To make it Send/Sync for static, we assume single core or appropriate lock.
-    // Making it zero-sized for now and creating instances on the fly or using static mut 
-    // internally would be cleaner, but let's stick to the pattern.
+// --- Shared Input Buffer (Phase 38.4 Harmony) ---
+use spin::Mutex;
+
+const INPUT_BUF_SIZE: usize = 64;
+static INPUT_QUEUE: Mutex<InputQueue> = Mutex::new(InputQueue::new());
+
+struct InputQueue {
+    buffer: [u8; INPUT_BUF_SIZE],
+    head: usize,
+    tail: usize,
 }
+
+impl InputQueue {
+    const fn new() -> Self {
+        Self {
+            buffer: [0; INPUT_BUF_SIZE],
+            head: 0,
+            tail: 0,
+        }
+    }
+
+    fn push(&mut self, c: u8) {
+        let next = (self.head + 1) % INPUT_BUF_SIZE;
+        if next != self.tail {
+            self.buffer[self.head] = c;
+            self.head = next;
+        }
+    }
+
+    fn pop(&mut self) -> Option<u8> {
+        if self.head == self.tail {
+            None
+        } else {
+            let c = self.buffer[self.tail];
+            self.tail = (self.tail + 1) % INPUT_BUF_SIZE;
+            Some(c)
+        }
+    }
+
+    fn is_empty(&self) -> bool {
+        self.head == self.tail
+    }
+}
+
+// --- Platform Implementation ---
+pub struct X86Platform {}
 
 pub static mut VGA: VgaWriter = VgaWriter::new();
 static SERIAL: SerialPort = SerialPort::new();
@@ -126,6 +174,56 @@ static SERIAL: SerialPort = SerialPort::new();
 impl X86Platform {
     pub const fn new() -> Self {
         Self {}
+    }
+
+    /// Pompa data dari hardware ke internal buffer (Phase 10.0 Harmony)
+    pub fn poll_hardware(&self) {
+        unsafe {
+            // 1. Poll Serial Port (Drain entire FIFO for high throughput)
+            let mut limit = 0;
+            while (inb(0x3F8 + 5) & 1) != 0 && limit < 16 {
+                let c = inb(0x3F8);
+                self.process_input_byte(c);
+                limit += 1;
+            }
+
+            // 2. Poll PS/2 Keyboard
+            if (inb(0x64) & 1) != 0 {
+                let scancode = inb(0x60);
+                if let Some(c) = self.map_ps2_to_ascii(scancode) {
+                    self.process_input_byte(c);
+                }
+            }
+        }
+    }
+
+    fn process_input_byte(&self, c: u8) {
+        // [MILITARY GRADE DIAGNOSTICS] Log Ring 0 Input (Uncomment for deep audit)
+        // crate::enterprise::AUDIT_LOGGER.lock().log_raw(format!("Input: 0x{:02x}", c));
+
+        // System Hotkey Interception
+        if c == b'd' || c == b'D' {
+            let mut dashboard = crate::ui::dashboard::FLEET_DASHBOARD.lock();
+            dashboard.active = !dashboard.active;
+            if dashboard.active {
+                dashboard.render();
+            }
+            return;
+        }
+
+        // Normal char goes to queue
+        INPUT_QUEUE.lock().push(c);
+    }
+
+    fn map_ps2_to_ascii(&self, scancode: u8) -> Option<u8> {
+        if scancode & 0x80 != 0 { return None; }
+        match scancode {
+            0x1C => Some(b'\n'), 0x39 => Some(b' '), 0x0E => Some(8),
+            0x02..=0x0B => { if scancode == 0x0B { Some(b'0') } else { Some(b'0' + (scancode - 1)) } },
+            0x0C => Some(b'-'), 0x35 => Some(b'/'), 0x37 => Some(b'*'), 0x4E => Some(b'+'),
+            0x20 => Some(b'd'), 0x21 => Some(b'f'),
+            _ => None,
+        }
     }
 }
 
@@ -145,43 +243,57 @@ unsafe fn inb(port: u16) -> u8 {
 impl Platform for X86Platform {
     fn init(&self) {
         SERIAL.init();
-        self.puts("X86_64 HAL Initialized (v7.9 Diamond Grade)\n");
+        self.puts("X86_64 HAL Initialized (v10.0 Diamond Harmony)\n");
     }
 
-    fn shutdown(&self) {
-        // QEMU shutdown hack (older style)
-        unsafe {
-             outb(0xf4, 0x00);
-        }
-    }
+    fn shutdown(&self) { unsafe { outb(0xf4, 0x00); } }
 
     fn get_ticks(&self) -> u64 {
-        let rax: u64;
-        let rdx: u64;
-        unsafe {
-            asm!("rdtsc", out("rax") rax, out("rdx") rdx);
-        }
+        let rax: u64; let rdx: u64;
+        unsafe { asm!("rdtsc", out("rax") rax, out("rdx") rdx); }
         (rdx << 32) | rax
     }
 
     fn sleep_ms(&self, ms: u64) {
-        // Very rough busy loop approximation
-        // 1ms ~ 1000000 cycles on modern CPU?
-        // v7.9: Reduced cycle count for faster VM simulation
         let steps = ms * 100000;
         let start = self.get_ticks();
-        while self.get_ticks() - start < steps {
-            core::hint::spin_loop();
-        }
+        while self.get_ticks() - start < steps { core::hint::spin_loop(); }
     }
 
     fn put_char(&self, c: u8) {
-        // VGA is static mut, so we need addr_of_mut!
         unsafe {
             SERIAL.send(c);
             let vga_ptr = core::ptr::addr_of_mut!(VGA);
             (*vga_ptr).write_byte(c);
         }
+    }
+
+    fn get_char(&self) -> u8 {
+        loop {
+            // Pump hardware
+            self.poll_hardware();
+            
+            // Check queue
+            if let Some(c) = INPUT_QUEUE.lock().pop() {
+                return c;
+            }
+            
+            // Background maintenance while waiting
+            crate::kernel_tick();
+            core::hint::spin_loop();
+        }
+    }
+
+    fn has_data(&self) -> bool {
+        self.poll_hardware();
+        !INPUT_QUEUE.lock().is_empty()
+    }
+
+    fn clear(&self) {
+        SERIAL.clear();
+        let mut queue = INPUT_QUEUE.lock();
+        queue.head = 0;
+        queue.tail = 0;
     }
 
     fn cpu_relax(&self) {

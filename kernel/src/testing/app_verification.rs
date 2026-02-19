@@ -31,8 +31,8 @@ impl AppVerification {
         log_security(AuditSeverity::Info, "Verification", "Testing OmniLang Native Engine...");
         let mut runtime = OmniRuntime::new();
         let source = "fn main() { print(\"Hello AetherOS v10.0\"); }";
-        let output = runtime.execute(source);
-        log_security(AuditSeverity::Info, "Verification", &format!(" -> [ OmniLang ]: Result: '{}'", output));
+        runtime.execute(source);
+        log_security(AuditSeverity::Info, "Verification", &format!(" -> [ OmniLang ]: Result: '{}'", runtime.last_output));
     }
 
     fn test_ms_office() {

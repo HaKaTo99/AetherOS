@@ -4,6 +4,29 @@
 use alloc::string::String;
 use alloc::vec::Vec;
 use alloc::format;
+use alloc::collections::BTreeMap;
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum Value {
+    Int(i64),
+    String(String),
+}
+
+impl Value {
+    pub fn as_int(&self) -> i64 {
+        match self {
+            Value::Int(n) => *n,
+            Value::String(_) => 0,
+        }
+    }
+    
+    pub fn as_bool(&self) -> bool {
+        match self {
+            Value::Int(n) => *n != 0,
+            Value::String(s) => !s.is_empty(),
+        }
+    }
+}
 
 // ===========================
 // Lexer
@@ -24,6 +47,7 @@ pub enum Token {
     Ident(String),
     // Operators
     Plus, Minus, Star, Slash, Eq, EqEq, Lt, Gt, Arrow,
+    And, Or, Not, NotEq, // &&, ||, !, !=
     // Delimiters
     LParen, RParen, LBrace, RBrace, Comma, Colon, Semi,
     // Special
@@ -79,6 +103,21 @@ impl Lexer {
                 }
                 Some(b'<') => { self.advance(); tokens.push(Token::Lt); }
                 Some(b'>') => { self.advance(); tokens.push(Token::Gt); }
+                Some(b'&') => {
+                    self.advance();
+                    if self.peek() == Some(b'&') { self.advance(); tokens.push(Token::And); }
+                    else { /* Bitwise and not supported yet, skip or return error */ }
+                }
+                Some(b'|') => {
+                    self.advance();
+                    if self.peek() == Some(b'|') { self.advance(); tokens.push(Token::Or); }
+                    else { /* Bitwise or not supported yet */ }
+                }
+                Some(b'!') => {
+                    self.advance();
+                    if self.peek() == Some(b'=') { self.advance(); tokens.push(Token::NotEq); }
+                    else { tokens.push(Token::Not); }
+                }
                 Some(b'(') => { self.advance(); tokens.push(Token::LParen); }
                 Some(b')') => { self.advance(); tokens.push(Token::RParen); }
                 Some(b'{') => { self.advance(); tokens.push(Token::LBrace); }
@@ -127,7 +166,8 @@ impl Lexer {
     fn read_ident(&mut self) -> String {
         let mut s = String::new();
         while let Some(ch) = self.peek() {
-            if ch.is_ascii_alphanumeric() || ch == b'_' {
+            // Allow dotted identifiers so namespaced builtins like System.input stay intact
+            if ch.is_ascii_alphanumeric() || ch == b'_' || ch == b'.' {
                 s.push(ch as char);
                 self.advance();
             } else { break; }
@@ -173,10 +213,14 @@ pub enum Expr {
     BinOp(Vec<Expr>, BinOp, Vec<Expr>), // Vec<Expr> with 1 element instead of Box
     Call(String, Vec<Expr>),
     If(Vec<Expr>, Vec<Stmt>, Option<Vec<Stmt>>), // condition as Vec<Expr>
+    UnaryOp(UnaryOp, Vec<Expr>),
 }
 
-#[derive(Debug, Clone, Copy)]
-pub enum BinOp { Add, Sub, Mul, Div, Eq, Lt, Gt }
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum BinOp { Add, Sub, Mul, Div, Eq, NotEq, Lt, Gt, And, Or }
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum UnaryOp { Not }
 
 #[derive(Debug, Clone)]
 pub enum Stmt {
@@ -184,6 +228,7 @@ pub enum Stmt {
     Return(Expr),
     Expr(Expr),
     While(Expr, Vec<Stmt>),
+    If(Expr, Vec<Stmt>, Option<Vec<Stmt>>),
 }
 
 #[derive(Debug, Clone)]
@@ -321,18 +366,160 @@ impl Parser {
                 if *self.peek() == Token::Semi { self.advance(); }
                 Some(Stmt::Return(expr))
             },
-             Token::Ident(_) => {
+            Token::If => {
+                self.advance(); // consume 'if'
+                if *self.peek() == Token::LParen { self.advance(); }
+                let cond = self.parse_expr()?;
+                if *self.peek() == Token::RParen { self.advance(); }
+                
+                let then_body = self.parse_block();
+                
+                let mut else_body = None;
+                if *self.peek() == Token::Else {
+                    self.advance();
+                    // Handle 'else if' or just 'else'
+                    if *self.peek() == Token::If {
+                         if let Some(s) = self.parse_stmt() {
+                             else_body = Some(vec![s]);
+                         }
+                    } else {
+                         else_body = Some(self.parse_block());
+                    }
+                }
+                Some(Stmt::If(cond, then_body, else_body))
+            },
+            Token::While => {
+                self.advance(); // consume 'while'
+                if *self.peek() == Token::LParen { self.advance(); }
+                let cond = self.parse_expr()?;
+                if *self.peek() == Token::RParen { self.advance(); }
+                
+                let body = self.parse_block();
+                Some(Stmt::While(cond, body))
+            },
+            Token::Ident(_) => {
                 // assume expression statement
                 let expr = self.parse_expr()?;
                 if *self.peek() == Token::Semi { self.advance(); }
                 Some(Stmt::Expr(expr))
-             }
+            },
             _ => None
         }
     }
 
+    fn parse_block(&mut self) -> Vec<Stmt> {
+        let mut body = Vec::new();
+        if *self.peek() == Token::LBrace {
+            self.advance();
+            while *self.peek() != Token::RBrace && *self.peek() != Token::Eof {
+                 if let Some(stmt) = self.parse_stmt() {
+                     body.push(stmt);
+                 } else {
+                     self.advance();
+                 }
+            }
+            if *self.peek() == Token::RBrace { self.advance(); }
+        } else {
+            // Single statement block
+            if let Some(stmt) = self.parse_stmt() {
+                body.push(stmt);
+            }
+        }
+        body
+    }
+
     fn parse_expr(&mut self) -> Option<Expr> {
-        self.parse_primary()
+        self.parse_logical_or()
+    }
+
+    fn parse_logical_or(&mut self) -> Option<Expr> {
+        let mut left = self.parse_logical_and()?;
+        while *self.peek() == Token::Or {
+            self.advance();
+            let right = self.parse_logical_and()?;
+            left = Expr::BinOp(vec![left], BinOp::Or, vec![right]);
+        }
+        Some(left)
+    }
+
+    fn parse_logical_and(&mut self) -> Option<Expr> {
+        let mut left = self.parse_equality()?;
+        while *self.peek() == Token::And {
+            self.advance();
+            let right = self.parse_equality()?;
+            left = Expr::BinOp(vec![left], BinOp::And, vec![right]);
+        }
+        Some(left)
+    }
+
+    fn parse_equality(&mut self) -> Option<Expr> {
+        let mut left = self.parse_comparison()?;
+        while matches!(self.peek(), Token::EqEq | Token::NotEq) {
+            let op = match self.advance() {
+                Token::EqEq => BinOp::Eq,
+                Token::NotEq => BinOp::NotEq,
+                _ => unreachable!(),
+            };
+            let right = self.parse_comparison()?;
+            left = Expr::BinOp(vec![left], op, vec![right]);
+        }
+        Some(left)
+    }
+
+    fn parse_comparison(&mut self) -> Option<Expr> {
+        let mut left = self.parse_term()?;
+        while matches!(self.peek(), Token::Lt | Token::Gt) {
+            let op = match self.advance() {
+                Token::Lt => BinOp::Lt,
+                Token::Gt => BinOp::Gt,
+                _ => unreachable!(),
+            };
+            let right = self.parse_term()?;
+            left = Expr::BinOp(vec![left], op, vec![right]);
+        }
+        Some(left)
+    }
+
+    fn parse_term(&mut self) -> Option<Expr> {
+        let mut left = self.parse_factor()?;
+        while matches!(self.peek(), Token::Plus | Token::Minus) {
+            let op = match self.advance() {
+                Token::Plus => BinOp::Add,
+                Token::Minus => BinOp::Sub,
+                _ => unreachable!(),
+            };
+            let right = self.parse_factor()?;
+            left = Expr::BinOp(vec![left], op, vec![right]);
+        }
+        Some(left)
+    }
+
+    fn parse_factor(&mut self) -> Option<Expr> {
+        let mut left = self.parse_unary()?;
+        while matches!(self.peek(), Token::Star | Token::Slash) {
+            let op = match self.advance() {
+                Token::Star => BinOp::Mul,
+                Token::Slash => BinOp::Div,
+                _ => unreachable!(),
+            };
+            let right = self.parse_unary()?;
+            left = Expr::BinOp(vec![left], op, vec![right]);
+        }
+        Some(left)
+    }
+
+    fn parse_unary(&mut self) -> Option<Expr> {
+        if matches!(self.peek(), Token::Not | Token::Minus) {
+            let tok = self.advance();
+            let right = self.parse_unary()?;
+            match tok {
+                Token::Not => Some(Expr::UnaryOp(UnaryOp::Not, vec![right])),
+                Token::Minus => Some(Expr::BinOp(vec![Expr::IntLit(0)], BinOp::Sub, vec![right])),
+                _ => unreachable!(),
+            }
+        } else {
+            self.parse_primary()
+        }
     }
 
     fn parse_primary(&mut self) -> Option<Expr> {
@@ -354,7 +541,7 @@ impl Parser {
                     self.advance();
                     // Parse args
                     let mut args = Vec::new();
-                    while *self.peek() != Token::RParen {
+                    while *self.peek() != Token::RParen && *self.peek() != Token::Eof {
                          if let Some(arg) = self.parse_expr() {
                              args.push(arg);
                          }
@@ -367,6 +554,12 @@ impl Parser {
                     Some(Expr::Ident(n))
                 }
             },
+            Token::LParen => {
+                self.advance();
+                let expr = self.parse_expr()?;
+                if *self.peek() == Token::RParen { self.advance(); }
+                Some(expr)
+            }
             _ => None
         }
     }
@@ -378,82 +571,180 @@ impl Parser {
 
 pub struct OmniRuntime {
     pub last_output: String,
+    pub variables: BTreeMap<String, Value>,
 }
 
 impl OmniRuntime {
     pub fn new() -> Self {
-        Self { last_output: String::new() }
+        Self { 
+            last_output: String::new(),
+            variables: BTreeMap::new(),
+        }
     }
 
-    pub fn execute(&mut self, source: &str) -> String {
+    pub fn execute(&mut self, source: &str) {
         let mut lexer = Lexer::new(source);
         let tokens = lexer.tokenize();
         let mut parser = Parser::new(tokens);
         let module = parser.parse_module();
 
-        self.last_output.clear();
-
-        // Interpreter
         for func in module.functions {
             if func.name == "main" {
                 self.eval_body(&func.body);
             }
-        }
-
-        if self.last_output.is_empty() {
-            String::from("Success (No Output)")
-        } else {
-            self.last_output.clone()
         }
     }
 
     fn eval_body(&mut self, body: &[Stmt]) {
         for stmt in body {
             match stmt {
-                Stmt::Expr(expr) => {
-                    self.eval_expr(expr);
+                Stmt::Expr(expr) => { self.eval_expr(expr); },
+                Stmt::Let(name, expr) => {
+                    let val = self.eval_expr(expr);
+                    self.variables.insert(name.clone(), val);
                 },
-                Stmt::Let(_, expr) => {
+                Stmt::While(cond, inner_body) => {
+                    while self.eval_expr(cond).as_bool() {
+                        self.eval_body(inner_body);
+                    }
+                },
+                Stmt::If(cond, then_body, else_body) => {
+                    if self.eval_expr(cond).as_bool() {
+                        self.eval_body(then_body);
+                    } else if let Some(eb) = else_body {
+                        self.eval_body(eb);
+                    }
+                },
+                Stmt::Return(expr) => {
                     self.eval_expr(expr);
+                    return;
                 },
                 _ => {}
             }
         }
     }
 
-    fn eval_expr(&mut self, expr: &Expr) -> i64 {
+    fn eval_expr(&mut self, expr: &Expr) -> Value {
         match expr {
-            Expr::IntLit(n) => *n,
-            Expr::StringLit(_) => 0, // Strings are 0 for now in this toy interpreter
+            Expr::IntLit(n) => Value::Int(*n),
+            Expr::StringLit(s) => Value::String(s.clone()),
+            Expr::Ident(n) => {
+                self.variables.get(n).cloned().unwrap_or(Value::Int(0))
+            },
             Expr::Call(name, args) => {
-                if name == "print" {
-                    if let Some(first) = args.first() {
-                        match first {
-                            Expr::StringLit(s) => self.last_output.push_str(s),
-                            Expr::IntLit(n) => self.last_output.push_str(&format!("{}", n)),
-                             _ => {}
+                let eval_args: Vec<Value> = args.iter().map(|a| self.eval_expr(a)).collect();
+                self.eval_builtin(name, &eval_args)
+            },
+            Expr::BinOp(left, op, right) => {
+                let l = left.first().map(|e| self.eval_expr(e)).unwrap_or(Value::Int(0));
+                let r = right.first().map(|e| self.eval_expr(e)).unwrap_or(Value::Int(0));
+                match (l, r) {
+                    (Value::Int(lv), Value::Int(rv)) => {
+                        match op {
+                            BinOp::Add => Value::Int(lv + rv),
+                            BinOp::Sub => Value::Int(lv - rv),
+                            BinOp::Mul => Value::Int(lv * rv),
+                            BinOp::Div => Value::Int(if rv != 0 { lv / rv } else { 0 }),
+                            BinOp::Eq => Value::Int(if lv == rv { 1 } else { 0 }),
+                            BinOp::NotEq => Value::Int(if lv != rv { 1 } else { 0 }),
+                            BinOp::Lt => Value::Int(if lv < rv { 1 } else { 0 }),
+                            BinOp::Gt => Value::Int(if lv > rv { 1 } else { 0 }),
+                            BinOp::And => Value::Int(if lv != 0 && rv != 0 { 1 } else { 0 }),
+                            BinOp::Or => Value::Int(if lv != 0 || rv != 0 { 1 } else { 0 }),
                         }
-                    }
-                    0
-                } else if name == "version" {
-                     100 // v1.0.0
-                } else if name == "System.shutdown" {
-                    crate::enterprise::lifecycle::shutdown();
-                    0
-                } else if name == "System.logout" {
-                    // Simulation of logout
-                    self.last_output = String::from("User logged out.");
-                    0
-                } else if name == "System.input" {
-                    // In a real environment, this would wait for keyboard input.
-                    // For the kernel boot simulation, we return a mock value.
-                    self.last_output = String::from("root"); 
-                    0
-                } else {
-                    0
+                    },
+                    (Value::String(ls), Value::String(rs)) => {
+                        match op {
+                            BinOp::Eq => Value::Int(if ls == rs { 1 } else { 0 }),
+                            BinOp::NotEq => Value::Int(if ls != rs { 1 } else { 0 }),
+                            BinOp::And => Value::Int(if !ls.is_empty() && !rs.is_empty() { 1 } else { 0 }),
+                            BinOp::Or => Value::Int(if !ls.is_empty() || !rs.is_empty() { 1 } else { 0 }),
+                            _ => Value::Int(0),
+                        }
+                    },
+                    _ => Value::Int(0),
                 }
             },
-            _ => 0,
+            Expr::UnaryOp(op, expr) => {
+                let v = expr.first().map(|e| self.eval_expr(e)).unwrap_or(Value::Int(0));
+                match op {
+                    UnaryOp::Not => Value::Int(if !v.as_bool() { 1 } else { 0 }),
+                }
+            },
+            Expr::If(cond, then_body, else_body) => {
+                let c = cond.first().map(|e| self.eval_expr(e)).unwrap_or(Value::Int(0));
+                if c.as_bool() {
+                    self.eval_body(then_body);
+                } else if let Some(eb) = else_body {
+                    self.eval_body(eb);
+                }
+                Value::Int(0)
+            },
+        }
+    }
+
+    fn eval_builtin(&mut self, name: &str, args: &[Value]) -> Value {
+        if name == "print" {
+            for arg in args {
+                let platform = crate::hal::get_platform();
+                match arg {
+                    Value::Int(n) => {
+                        let s = format!("{}", n);
+                        platform.puts(&s);
+                    },
+                    Value::String(s) => {
+                        // Standardize terminal output for escapes
+                        let processed = s.replace("\\n", "\n").replace("\\t", "\t");
+                        platform.puts(&processed);
+                    }
+                }
+            }
+            Value::Int(0)
+        } else if name == "System.shutdown" {
+            crate::hal::get_platform().shutdown();
+            Value::Int(0)
+        } else if name == "System.input" {
+            let mut input = String::new();
+            let platform = crate::hal::get_platform();
+            
+            // Diamond Grade: Aggressive buffer clearing before starting input
+            platform.clear();
+
+            loop {
+                // platform.get_char() blocks until data is available in UART
+                let c = platform.get_char();
+                
+                // Noise filter (Null or UART Phantom bytes)
+                if c == 0 || c == 0xFF { continue; } 
+                
+                if c == b'\r' || c == b'\n' {
+                     platform.puts("\r\n");
+                     
+                     // Strict CRLF Sync: if \r, consume the potential following \n
+                     if c == b'\r' {
+                         for _ in 0..10000 {
+                             if platform.has_data() {
+                                 let next = platform.get_char();
+                                 if next == b'\n' { /* consumed */ }
+                                 break;
+                             }
+                             core::hint::spin_loop();
+                         }
+                     }
+                     break;
+                } else if c == 8 || c == 127 { // Backspace
+                     if !input.is_empty() {
+                         input.pop();
+                         platform.puts("\x08 \x08"); 
+                     }
+                } else {
+                     input.push(c as char);
+                     platform.put_char(c);
+                }
+            }
+            Value::String(input)
+        } else {
+            Value::Int(0)
         }
     }
 

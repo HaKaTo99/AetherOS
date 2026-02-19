@@ -2,11 +2,13 @@
 #![no_main]
 
 use aetheros_kernel::{kernel_init, kernel_tick};
+use bootloader::{entry_point, BootInfo};
 
-#[no_mangle]
-pub extern "C" fn kernel_main(dtb_ptr: usize, _x1: usize, _x2: usize, _x3: usize) -> ! {
-    // Initialize all subsystems with hardware context
-    kernel_init(dtb_ptr);
+entry_point!(kernel_main);
+
+fn kernel_main(_boot_info: &'static BootInfo) -> ! {
+    // Initialize kernel with no DTB pointer (legacy path)
+    kernel_init(0);
 
     // Main kernel loop
     loop {

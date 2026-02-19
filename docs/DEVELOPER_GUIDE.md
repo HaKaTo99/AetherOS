@@ -1,47 +1,36 @@
 # xAetherOS Developer Guide
-**Version**: v5.1 "Foundation"  
+**Version**: v10.0 "The Fabric" (Harmony Certified)  
 **Target Audience**: Systems Engineers, AI Developers, Distributed Systems Architects
 
 ---
 
-## 🚀 1. Getting Started
+## 🌌 1. Fast Track (Quick Start v10.0)
+Gunakan langkah ini untuk menjalankan AetherOS dalam 5 menit.
 
-### Prerequisites
-*   **Operating System**: Linux (Ubuntu 22.04+), macOS, or Windows (WSL2 recommended).
-*   **Rust Toolchain**: Nightly channel required.
-    ```bash
-    rustup toolchain install nightly
-    rustup target add aarch64-unknown-none-softfloat
-    rustup component add rust-src llvm-tools-preview
-    ```
-*   **QEMU**: For emulation.
-    ```bash
-    # Ubuntu
-    sudo apt install qemu-system-aarch64 qemu-system-x86
-    ```
-
-### Building the Kernel
-Clone the repository and build for your target architecture.
-
-**Raspberry Pi 4 (aarch64)**
+### Prerequisites (Rust Nightly)
 ```bash
-cargo build --release --target aarch64-unknown-none-softfloat
-./build_rpi4.ps1 # Powershell script to generate SD card image
+rustup default nightly
+rustup target add x86_64-unknown-none
+cargo install bootimage
 ```
 
-**x86_64 PC (UEFI)**
-```bash
-cargo build --release --target x86_64-unknown-uefi
+### Build & Launch (QEMU)
+```powershell
+cd kernel
+cargo run --release
 ```
 
-### Running in Emulator
-```bash
-# Run aarch64 (RPi4 emulation)
-qemu-system-aarch64 -M raspi4b -kernel target/aarch64.../kernel8.img -serial stdio
+---
 
-# Run x86_64
-cargo run --target x86_64-unknown-uefi
-```
+## 🚀 2. Getting Started (Full Setup)
+
+### Operating System
+*   **Linux (Ubuntu 22.04+)**, **macOS**, or **Windows (WSL2/PowerShell)**.
+
+### Target Architectures
+xAetherOS mendukung platform berikut secara native:
+- **x86_64 PC (UEFI)**: Target utama untuk v10.0 "The Fabric".
+- **Raspberry Pi 4 (aarch64)**: Target untuk pengujian hardware IoT.
 
 ---
 

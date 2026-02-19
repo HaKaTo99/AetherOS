@@ -1,6 +1,0 @@
-# x86_64 Build Config
-[build]
-target = "x86_64-unknown-none"
-
-[target.x86_64-unknown-none]
-# No custom rustflags needed for x86_64 with bootloader crate

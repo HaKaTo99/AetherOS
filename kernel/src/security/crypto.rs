@@ -9,6 +9,7 @@
 
 use alloc::vec::Vec;
 use alloc::string::String;
+use crate::enterprise::audit::{AuditSeverity, log_security};
 
 /// Security Level for the Kernel
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -81,6 +82,15 @@ impl AetherQuantumProvider {
         }
         sig
     }
+
+    /// Military Tactical Encryption (Phase 29.1)
+    pub fn tactical_encrypt(payload: &[u8]) -> Vec<u8> {
+        log_security(AuditSeverity::Critical, "Security", "Tactical Encryption: Enforcing Kyber-1024 [Fortress] for payload.");
+        // Simulated Fortress Encryption
+        let mut encrypted = vec![0xEE; payload.len() + 32];
+        encrypted[0..payload.len()].copy_from_slice(payload);
+        encrypted
+    }
 }
 
 impl QuantumSecurity for AetherQuantumProvider {
@@ -112,19 +122,10 @@ impl QuantumSecurity for AetherQuantumProvider {
         Self::dilithium_sign(message, private_key)
     }
 
-    /// Military Tactical Encryption (Phase 29.1)
-    pub fn tactical_encrypt(payload: &[u8]) -> Vec<u8> {
-        log_security(AuditSeverity::Critical, "Security", "Tactical Encryption: Enforcing Kyber-1024 [Fortress] for payload.");
-        // Simulated Fortress Encryption
-        let mut encrypted = vec![0xEE; payload.len() + 32];
-        encrypted[0..payload.len()].copy_from_slice(payload);
-        encrypted
-    }
-
     fn verify(message: &[u8], signature: &[u8], _public_key: &[u8], level: SecurityLevel) -> bool {
         // [SIMULATION] Military Grade Verification (Sync-Align-Harmony)
         // Must be at least Advance level for critical infrastructure
-        if level as u8 < SecurityLevel::Advance as u8 {
+        if (level as u8) < (SecurityLevel::Advance as u8) {
             return false;
         }
 

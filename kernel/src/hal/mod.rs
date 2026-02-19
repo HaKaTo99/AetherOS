@@ -18,8 +18,11 @@ pub trait Platform: Sync {
     fn get_ticks(&self) -> u64;
     fn sleep_ms(&self, ms: u64);
     
-    // Serial support (debug output)
+    // Serial/Keyboard support
     fn put_char(&self, c: u8);
+    fn get_char(&self) -> u8;
+    fn has_data(&self) -> bool;
+    fn clear(&self);
 
     // Default implementation for string output
     fn puts(&self, s: &str) {

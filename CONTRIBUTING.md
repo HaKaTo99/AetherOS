@@ -1,259 +1,69 @@
-# Contributing to AetherOS
+# Contributing to AetherOS v10.0 "The Fabric"
 
-Thank you for your interest in contributing to AetherOS v3.0! This document provides guidelines and information for contributors.
-
----
-
-##  Code of Conduct
-
-- Be respectful, inclusive, and professional in all interactions
-- Provide constructive feedback
-- Focus on what is best for the community
-- Show empathy towards other community members
+Terima kasih atas dedikasi Anda untuk mengembangkan **AetherOS**, kain intelijen terdistribusi pertama di dunia. Dokumen ini memberikan panduan kolaborasi untuk menjaga standar **Diamond Grade**.
 
 ---
 
-##  Reporting Bugs
+## 🤝 Code of Conduct
+AetherOS adalah proyek visioner. Kami menghargai profesionalisme, pemikiran strategis, dan rasa hormat antar kontributor. Fokus utama kita adalah kedaulatan digital dan inovasi tanpa kompromi.
 
-Before submitting a bug report:
+---
 
-1. **Check existing issues** to avoid duplicates
-2. **Use the latest version** (v3.0.0)
-3. **Provide clear reproduction steps**
+## 🐞 Pelaporan Bug (v10.0)
+Gunakan versi terbaru (`v10.0.0-gold`) sebelum melaporkan isu. Pastikan Anda telah menjalankan audit mandiri.
 
 **Bug Report Template**:
 ```markdown
 **Environment**:
-- AetherOS Version: v3.0.0
-- Platform: x86_64 / aarch64
-- Host OS: Windows/Linux/macOS
+- AetherOS Version: v10.0.0 (The Fabric)
+- Platform: x86_64 (UEFI) / aarch64 (RPi4)
+- Intent Mode: (Development / Production / Minimal)
 
-**Description**: Clear description of the bug
+**Description**: Deskripsi jelas mengenai anomali.
 
 **Steps to Reproduce**:
-1. Step one
-2. Step two
-3. Expected vs actual behavior
+1. Langkah inisialisasi
+2. Trigger anomali
+3. Hasil aktual vs hasil proaktif yang diharapkan
 
-**Logs**: Paste kernel logs or panic output
+**Logs**: Lampirkan log dari serial console AetherOS atau terminal QEMU.
 ```
 
 ---
 
-##  Suggesting Features
+## 🚀 Alur Kerja Pull Request (PR)
 
-Feature requests are welcome! Please:
-
-1. **Check existing feature requests** first
-2. **Explain the use case** clearly
-3. **Consider implementation complexity**
-4. **Align with project vision** (distributed computing, multi-platform)
-
----
-
-##  Pull Requests
-
-### Workflow
-
-1. **Fork** the repository
-2. **Create a feature branch**:
-   ```bash
-   git checkout -b feature/amazing-feature
-   ```
-3. **Make your changes**
-4. **Add tests** for new functionality
-5. **Run verification**:
-   ```bash
-   cargo fmt
-   cargo clippy --all-targets -- -D warnings
-   cargo test
-   cargo build --release --target x86_64-unknown-none
-   ```
-6. **Commit** with clear, descriptive messages
-7. **Push** to your fork
-8. **Open a Pull Request** with a clear description
-
-### PR Requirements
-
--  All tests pass
--  Code formatted (`cargo fmt`)
--  No clippy warnings
--  Documentation updated (if applicable)
--  CHANGELOG entry (for user-facing changes)
-
----
-
-##  Development Setup
-
-### Clone Repository
-
+### 1. Persiapan
+Pastikan kode Anda selaras dengan prinsip **Cognitive-First**:
 ```bash
-git clone https://github.com/HaKaTo99/AetherOS.git
-cd AetherOS
+# Format kode
+cargo fmt
+
+# Lakukan audit mandiri
+cargo clippy --all-targets -- -D warnings
+
+# Verifikasi build universal
+./run_fabric.ps1 --build-only
 ```
 
-### Install Dependencies
-
-```bash
-# Rust nightly
-rustup default nightly
-
-# Cross-compilation targets
-rustup target add x86_64-unknown-none
-rustup target add aarch64-unknown-none
-
-# QEMU (for testing)
-# Linux: sudo apt install qemu-system-x86 qemu-system-aarch64
-# macOS: brew install qemu
-# Windows: Download from qemu.org
-```
-
-### Build
-
-```bash
-cd kernel
-cargo build --release --target x86_64-unknown-none
-```
-
-### Test
-
-```bash
-# Unit tests
-cargo test
-
-# Run in QEMU
-qemu-system-x86_64 \
-  -kernel target/x86_64-unknown-none/release/aetheros-kernel \
-  -serial stdio
-```
+### 2. Standar Komit
+Gunakan pesan komit yang deskriptif dan visioner:
+- `feat: Implement cognitive intent parser for filesystem`
+- `fix: Resolve race condition in Quantum Bus peer discovery`
+- `docs: Update OmniLang handbook for Organic UI 2.0`
 
 ---
 
-##  Coding Standards
-
-### Rust Code
-
-- **Follow Rust Style Guide**: Use `cargo fmt`
-- **Fix Clippy Warnings**: Run `cargo clippy` before committing
-- **Document Public APIs**: Add `///` doc comments with examples
-- **Safety First**: Document all `unsafe` blocks with safety requirements
-
-**Example**:
-```rust
-/// Allocates memory from the SMME pool.
-///
-/// # Safety
-///
-/// Caller must ensure the allocated memory is properly initialized
-/// before use and deallocated with the correct size.
-///
-/// # Example
-///
-/// ```no_run
-/// let ptr = unsafe { SMME.allocate(4096).expect("Out of memory") };
-/// // Use memory...
-/// unsafe { SMME.deallocate(ptr, 4096); }
-/// ```
-pub unsafe fn allocate(&self, size: usize) -> Result<usize, &'static str> {
-    // Implementation...
-}
-```
-
-### Commit Messages
-
-Use conventional commits format:
-
-```
-feat: Add distributed KV store replication
-fix: Correct scheduler priority inversion
-docs: Update DEVELOPER_GUIDE with QEMU instructions
-test: Add unit tests for SMME allocator
-refactor: Simplify Quantum Bus RPC serialization
-```
+## 🏗️ Standar Arsitektur (Diamond Grade)
+Setiap kontribusi harus mematuhi pilar berikut:
+1. **Memory Sovereignty**: Gunakan SMME secara efisien; hindari fragmentasi.
+2. **OmniLang Integration**: Logika antarmuka harus menggunakan OmniLang jika memungkinkan.
+3. **PQC First**: Seluruh komunikasi baru harus terenkripsi secara pasca-kuantum.
+4. **Active Objects**: Prioritaskan pola Active Object (Symbian-Style) daripada threading mentah.
 
 ---
 
-##  Testing
+## 🏛️ Lisensi
+Dengan berkontribusi, Anda setuju bahwa seluruh kontribusi Anda dilisensikan di bawah **MIT License**.
 
-### Unit Tests
-
-Write tests for all new functionality:
-
-```rust
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_smme_allocation() {
-        // Test implementation
-    }
-}
-```
-
-### Integration Tests
-
-- Test cross-module interactions
-- Verify distributed computing features
-- Test on real hardware when possible (RPi4, x86_64 PC)
-
----
-
-##  Documentation
-
-Update documentation for any changes:
-
-- **README.md**: User-facing features
-- **DEVELOPER_GUIDE.md**: Architecture changes
-- **API_REFERENCE.md**: New public APIs
-- **CHANGELOG.md**: All user-visible changes
-- **Rustdoc**: Inline code documentation
-
----
-
-##  Architecture Guidelines
-
-When contributing, keep in mind AetherOS design principles:
-
-1. **Stability First**: No experimental features in main branch
-2. **Symbian DNA**: Prefer Active Objects over threads
-3. **Distributed-First**: Design for multi-device scenarios
-4. **Resource Awareness**: Optimize for embedded devices
-5. **Safety**: Minimize `unsafe`, document all invariants
-
----
-
-##  Areas for Contribution
-
-We welcome contributions in these areas:
-
-- **Drivers**: Network cards, GPU, USB
-- **Distributed Features**: Improved task migration, consensus algorithms
-- **UI Framework**: New widgets, animations
-- **Platform Support**: New architectures, device support
-- **Documentation**: Tutorials, examples, translations
-- **Testing**: More unit tests, fuzzing, hardware testing
-
----
-
-##  License
-
-By contributing, you agree that your contributions will be licensed under the MIT License.
-
----
-
-##  Questions?
-
-- **GitHub Discussions**: Ask general questions
-- **GitHub Issues**: Report bugs or request features
-- **Email**: security@aetheros.org (for security issues only)
-
----
-
-##  Thank You!
-
-Your contributions make AetherOS better for everyone. We appreciate your time and effort!
-
----
-
-**Happy Coding!** 
+**"One Mind. One Mesh. Zero Compromise."** 🔥

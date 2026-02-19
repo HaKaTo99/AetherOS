@@ -4,15 +4,13 @@ version = "10.0.0"
 edition = "2021"
 
 [dependencies]
-
+bootloader = { version = "0.9.8", features = ["map_physical_memory"] }
 smoltcp = { version = "0.10", default-features = false, features = ["proto-ipv4", "socket-udp", "socket-tcp", "medium-ethernet", "log", "alloc"] }
 log = { version = "0.4", default-features = false }
 lazy_static = { version = "1.4", features = ["spin_no_std"] }
 spin = "0.9.8"
-
-[target.'cfg(target_arch = "x86_64")'.dependencies]
-bootloader = "0.9.8"
 x86_64 = "0.14.10"
+uart_16550 = "0.3.0"
 
 
 [features]
@@ -42,7 +40,3 @@ path = "src/lib.rs"
 name = "aetheros-kernel"
 path = "src/main.rs"
 
-[package.metadata.bootimage]
-test-args = ["-device", "isa-debug-exit,iobase=0xf4,iosize=0x04", "-serial", "stdio", "-display", "none"]
-test-success-exit-code = 33
-test-timeout = 300

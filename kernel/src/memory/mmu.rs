@@ -103,21 +103,21 @@ impl Mmu {
         let rodata_end = &__rodata_end as *const _ as usize;
         let data_start = &__data_start as *const _ as usize;
         let bss_end = &__bss_end as *const _ as usize;
-        for addr in (text_start..text_end).step_by(4096) { mapper.map_memory(addr, addr, ATTR_CODE | PageDescriptor::ACCESS); }
-        for addr in (rodata_start..rodata_end).step_by(4096) { mapper.map_memory(addr, addr, ATTR_RODATA | PageDescriptor::ACCESS); }
+        for addr in (text_start..text_end).step_by(4096) { mapper.map_memory(addr, addr, ATTR_CODE | crate::memory::paging::PageDescriptor::ACCESS); }
+        for addr in (rodata_start..rodata_end).step_by(4096) { mapper.map_memory(addr, addr, ATTR_RODATA | crate::memory::paging::PageDescriptor::ACCESS); }
         let rw_start = data_start;
         let rw_end = bss_end;
-        for addr in (rw_start..rw_end).step_by(4096) { mapper.map_memory(addr, addr, ATTR_DATA | PageDescriptor::ACCESS); }
+        for addr in (rw_start..rw_end).step_by(4096) { mapper.map_memory(addr, addr, ATTR_DATA | crate::memory::paging::PageDescriptor::ACCESS); }
         let heap_start = (bss_end + 4095) & !4095;
         let kernel_limit = KERNEL_BASE + 0x200000;
         if heap_start < kernel_limit {
-            for addr in (heap_start..kernel_limit).step_by(4096) { mapper.map_memory(addr, addr, ATTR_DATA | PageDescriptor::ACCESS); }
+            for addr in (heap_start..kernel_limit).step_by(4096) { mapper.map_memory(addr, addr, ATTR_DATA | crate::memory::paging::PageDescriptor::ACCESS); }
         }
         let peripheral_l1_idx = (PERIPHERAL_BASE >> 30) & 0x3;
         let l1_peripheral_ptr = &mut tables.l1_tables[peripheral_l1_idx] as *mut PageTable;
-        let mut peripheral_mapper = Mapper::new(&mut *l1_peripheral_ptr);
+        let mut peripheral_mapper = crate::memory::paging::Mapper::new(&mut *l1_peripheral_ptr);
         for addr in (PERIPHERAL_BASE..PERIPHERAL_BASE + PERIPHERAL_SIZE).step_by(0x200000) {
-            peripheral_mapper.map_memory(addr, addr, ATTR_DEVICE | PageDescriptor::ACCESS);
+            peripheral_mapper.map_memory(addr, addr, ATTR_DEVICE | crate::memory::paging::PageDescriptor::ACCESS);
         }
     }
 

@@ -2,24 +2,25 @@ name: AetherOS CI
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ main, master, develop ]
   pull_request:
-    branches: [ main ]
+    branches: [ main, master ]
 
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
     
     steps:
-    - uses: actions/checkout@v3
+    - name: Checkout repository
+      uses: actions/checkout@v4
     
-    - name: Install Rust
+    - name: Setup Rust (stable)
       uses: actions-rs/toolchain@v1
       with:
         toolchain: stable
-        target: aarch64-unknown-none
         override: true
-    
+        profile: minimal
+
     - name: Cache cargo registry
       uses: actions/cache@v3
       with:
@@ -37,18 +38,21 @@ jobs:
       with:
         path: target
         key: ${{ runner.os }}-cargo-build-target-${{ hashFiles('**/Cargo.lock') }}
-    
-    - name: Build Kernel
-      run: cd kernel && cargo build --release
-    
-    - name: Build Compiler
-      run: cd compiler && cargo build --release
-    
-    - name: Run Tests
-      run: cargo test --workspace --verbose
-    
+
+    - name: Install cargo-audit
+      run: cargo install cargo-audit --version 0.17.4 || true
+
     - name: Check Formatting
       run: cargo fmt --all -- --check
-    
+
     - name: Run Clippy
       run: cargo clippy --all-targets --all-features -- -D warnings
+
+    - name: Build Kernel and other components
+      run: cargo build --workspace --release
+
+    - name: Run tests
+      run: cargo test --workspace --all-features --quiet
+
+    - name: Security audit
+      run: cargo audit || true

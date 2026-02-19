@@ -3,7 +3,9 @@ resolver = "2"
 members = [
     "kernel",
     "compiler",
+    "booter",
 ]
+default-run = "aetheros-kernel"
 
 [profile.dev]
 panic = "abort"
