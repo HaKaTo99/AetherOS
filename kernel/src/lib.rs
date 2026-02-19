@@ -468,6 +468,7 @@ pub fn kernel_init(dtb_ptr: usize) {
                 
                 // 1. Play Movie
                 if let Ok(mut player) = MediaRuntime::new("Avatar_The_Way_of_Water.mkv") {
+                    let player: &mut MediaRuntime = &mut player;
                     let _ = player.play();
                 } else {
                     crate::println!("[Media] Error: Failed to initialize Video Player (OOM/Resource)");
@@ -475,6 +476,7 @@ pub fn kernel_init(dtb_ptr: usize) {
 
                 // 2. Camera Capture
                 if let Ok(mut cam) = MediaRuntime::new("/dev/video0") {
+                    let cam: &mut MediaRuntime = &mut cam;
                     let _ = cam.capture();
                 } else {
                     crate::println!("[Media] Error: Failed to initialize Camera Runtime (OOM)");

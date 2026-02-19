@@ -3,7 +3,7 @@
 
 use alloc::string::String;
 use alloc::vec::Vec;
-use crate::runtime::wasm::{WasmModule, WasmInterpreter, WasmValue, WasmType, WasmInstr, WasmFunc};
+use crate::runtime::wasm::legacy_runtime::{WasmModule, WasmInterpreter, WasmValue, WasmType, WasmInstr, WasmFunc};
 
 /// QuickJS Runtime environment
 pub struct QuickJsRuntime {

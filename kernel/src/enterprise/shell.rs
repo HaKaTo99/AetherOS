@@ -30,6 +30,7 @@ impl AetherShell {
             } else if cmd == "help" {
                 platform.puts("\r\nAvailable Commands:\r\n");
                 platform.puts("  omni [code]   : Compile and run OmniLang code\r\n");
+                platform.puts("  blender [file]: Start headless render job (.blend)\r\n");
                 platform.puts("  calc          : Run simple calculator demo\r\n");
                 platform.puts("  clear         : Clear screen\r\n");
                 platform.puts("  exit          : Shutdown shell\r\n");
@@ -40,6 +41,21 @@ impl AetherShell {
                     platform.puts("[Output] ");
                     platform.puts(&output);
                     platform.puts("\r\n");
+                }
+            } else if cmd.starts_with("blender ") {
+                let filename = cmd[8..].trim();
+                platform.puts("\r\n[Blender] Initializing Compute Node...\r\n");
+                let mut node = crate::runtime::media::blender::BlenderComputeNode::new();
+                match node.start_render(filename) {
+                    Ok(res) => {
+                         platform.puts(&res);
+                         platform.puts("\r\n");
+                    },
+                    Err(e) => {
+                         platform.puts("Error: ");
+                         platform.puts(e);
+                         platform.puts("\r\n");
+                    }
                 }
             } else if cmd == "calc" {
                  // Calculator Logic

@@ -1,8 +1,13 @@
 //! Media Runtime for AetherOS (Phase 16.6)
 //! Bridges Multimedia (FFmpeg, OpenCV, Whisper) to the Kernel via WASM
 
+pub mod blender; // [NEW] Phase 3: Blender Compute Node
+
 use alloc::string::String;
 use alloc::vec::Vec;
+// use crate::runtime::wasm::{WasmModule, WasmInterpreter, WasmValue, WasmType, WasmInstr, WasmFunc};
+// Simplified imports to avoid issues if wasm module is still fluctuating, 
+// but based on previous steps, wasm module exports are consolidated.
 use crate::runtime::wasm::{WasmModule, WasmInterpreter, WasmValue, WasmType, WasmInstr, WasmFunc};
 
 /// Media Runtime environment
