@@ -114,24 +114,34 @@ impl MemoryPool {
 
     /// Phase 1: Reserve virtual address space (Symbian DNA)
     pub fn reserve(&self, size: usize) -> Result<usize, AllocationError> {
-        // Align size to 16 bytes minimum
-        let aligned_size = (size + 15) & !15;
+        // Military Grade: L3 Guarded Allocation (v10.2 SUPREME)
+        // Add 8 bytes before and 8 bytes after for canaries
+        let guarded_size = size + 16;
+        let aligned_size = (guarded_size + 15) & !15;
         
         // First, try to find a suitable block in free list
-        if let Some(addr) = self.find_free_block(aligned_size) {
+        let addr = if let Some(free_addr) = self.find_free_block(aligned_size) {
             self.alloc_count.fetch_add(1, Ordering::Relaxed);
-            return Ok(addr);
+            free_addr
+        } else {
+            // Otherwise, allocate from reserved space
+            let old = self.reserved.fetch_add(aligned_size, Ordering::AcqRel);
+            if old + aligned_size > self.size {
+                self.reserved.fetch_sub(aligned_size, Ordering::Release);
+                return Err(AllocationError::OutOfMemory);
+            }
+            self.alloc_count.fetch_add(1, Ordering::Relaxed);
+            self.base + old
+        };
+
+        // Write Head Canary
+        unsafe {
+            ptr::write(addr as *mut u64, 0xDEAD_BEEF_C0DE_FEED);
+            // Write Tail Canary (at the end of requested data, before alignment padding)
+            ptr::write((addr + 8 + size) as *mut u64, 0xFEED_C0DE_BEEF_DEAD);
         }
         
-        // Otherwise, allocate from reserved space
-        let old = self.reserved.fetch_add(aligned_size, Ordering::AcqRel);
-        if old + aligned_size > self.size {
-            self.reserved.fetch_sub(aligned_size, Ordering::Release);
-            return Err(AllocationError::OutOfMemory);
-        }
-        
-        self.alloc_count.fetch_add(1, Ordering::Relaxed);
-        Ok(self.base + old)
+        Ok(addr + 8) // Return pointer to data (after head canary)
     }
 
     /// Find and remove a suitable block from the free list
@@ -197,12 +207,27 @@ impl MemoryPool {
     }
 
     /// Deallocate memory - add to free list with coalescing
-    pub fn deallocate(&self, addr: usize, size: usize) -> Result<(), AllocationError> {
+    pub fn deallocate(&self, data_addr: usize, size: usize) -> Result<(), AllocationError> {
+        let addr = data_addr - 8; // Adjust to actual block start (head canary)
         if addr < self.base || addr >= self.base + self.size {
             return Err(AllocationError::InvalidAddress);
         }
         
-        let aligned_size = (size + 15) & !15;
+        // Military Grade: Canary Validation
+        unsafe {
+            let head = ptr::read(addr as *const u64);
+            let tail = ptr::read((addr + 8 + size) as *const u64);
+            if head != 0xDEAD_BEEF_C0DE_FEED || tail != 0xFEED_C0DE_BEEF_DEAD {
+                crate::enterprise::audit::log_security(
+                    crate::enterprise::audit::AuditSeverity::Critical,
+                    "SMME", "Memory Corruption Detected (Canary Breach)!"
+                );
+                return Err(AllocationError::InvalidRequest);
+            }
+        }
+
+        let guarded_size = size + 16;
+        let aligned_size = (guarded_size + 15) & !15;
         
         self.lock();
         
@@ -258,7 +283,7 @@ impl MemoryPool {
         
         self.free_count.fetch_add(1, Ordering::Relaxed);
         
-        // Military Grade: Memory Poisoning (0xDEADBEEF) - PHASE 28.4
+        // Military Grade: Memory Poisoning (0xDEADBEEF) - v10.2 SUPREME
         // Scrub the memory after the header to catch use-after-free
         let start_pos = addr + core::mem::size_of::<FreeBlock>();
         let scrub_size = aligned_size.saturating_sub(core::mem::size_of::<FreeBlock>());

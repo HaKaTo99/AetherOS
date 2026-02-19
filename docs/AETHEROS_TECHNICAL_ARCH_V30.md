@@ -1,7 +1,7 @@
 # AetherOS Technical Architecture Specification (v30.0 "The Singularity")
 
-**Status**: Universal Harmony Certified ✅  
-**Grade**: Diamond Grade Stability  
+**Status**: Supreme Grade Sovereign Framework (v10.2) ✅  
+**Grade**: Supreme Grade Stability  
 **Target Audience**: Systems Engineers, AI Developers, Security Architects.
 
 ---
@@ -78,7 +78,7 @@ Penjadwal kooperatif-preemptif berbasis prioritas dinamis.
 | Mesh Latency | < 2ms (P2P) | Pada jaringan lokal Ultra-Wideband. |
 | Security Grade | Military EAL7+ | Sertifikasi PQC Kyber-Dilithium. |
 | Memory Overhead | < 8MB | Footprint minimum kernel fabric. |
-| Resilience | 99.999% | Diamond Grade Reliability. |
+| Resilience | 99.999% | Supreme Grade Reliability. |
 
 ---
 

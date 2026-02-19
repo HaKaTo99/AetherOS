@@ -1,7 +1,7 @@
 # 💎 OmniLang Handbook: The Universal Intelligence Language
 
-**Status**: Official Specification (v10.0 Harmony)  
-**Target**: `kernel/src/runtime/omnilang.rs` & `kernel/src/ui/organic_ui.rs`
+**Status**: Official Specification (v10.2 Supreme Grade)  
+**Target**: `kernel/src/runtime/omnilang_bridge.rs` & `kernel/src/runtime/ai/`
 
 ---
 

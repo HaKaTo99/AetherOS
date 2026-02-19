@@ -3,10 +3,10 @@
 set -euo pipefail
 
 echo "=========================================="
-echo "🚀 AETHEROS v1.0 LAUNCH SEQUENCE"
+echo "🚀 AETHEROS v10.2 LAUNCH SEQUENCE"
 echo "=========================================="
 echo "Timestamp: $(date -u)"
-echo "Version: v1.0.0"
+echo "Version: v10.2.0"
 echo "Build: $(git rev-parse --short HEAD || echo 'unknown')"
 echo ""
 

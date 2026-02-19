@@ -1,6 +1,6 @@
-# Contributing to AetherOS v10.0 "The Fabric"
+# Contributing to AetherOS v10.2 "The Fabric"
 
-Terima kasih atas dedikasi Anda untuk mengembangkan **AetherOS**, kain intelijen terdistribusi pertama di dunia. Dokumen ini memberikan panduan kolaborasi untuk menjaga standar **Diamond Grade**.
+Terima kasih atas dedikasi Anda untuk mengembangkan **AetherOS**, kain intelijen terdistribusi pertama di dunia. Dokumen ini memberikan panduan kolaborasi untuk menjaga standar **Supreme Grade**.
 
 ---
 
@@ -9,13 +9,13 @@ AetherOS adalah proyek visioner. Kami menghargai profesionalisme, pemikiran stra
 
 ---
 
-## 🐞 Pelaporan Bug (v10.0)
-Gunakan versi terbaru (`v10.0.0-gold`) sebelum melaporkan isu. Pastikan Anda telah menjalankan audit mandiri.
+## 🐞 Pelaporan Bug (v10.2)
+Gunakan versi terbaru (`v10.2.0-supreme`) sebelum melaporkan isu. Pastikan Anda telah menjalankan audit mandiri.
 
 **Bug Report Template**:
 ```markdown
 **Environment**:
-- AetherOS Version: v10.0.0 (The Fabric)
+- AetherOS Version: v10.2.0 (The Fabric - Supreme)
 - Platform: x86_64 (UEFI) / aarch64 (RPi4)
 - Intent Mode: (Development / Production / Minimal)
 
@@ -54,7 +54,7 @@ Gunakan pesan komit yang deskriptif dan visioner:
 
 ---
 
-## 🏗️ Standar Arsitektur (Diamond Grade)
+## 🏗️ Standar Arsitektur (Supreme Grade)
 Setiap kontribusi harus mematuhi pilar berikut:
 1. **Memory Sovereignty**: Gunakan SMME secara efisien; hindari fragmentasi.
 2. **OmniLang Integration**: Logika antarmuka harus menggunakan OmniLang jika memungkinkan.

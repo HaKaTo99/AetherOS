@@ -32,6 +32,18 @@ impl Elf64Header {
         if data[0..4] != ELF_MAGIC {
             return false;
         }
+
+        // Military Grade: ELF Architecture Validation (Phase 28.5)
+        let header = unsafe { &*(data.as_ptr() as *const Elf64Header) };
+        if header.e_machine != 62 && header.e_machine != 183 {
+            // 62 = AMD x86-64, 183 = AArch64
+            return false;
+        }
+
+        if header.e_type != 2 && header.e_type != 3 {
+            // 2 = ET_EXEC, 3 = ET_DYN
+            return false;
+        }
         
         true
     }

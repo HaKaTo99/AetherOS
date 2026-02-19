@@ -1,6 +1,6 @@
-//! # xAetherOS Quantum Microkernel v9.0 "Universal Intelligence Layer"
+//! # xAetherOS Quantum Microkernel v10.2.0 "Supreme Grade"
 //! 
-//! The core kernel of the Universal Intelligence Fabric.
+//! The core kernel of the Universal Intelligence Fabric (Sovereign Framework).
 //! Built on three pillars:
 //! 1. **AI-Native**: Oracle Engine for intent-based orchestration.
 //! 2. **Post-Quantum**: Zero-trust security by default.
@@ -12,7 +12,6 @@
 
 #![no_std]
 #![feature(abi_x86_interrupt)]
-#![allow(static_mut_refs)] // Phase 3 stability: Allow until Phase 4 sync implemented
 #[macro_use]
 extern crate alloc;
 use alloc::string::String;
@@ -142,7 +141,7 @@ static TICK_COUNTER: AtomicUsize = AtomicUsize::new(0);
 //
 // Default for local dev: enable FAST_DEMO so kalkulator/OmniLang
 // cepat muncul dan log tidak dipenuhi test suite di background.
-const FAST_DEMO: bool = true;
+const FAST_DEMO: bool = false; // [HARDENED] Enable full sync by default for military grade
 const ULTRA_FAST_DEMO: bool = false;
 
 pub fn kernel_init(dtb_ptr: usize) {
@@ -205,9 +204,9 @@ pub fn kernel_init(dtb_ptr: usize) {
             }
             let platform = hal::get_platform();
             platform.puts("\n\n\n");
-            platform.puts("                               AetherOS v10.0 THE FABRIC\r\n");
-            platform.puts("                            Military Grade: [ SUCCESS ]\r\n");
-            platform.puts("                               [ Herman's Edition ]\r\n");
+            platform.puts("                               AetherOS v10.2 THE FABRIC\r\n");
+            platform.puts("                            Military Grade: [ SUPREME ]\r\n");
+            platform.puts("                               [ Herman's Supreme Edition ]\r\n");
             platform.puts("\n\r\n");
 
             // Helper for demo (because widgets own content)
@@ -485,9 +484,9 @@ pub fn kernel_init(dtb_ptr: usize) {
 
             // 13. Phase 17: Distributed Orchestration (Mesh & Market)
             {
-                use crate::distributed::{MESH_NETWORK, CAPABILITY_MARKET, DIST_STORAGE, GLOBAL_DHT};
+                use crate::distributed::{MESH_NETWORK, CAPTRADE_MANAGER, DIST_STORAGE, GLOBAL_DHT};
                 let mut mesh = MESH_NETWORK.lock();
-                let mut market = CAPABILITY_MARKET.lock();
+                let mut market = CAPTRADE_MANAGER.lock();
                 let mut storage = DIST_STORAGE.lock();
                 let mut dht = GLOBAL_DHT.lock(); // DHT is thread-safe internally or we lock it here
 

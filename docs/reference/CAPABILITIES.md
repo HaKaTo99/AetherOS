@@ -1,6 +1,6 @@
 # 💎 AetherOS v10.2: Supreme Grade Capabilities Ledger
 
-**Sertifikasi**: **Universal Harmony Certified (Diamond Grade)**  
+**Sertifikasi**: **Universal Sovereignty Certified (Supreme Grade)**  
 **Identitas**: **Secure Distributed Intelligence Fabric**
 
 Dokumen ini adalah daftar resmi kemampuan teknis yang dapat ditangani oleh AetherOS v10.2, mencakup infrastruktur inti, kecerdasan buatan, dan kompatibilitas universal.

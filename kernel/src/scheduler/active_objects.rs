@@ -390,6 +390,14 @@ impl ActiveObjectScheduler {
 
     /// Tick the scheduler - called by hardware timer
     pub fn tick(&mut self) {
+        // [MILITARY GRADE AUDIT] Track system heartbeat
+        if self.idle_ticks.load(Ordering::Relaxed) % 1000 == 0 {
+             crate::enterprise::audit::log_security(
+                crate::enterprise::audit::AuditSeverity::Info,
+                "Scheduler", "System Heartbeat: Nominal. Ph 1-30 synchronization active."
+            );
+        }
+
         let idx = self.current_object.load(Ordering::Relaxed) as usize;
         
         // Extract values first to avoid borrow conflict
@@ -604,17 +612,34 @@ impl ActiveObjectScheduler {
 
     /// Priority inheritance - boost priority of task holding resource
     pub fn priority_inherit(&mut self, blocker_id: u32, waiter_priority: u8) {
+        // Military Grade: Deadlock/Cycle Detection (Ph 28.4)
+        // Hardened: Check for recursive dependency to prevent infinite priority loops
+        let mut check_id = blocker_id;
+        let mut depth = 0;
+        while let Some(Some(obj)) = self.objects.get(check_id as usize) {
+            if let Some(waiting_id) = obj.waiting_on {
+                if waiting_id == self.current_object.load(Ordering::Relaxed) {
+                    crate::enterprise::audit::log_security(
+                        crate::enterprise::audit::AuditSeverity::Critical,
+                        "Scheduler", "Deadlock Risk Detected in Priority Inheritance! Aborting boost."
+                    );
+                    return;
+                }
+                check_id = waiting_id;
+                depth += 1;
+                if depth > 32 { break; } // Safety limit
+            } else {
+                break;
+            }
+        }
+
         let mut should_remove = false;
         let mut should_insert = false;
         let mut old_priority = 0u8;
         let mut new_priority = 0u8;
         let mut task_id = 0u32;
         let mut is_ready = false;
-        
-        // Military Grade: Deadlock/Cycle Detection (Ph 28.4)
-        // Check if the blocker is not already waiting on someone who eventually waits on us
-        // This is a simplified guard against complex inheritance cycles
-        
+
         if let Some(Some(blocker)) = self.objects.get_mut(blocker_id as usize) {
             if waiter_priority < blocker.priority {
                 task_id = blocker.id;

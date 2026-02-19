@@ -12,10 +12,30 @@ impl Win32Loader {
         Self { pe_base: 0x400000 }
     }
 
-    pub fn load_pe(&mut self, _data: &[u8]) -> bool {
-        log_security(AuditSeverity::Info, "Win32", "PE Loader: Mapping image into virtual memory.");
+    pub fn load_pe(&mut self, data: &[u8]) -> bool {
+        // Military Grade: PE Header Validation (Phase 28.5)
+        if data.len() < 64 { return false; }
+        
+        // Check DOS Header Magic 'MZ'
+        if data[0] != b'M' || data[1] != b'Z' {
+            log_security(AuditSeverity::Critical, "Win32", "PE Loader: Invalid DOS Magic (MZ). Rejecting.");
+            return false;
+        }
+
+        // Check PE Header Offset
+        let pe_offset = u32::from_le_bytes([data[0x3C], data[0x3D], data[0x3E], data[0x3F]]) as usize;
+        if data.len() < pe_offset + 4 { return false; }
+
+        // Check PE Magic 'PE\0\0'
+        if &data[pe_offset..pe_offset+4] != b"PE\0\0" {
+            log_security(AuditSeverity::Critical, "Win32", "PE Loader: Invalid PE Magic. Rejecting.");
+            return false;
+        }
+
+        log_security(AuditSeverity::Info, "Win32", "PE Loader: Header validated. Mapping image.");
         true
     }
+
 
     pub fn resolve_imports(&self) {
         log_security(AuditSeverity::Info, "Win32", "PE Loader: Resolving KERNEL32.DLL imports.");

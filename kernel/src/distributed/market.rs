@@ -1,4 +1,4 @@
-//! Capability Market (Phase 17.3)
+//! CapTrade Manager (Phase 29.2)
 //! Decentralized Resource Trading Engine for Compute/Storage.
 
 use alloc::string::String;
@@ -19,13 +19,13 @@ pub struct MarketOrder {
     pub price: u64, // AetherCoins (AT)
 }
 
-/// The Capability Market Engine
-pub struct CapabilityMarket {
+/// The CapTrade (Ability Economy) Engine
+pub struct CapTradeManager {
     buy_orders: Vec<MarketOrder>,
     sell_orders: Vec<MarketOrder>,
 }
 
-impl CapabilityMarket {
+impl CapTradeManager {
     pub const fn new() -> Self {
         Self {
             buy_orders: Vec::new(),
@@ -58,10 +58,10 @@ impl CapabilityMarket {
              let bid = self.buy_orders.remove(0);
              let ask = self.sell_orders.remove(0);
              
-             crate::println!("[Market] MATCH! Node {} sold to Node {} @ {} AT", ask.node_id, bid.node_id, bid.price);
+             crate::println!("[CapTrade] MATCH! Node {} sold to Node {} @ {} AT", ask.node_id, bid.node_id, bid.price);
              // Transaction would be recorded on distributed ledger
         }
     }
 }
 
-pub static CAPABILITY_MARKET: Mutex<CapabilityMarket> = Mutex::new(CapabilityMarket::new());
+pub static CAPTRADE_MANAGER: Mutex<CapTradeManager> = Mutex::new(CapTradeManager::new());

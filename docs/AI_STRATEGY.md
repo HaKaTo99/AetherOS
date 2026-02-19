@@ -20,7 +20,7 @@ AetherOS tidak hanya meniru, melainkan mengintegrasikan keunggulan arsitektur di
 
 ### 1. Efisiensi Skala Besar (DeepSeek MoE → Sectoral AI)
 *   **DeepSeek** menggunakan *Mixture-of-Experts* (MoE) untuk mengaktifkan sebagian parameter.
-*   **AetherOS Phase 27** menggunakan **Sectoral AI Fabric**. Hanya "pakar" (expert) yang relevan (seperti pakar Medis atau Militer) yang dimuat ke dalam cache kernel. Ini menjamin performa maksimal pada perangkat dengan sumber daya terbatas (RPi4/Edge).
+*   **AetherOS Phase 27-28** menggunakan **Sectoral AI Fabric**. Hanya "pakar" (expert) yang relevan (seperti pakar Medis atau Militer) yang dimuat ke dalam cache kernel secara atomik melalui **Security Context Flush** (Phase 28.6). Ini menjamin isolasi dan performa maksimal pada perangkat dengan sumber daya terbatas (RPi4/Edge).
 
 ### 2. Penalaran Multimodal (Gemini → Intent Parser)
 *   **Gemini** memahami logika fisik dan spasial lintas format.
@@ -42,7 +42,7 @@ Berbeda dengan 4 raksasa di atas yang berjalan di atas sistem operasi pihak keti
 
 -   **Intelligence at Ring 0**: AI kami memiliki akses langsung ke hardware dan penjadwal kernel.
 -   **Security by PQC**: Seluruh pikiran AI dilindungi oleh kriptografi pascapaska-kuantum.
--   **Autonomous Evolution (Phase 30)**: Di mana Copilot membantu Anda menulis kode, AetherOS **menulis ulang kodenya sendiri** untuk memperbaiki bug dan beradaptasi dengan hardware baru tanpa campur tangan manusia.
+-   **Autonomous Evolution (Phase 30)**: Di mana Copilot membantu Anda menulis kode, AetherOS **menulis ulang kodenya sendiri** untuk memperbaiki bug dan beradaptasi melalui Evolution Core yang terintegrasi dengan audit kesehatan SMME (Phase 30.1).
 
 ---
 

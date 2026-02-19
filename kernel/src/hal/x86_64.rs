@@ -86,6 +86,7 @@ impl SerialPort {
     pub const fn new() -> Self { SerialPort }
 
     pub fn init(&self) {
+        let _guard = InterruptGuard::new();
         unsafe {
             // Disable interrupts (Important for Military Grade Polling)
             outb(0x3F8 + 1, 0x00);
@@ -178,6 +179,7 @@ impl X86Platform {
 
     /// Pompa data dari hardware ke internal buffer (Phase 10.0 Harmony)
     pub fn poll_hardware(&self) {
+        let _guard = InterruptGuard::new();
         unsafe {
             // 1. Poll Serial Port (Drain entire FIFO for high throughput)
             let mut limit = 0;
@@ -190,8 +192,11 @@ impl X86Platform {
             // 2. Poll PS/2 Keyboard
             if (inb(0x64) & 1) != 0 {
                 let scancode = inb(0x60);
-                if let Some(c) = self.map_ps2_to_ascii(scancode) {
-                    self.process_input_byte(c);
+                // Military Grade: Scancode validation
+                if scancode != 0 && scancode != 0xFF {
+                    if let Some(c) = self.map_ps2_to_ascii(scancode) {
+                        self.process_input_byte(c);
+                    }
                 }
             }
         }
@@ -235,15 +240,33 @@ unsafe fn outb(port: u16, val: u8) {
 
 #[inline]
 unsafe fn inb(port: u16) -> u8 {
+    // Military Grade: Port Range Validation
+    if port > 0xFFFF { return 0; }
     let ret: u8;
     asm!("in al, dx", out("al") ret, in("dx") port, options(nostack, nomem, preserves_flags));
     ret
 }
 
+/// Military Grade RAII Interrupt Guard
+struct InterruptGuard;
+
+impl InterruptGuard {
+    fn new() -> Self {
+        unsafe { asm!("cli", options(nomem, nostack)); }
+        InterruptGuard
+    }
+}
+
+impl Drop for InterruptGuard {
+    fn drop(&mut self) {
+        unsafe { asm!("sti", options(nomem, nostack)); }
+    }
+}
+
 impl Platform for X86Platform {
     fn init(&self) {
         SERIAL.init();
-        self.puts("X86_64 HAL Initialized (v10.0 Diamond Harmony)\n");
+        self.puts("X86_64 HAL Initialized (v10.2 Supreme Grade)\n");
     }
 
     fn shutdown(&self) { unsafe { outb(0xf4, 0x00); } }

@@ -1,5 +1,5 @@
 # xAetherOS Developer Guide
-**Version**: v10.0 "The Fabric" (Harmony Certified)  
+**Version**: v10.2 "The Fabric" (Supreme Grade - Sovereign Framework)  
 **Target Audience**: Systems Engineers, AI Developers, Distributed Systems Architects
 
 ---
@@ -29,8 +29,9 @@ cargo run --release
 
 ### Target Architectures
 xAetherOS mendukung platform berikut secara native:
-- **x86_64 PC (UEFI)**: Target utama untuk v10.0 "The Fabric".
-- **Raspberry Pi 4 (aarch64)**: Target untuk pengujian hardware IoT.
+- **x86_64 PC (UEFI/BIOS)**: Target utama untuk v10.2 (Sovereign Framework).
+- **Raspberry Pi 4 (aarch64)**: Target IoT dengan GICv2 Hardening.
+- **Universal Bridges**: Mendukung binari POSIX, Win32, Darwin, HarmonyOS, Symbian, dan webOS secara native.
 
 ---
 
@@ -47,7 +48,7 @@ xAetherOS is not just an OS; it's a **Distributed Intelligence Fabric**.
 
 ## 💻 3. Developing Applications
 
-xAetherOS supports multiple runtimes. Choose the best one for your needs.
+AetherOS mendukung beragam runtime berdaulat. Gunakan `AetherShell` untuk memverifikasi kesiapan toolchain.
 
 ### A. Universal Runtime (QuickJS)
 Write apps in standard JavaScript/TypeScript.

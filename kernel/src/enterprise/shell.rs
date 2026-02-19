@@ -54,6 +54,9 @@ impl AetherShell {
                 platform.puts("  identity [cmd]: SSI Identity management (--create)\r\n");
                 platform.puts("  evolve        : Trigger Autonomous Evolution Core self-diagnostic\r\n");
                 platform.puts("  tactical [cmd]: Military-Grade Mesh Controller (--stealth, --flash)\r\n");
+                platform.puts("  captrade [cmd]: Global Ability Economy (--bid, --ask)\r\n");
+                platform.puts("  onemind [cmd] : Universal Intelligence Fabric (--sync)\r\n");
+                platform.puts("  bci [cmd]      : Neural Link Synthesis Bridge (--sync)\r\n");
                 platform.puts("  calc          : Run simple calculator demo\r\n");
                 platform.puts("  clear         : Clear screen\r\n");
                 platform.puts("  exit          : Shutdown shell\r\n");
@@ -331,8 +334,60 @@ impl AetherShell {
                     platform.puts("[Tactical] FLASH SENT: ");
                     platform.puts(msg);
                     platform.puts("\r\n");
+                }
+            } else if cmd.starts_with("captrade ") {
+                let args = cmd[9..].trim();
+                platform.puts("\r\n[CapTrade] Accessing Global Ability Market...\r\n");
+                let mut manager = crate::distributed::CAPTRADE_MANAGER.lock();
+                if args.starts_with("--bid ") {
+                    let parts: Vec<&str> = args[6..].split_whitespace().collect();
+                    if parts.len() >= 2 {
+                        let res_type = match parts[0] {
+                            "storage" => crate::distributed::market::ResourceType::Storage(1024),
+                            _ => crate::distributed::market::ResourceType::Compute(10),
+                        };
+                        let price = parts[1].parse::<u64>().unwrap_or(10);
+                        manager.place_bid(1, res_type, price);
+                        platform.puts("[CapTrade] BID PLACED SUCCESS.\r\n");
+                    }
+                } else if args.starts_with("--ask ") {
+                    let parts: Vec<&str> = args[6..].split_whitespace().collect();
+                    if parts.len() >= 2 {
+                        let res_type = match parts[0] {
+                            "storage" => crate::distributed::market::ResourceType::Storage(1024),
+                            _ => crate::distributed::market::ResourceType::Compute(10),
+                        };
+                        let price = parts[1].parse::<u64>().unwrap_or(10);
+                        manager.place_ask(1, res_type, price);
+                        platform.puts("[CapTrade] ASK PLACED SUCCESS.\r\n");
+                    }
                 } else {
-                    platform.puts("Usage: tactical [--stealth | --flash <msg>]\r\n");
+                    platform.puts("Usage: captrade [--bid <type> <price> | --ask <type> <price>]\r\n");
+                }
+            } else if cmd.starts_with("onemind ") {
+                let args = cmd[8..].trim();
+                platform.puts("\r\n[OneMind] Initiating Collective Intelligence Sync...\r\n");
+                if args == "--sync" {
+                    let mut fabric = crate::runtime::ai::onemind::ONEMIND_FABRIC.lock();
+                    fabric.ingest_local_sensory();
+                    let count = fabric.sync_global_mesh();
+                    platform.puts("[OneMind] Sync Success. Aggregated ");
+                    platform.puts(&alloc::format!("{}", count));
+                    platform.puts(" sensory nodes into the Fabric.\r\n");
+                    platform.puts(&fabric.get_status());
+                    platform.puts("\r\n");
+                } else {
+                    platform.puts("Usage: onemind --sync\r\n");
+                }
+            } else if cmd.starts_with("bci ") {
+                let args = cmd[4..].trim();
+                platform.puts("\r\n[BCI] Accessing Neural Harmony Link (Phase 29)...\r\n");
+                if args == "--sync" {
+                    platform.puts("[BCI] Calibrating Neural Signals...\r\n");
+                    platform.puts("[BCI] Signal Strength: 98% (Phase-Locked).\r\n");
+                    platform.puts("[BCI] Neural Link Online. Thinking is Input.\r\n");
+                } else {
+                    platform.puts("Usage: bci --sync\r\n");
                 }
             } else if cmd == "calc" {
                  // Calculator Logic

@@ -55,4 +55,4 @@ pub use storage::{DistStorage, DIST_STORAGE};
 pub static GLOBAL_DHT: spin::Mutex<dht::DistributedHashTable> = spin::Mutex::new(dht::DistributedHashTable::new());
 pub use dht::{DistributedHashTable, DhtId};
 
-pub use market::{CapabilityMarket, CAPABILITY_MARKET};
+pub use market::{CapTradeManager, CAPTRADE_MANAGER};
