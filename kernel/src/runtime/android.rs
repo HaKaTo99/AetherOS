@@ -151,6 +151,10 @@ impl ApkInstaller {
     pub fn list(&self) -> Vec<&str> {
         self.installed.keys().map(|s| s.as_str()).collect()
     }
+
+    pub fn find(&self, package: &str) -> Option<&InstalledApk> {
+        self.installed.get(package)
+    }
 }
 
 // ===========================

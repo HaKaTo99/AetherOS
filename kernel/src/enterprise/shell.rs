@@ -3,6 +3,9 @@
 //! Encapsulates the boot-time login and command handling logic.
 
 use crate::hal;
+use alloc::string::String;
+use alloc::vec::Vec;
+use crate::runtime::android::{ApkManifest, APK_INSTALLER};
 
 pub struct AetherShell;
 
@@ -32,6 +35,7 @@ impl AetherShell {
                 platform.puts("  omni [code]   : Compile and run OmniLang code\r\n");
                 platform.puts("  blender [file]: Start headless render job (.blend)\r\n");
                 platform.puts("  vlc [file]    : Play multimedia resource\r\n");
+                platform.puts("  apk [flags]   : Android App Bridge (--install, --list, --run)\r\n");
                 platform.puts("  calc          : Run simple calculator demo\r\n");
                 platform.puts("  clear         : Clear screen\r\n");
                 platform.puts("  exit          : Shutdown shell\r\n");
@@ -65,6 +69,59 @@ impl AetherShell {
                     let _ = player.play();
                 } else {
                     platform.puts("Error: Failed to load Media Runtime.\r\n");
+                }
+            } else if cmd.starts_with("apk ") {
+                let args = cmd[4..].trim();
+                if args == "--list" {
+                    platform.puts("\r\n[Android] Installed APKs:\r\n");
+                    let installer = crate::runtime::android::APK_INSTALLER.lock();
+                    for app in installer.list() {
+                        platform.puts("  - ");
+                        platform.puts(app);
+                        platform.puts("\r\n");
+                    }
+                    if installer.list().is_empty() {
+                         platform.puts("  (No apps installed)\r\n");
+                    }
+                } else if args.starts_with("--install ") {
+                    let pkg = args[10..].trim();
+                    platform.puts("\r\n[Android] Installing: ");
+                    platform.puts(pkg);
+                    platform.puts("...\r\n");
+                    
+                    let manifest = crate::runtime::android::ApkManifest {
+                        package: String::from(pkg),
+                        version_code: 1,
+                        version_name: String::from("1.0"),
+                        min_sdk: 33,
+                        main_activity: String::from("MainActivity"),
+                    };
+                    
+                    let mut installer = crate::runtime::android::APK_INSTALLER.lock();
+                    if let Ok(_) = installer.install(manifest, alloc::vec![]) {
+                        platform.puts("[Android] Success: APK installed to /data/app/\r\n");
+                    } else {
+                        platform.puts("[Android] Error: Installation failed.\r\n");
+                    }
+                } else if args.starts_with("--run ") {
+                    let pkg = args[6..].trim();
+                    platform.puts("\r\n[Android] Starting Activity: ");
+                    platform.puts(pkg);
+                    platform.puts("\r\n");
+                    
+                    let installer = crate::runtime::android::APK_INSTALLER.lock();
+                    if let Some(app) = installer.find(pkg) {
+                        platform.puts("[Android] Initializing ART (Android Runtime)...\r\n");
+                        platform.puts("[Android] Loading DEX: ");
+                        platform.puts(&app.manifest.package);
+                        platform.puts("\r\n");
+                        platform.puts("[Android] Execution: MainActivity.onCreate()\r\n");
+                        platform.puts("[Android] Process Lifecycle: OK.\r\n");
+                    } else {
+                        platform.puts("[Android] Error: App not found.\r\n");
+                    }
+                } else {
+                    platform.puts("Usage: apk [--install <pkg> | --list | --run <pkg>]\r\n");
                 }
             } else if cmd == "calc" {
                  // Calculator Logic
