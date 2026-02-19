@@ -29,3 +29,4 @@ pub use media::MediaRuntime;
 pub use terminal::TerminalRuntime;
 pub use devtools::DevTools;
 pub use omnilang::OmniRuntime;
+pub mod omnilang_bridge; // [NEW] Phase 3 Bridge

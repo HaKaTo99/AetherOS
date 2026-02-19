@@ -2,7 +2,6 @@
 //! 
 //! Interface for on-device media generation.
 
-use alloc::string::String;
 use alloc::vec::Vec;
 
 pub struct GenAiEngine;
