@@ -31,6 +31,7 @@ impl AetherShell {
                 platform.puts("\r\nAvailable Commands:\r\n");
                 platform.puts("  omni [code]   : Compile and run OmniLang code\r\n");
                 platform.puts("  blender [file]: Start headless render job (.blend)\r\n");
+                platform.puts("  vlc [file]    : Play multimedia resource\r\n");
                 platform.puts("  calc          : Run simple calculator demo\r\n");
                 platform.puts("  clear         : Clear screen\r\n");
                 platform.puts("  exit          : Shutdown shell\r\n");
@@ -56,6 +57,14 @@ impl AetherShell {
                          platform.puts(e);
                          platform.puts("\r\n");
                     }
+                }
+            } else if cmd.starts_with("vlc ") {
+                let filename = cmd[4..].trim();
+                platform.puts("\r\n[VLC] Initializing Universal Media Player...\r\n");
+                if let Ok(mut player) = crate::runtime::MediaRuntime::new(filename) {
+                    let _ = player.play();
+                } else {
+                    platform.puts("Error: Failed to load Media Runtime.\r\n");
                 }
             } else if cmd == "calc" {
                  // Calculator Logic
