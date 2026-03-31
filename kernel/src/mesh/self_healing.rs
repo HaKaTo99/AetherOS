@@ -29,7 +29,7 @@ impl SelfHealingEngine {
         self.last_heartbeat.store(time, Ordering::SeqCst);
     }
 
-    pub fn trigger_failover(&self, failed_node: [u8; 32]) {
+    pub fn trigger_failover(&self, _failed_node: [u8; 32]) {
         let platform = hal::get_platform();
         platform.puts("[ v7.0 ] FAILOVER: Node detected dead. Re-routing mesh traffic...\n");
         // Logic for backup election and task re-assignment

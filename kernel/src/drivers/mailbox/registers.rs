@@ -1,3 +1,4 @@
+#![allow(dead_code)]
 //! Mailbox Hardware Registers for Raspberry Pi 4 (BCM2711)
 //! 
 //! The mailbox is a communication mechanism between the ARM CPU and VideoCore GPU.

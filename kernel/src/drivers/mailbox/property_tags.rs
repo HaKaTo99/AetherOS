@@ -1,3 +1,4 @@
+#![allow(dead_code)]
 //! Mailbox Property Tags Interface
 //! 
 //! Property tags are used to communicate with VideoCore GPU for various
@@ -93,7 +94,7 @@ impl PropertyMessage {
 
     /// Add a property tag to the message
     pub fn add_tag(&mut self, tag: PropertyTag, request_size: usize, response_size: usize) -> usize {
-        let tag_start = self.size;
+        let _tag_start = self.size;
         
         self.buffer[self.size] = tag as u32;
         self.size += 1;

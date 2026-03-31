@@ -2,12 +2,11 @@
 //! Implements a Kademlia-like protocol for global peer discovery.
 
 use alloc::vec::Vec;
-use alloc::collections::BTreeMap;
 use spin::Mutex;
-use crate::distributed::mesh::NodeId; // Reuse NodeId from Phase 17
+ // Reuse NodeId from Phase 17
 
 const K_BUCKET_SIZE: usize = 20;
-const ID_Length: usize = 20; // 160-bit SHA-1 style
+const _ID_LENGTH: usize = 20; // 160-bit SHA-1 style
 
 /// Enhanced Node ID for DHT (160-bit)
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
@@ -44,14 +43,14 @@ pub struct DhtPeer {
 
 /// Routing Table (K-Buckets)
 pub struct RoutingTable {
-    local_id: DhtId,
+    _local_id: DhtId,
     buckets: Vec<Vec<DhtPeer>>, // Simplification: Vector of buckets
 }
 
 impl RoutingTable {
     pub const fn new(local_id: DhtId) -> Self {
         Self {
-            local_id,
+            _local_id: local_id,
             buckets: Vec::new(), // new() is const for Vec
         }
     }
@@ -73,7 +72,7 @@ impl RoutingTable {
         }
     }
 
-    pub fn find_closest_peers(&self, target: &DhtId) -> Vec<DhtPeer> {
+    pub fn find_closest_peers(&self, _target: &DhtId) -> Vec<DhtPeer> {
         // Return 20 closest peers
         // Simulation: Return all known peers
         self.buckets.iter().flat_map(|b| b.clone()).take(20).collect()

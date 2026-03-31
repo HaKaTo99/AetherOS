@@ -2,7 +2,6 @@
 //! Simulates Neural Link signals for thought-controlled UI.
 
 use crate::drivers::{Driver, DriverType};
-use alloc::vec::Vec;
 
 #[derive(Debug, Clone, Copy)]
 pub struct BrainSignal {

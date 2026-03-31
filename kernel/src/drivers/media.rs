@@ -27,13 +27,13 @@ pub struct VideoFrame {
 
 /// Video decoder
 pub struct VideoDecoder {
-    codec: VideoCodec,
+    _codec: VideoCodec,
     initialized: bool,
 }
 
 impl VideoDecoder {
     pub fn new(codec: VideoCodec) -> Self {
-        Self { codec, initialized: false }
+        Self { _codec: codec, initialized: false }
     }
 
     pub fn init(&mut self) -> Result<(), &'static str> {
@@ -74,9 +74,9 @@ pub struct AudioBuffer {
 
 /// Audio output device
 pub struct AudioOutput {
-    sample_rate: u32,
-    channels: u8,
-    format: AudioFormat,
+    _sample_rate: u32,
+    _channels: u8,
+    _format: AudioFormat,
     volume: u8, // 0-100
     muted: bool,
 }
@@ -84,9 +84,9 @@ pub struct AudioOutput {
 impl AudioOutput {
     pub fn new(sample_rate: u32, channels: u8) -> Self {
         Self {
-            sample_rate,
-            channels,
-            format: AudioFormat::Pcm16,
+            _sample_rate: sample_rate,
+            _channels: channels,
+            _format: AudioFormat::Pcm16,
             volume: 80,
             muted: false,
         }

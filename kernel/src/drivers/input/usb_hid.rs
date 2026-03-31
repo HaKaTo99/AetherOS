@@ -1,6 +1,6 @@
 //! USB HID Driver (Phase 13.2)
 
-use super::{InputEvent, KeyCode, KeyState};
+use super::InputEvent;
 
 /// HID device types
 #[derive(Debug, Clone, Copy)]

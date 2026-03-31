@@ -24,7 +24,7 @@ impl TacticalMeshController {
         }
     }
 
-    pub fn send_secure_flash(&self, payload: &[u8]) {
+    pub fn send_secure_flash(&self, _payload: &[u8]) {
         log_security(AuditSeverity::Critical, "Tactical", "FLASH MESSAGE: Initiating Military-Grade encrypted broadcast.");
         
         // Military Grade: PQC Hybrid Encryption (Ph 24.1 / 29.1)

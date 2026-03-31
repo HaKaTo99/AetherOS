@@ -13,17 +13,17 @@ use crate::hal;
 
 /// Global Mesh Controller
 pub struct GlobalMeshController {
-    node_id: [u8; 32],
-    is_master: bool,
-    peers: Vec<[u8; 32]>,
+    _node_id: [u8; 32],
+    _is_master: bool,
+    _peers: Vec<[u8; 32]>,
 }
 
 impl GlobalMeshController {
     pub const fn new() -> Self {
         Self {
-            node_id: [0u8; 32],
-            is_master: false,
-            peers: Vec::new(),
+            _node_id: [0u8; 32],
+            _is_master: false,
+            _peers: Vec::new(),
         }
     }
 
@@ -42,6 +42,36 @@ impl GlobalMeshController {
         
         platform.puts("[ v7.0 ] Global Mesh: Harmony Baseline Stable.\n");
     }
+    
+    /// Tambahkan peer baru dan log event discovery
+    pub fn add_peer(&mut self, peer_id: [u8; 32]) {
+        let platform = hal::get_platform();
+        self._peers.push(peer_id);
+        platform.puts("[Mesh] Peer discovered: ");
+        for b in &peer_id {
+            platform.puts(&format!("{:02X}", b));
+        }
+        platform.puts("\n");
+    }
+    
+    /// Debug: Print status mesh/peer ke log (bisa dipanggil dari shell)
+    pub fn debug_print_status(&self) {
+        let platform = hal::get_platform();
+        platform.puts("[Mesh] Node ID: ");
+        for b in &self._node_id {
+            platform.puts(&format!("{:02X}", b));
+        }
+        platform.puts("\n[Mesh] Peer count: ");
+        platform.puts(&format!("{}\n", self._peers.len()));
+        for (i, peer) in self._peers.iter().enumerate() {
+            platform.puts(&format!("[Mesh] Peer {}: ", i));
+            for b in peer {
+                platform.puts(&format!("{:02X}", b));
+            }
+            platform.puts("\n");
+        }
+    }
 }
+// end impl GlobalMeshController
 
 pub static GLOBAL_MESH: Mutex<GlobalMeshController> = Mutex::new(GlobalMeshController::new());

@@ -3,7 +3,6 @@
 //! Restore missing dependency for Gaming Runtime.
 
 use spin::Mutex;
-use alloc::vec::Vec;
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum PipelineStage {

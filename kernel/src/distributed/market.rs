@@ -1,7 +1,6 @@
 //! CapTrade Manager (Phase 29.2)
 //! Decentralized Resource Trading Engine for Compute/Storage.
 
-use alloc::string::String;
 use alloc::vec::Vec;
 use spin::Mutex;
 

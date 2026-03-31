@@ -4,7 +4,7 @@
 use alloc::vec::Vec;
 
 pub struct RoutingTable {
-    peers: Vec<[u8; 32]>,
+    _peers: Vec<[u8; 32]>,
 }
 
 pub struct GeoRoutingEngine;

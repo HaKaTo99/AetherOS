@@ -6,17 +6,17 @@ use spin::Mutex;
 
 
 pub struct VirtIoGpu {
-    width: u32,
-    height: u32,
-    framebuffer_addr: usize,
+    _width: u32,
+    _height: u32,
+    _framebuffer_addr: usize,
 }
 
 impl VirtIoGpu {
     pub const fn new() -> Self {
         Self {
-            width: 1024,
-            height: 768,
-            framebuffer_addr: 0,
+            _width: 1024,
+            _height: 768,
+            _framebuffer_addr: 0,
         }
     }
 
