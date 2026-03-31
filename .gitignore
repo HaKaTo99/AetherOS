@@ -40,3 +40,13 @@ Desktop.ini
 *.bak
 *.orig
 *~
+
+# === Generated Build Artifacts ===
+out/
+*.iso
+*.img
+
+# === Virtual Machine Artifacts ===
+*.vdi
+*.vbox
+*.vbox-prev
