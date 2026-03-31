@@ -2,7 +2,6 @@
 //! Implements Self-Hosting Capabilities (Rustc/Cargo/Git).
 
 use alloc::string::String;
-use alloc::vec::Vec;
 use spin::Mutex;
 
 /// Self-Hosting Environemnt

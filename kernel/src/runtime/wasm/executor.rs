@@ -6,15 +6,15 @@
 use alloc::vec::Vec;
 
 pub struct WasmExecutor {
-    memory: Vec<u8>,
-    stack_ptr: usize,
+    _memory: Vec<u8>,
+    _stack_ptr: usize,
 }
 
 impl WasmExecutor {
     pub fn new() -> Self {
         Self {
-            memory: Vec::with_capacity(1024 * 1024), // 1MB Heap
-            stack_ptr: 0,
+            _memory: Vec::with_capacity(1024 * 1024), // 1MB Heap
+            _stack_ptr: 0,
         }
     }
 

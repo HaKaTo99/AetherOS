@@ -3,7 +3,6 @@
 //! Connects the kernel runtime to the external OmniLang compiler source.
 //! This acts as the Foreign Function Interface (FFI) to D:\GitHub\OmniLang.
 
-use alloc::vec::Vec;
 use alloc::string::String;
 
 pub struct OmniBridge;

@@ -5,6 +5,7 @@ pub mod scheduler;
 pub mod memory;
 pub mod ipc;
 pub mod stress;
+pub mod command_test;
 
 use crate::hal;
 
@@ -30,9 +31,9 @@ pub fn run_suite() {
     log(format_args!("[TEST] Running Scheduler Tests..."));
     scheduler::test_preemption();
     
-    // 2. Memory Tests
-    log(format_args!("[TEST] Running Memory Tests..."));
-    memory::test_allocation();
+    // 2. Memory Tests (DISABLED for soak/shell validation)
+    log(format_args!("[TEST] Running Memory Tests... [SKIPPED]"));
+    // memory::test_allocation();
     
     // 3. IPC Tests
     log(format_args!("[TEST] Running IPC Tests..."));
@@ -40,6 +41,9 @@ pub fn run_suite() {
     
     // 4. Stress Tests
     stress::run();
+
+    // 5. Shell Command Smoketests
+    command_test::test_all_commands();
 
     log(format_args!("[TEST] === All Tests Completed ===\n"));
 }

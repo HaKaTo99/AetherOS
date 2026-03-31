@@ -2,8 +2,7 @@
 //! Bridges JavaScript code to the WASM Runtime
 
 use alloc::string::String;
-use alloc::vec::Vec;
-use crate::runtime::wasm::legacy_runtime::{WasmModule, WasmInterpreter, WasmValue, WasmType, WasmInstr, WasmFunc};
+use crate::runtime::wasm::legacy_runtime::{WasmModule, WasmInterpreter, WasmType, WasmInstr, WasmFunc};
 
 /// QuickJS Runtime environment
 pub struct QuickJsRuntime {

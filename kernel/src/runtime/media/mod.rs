@@ -4,15 +4,14 @@
 pub mod blender; // [NEW] Phase 3: Blender Compute Node
 
 use alloc::string::String;
-use alloc::vec::Vec;
 // use crate::runtime::wasm::{WasmModule, WasmInterpreter, WasmValue, WasmType, WasmInstr, WasmFunc};
 // Simplified imports to avoid issues if wasm module is still fluctuating, 
 // but based on previous steps, wasm module exports are consolidated.
-use crate::runtime::wasm::{WasmModule, WasmInterpreter, WasmValue, WasmType, WasmInstr, WasmFunc};
+use crate::runtime::wasm::{WasmModule, WasmInterpreter, WasmType, WasmInstr, WasmFunc};
 
 /// Media Runtime environment
 pub struct MediaRuntime {
-    interpreter: WasmInterpreter,
+    _interpreter: WasmInterpreter,
     resource: String,
 }
 
@@ -25,7 +24,7 @@ impl MediaRuntime {
         let interpreter = WasmInterpreter::new(module.memory_pages)?;
         
         Ok(Self { 
-            interpreter,
+            _interpreter: interpreter,
             resource: String::from(resource),
         })
     }

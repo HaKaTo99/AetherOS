@@ -2,12 +2,11 @@
 //! Bridges PHP/Laravel Applications to the Kernel via WASM (CGI)
 
 use alloc::string::String;
-use alloc::vec::Vec;
-use crate::runtime::wasm::{WasmModule, WasmInterpreter, WasmValue, WasmType, WasmInstr, WasmFunc};
+use crate::runtime::wasm::{WasmModule, WasmInterpreter, WasmType, WasmInstr, WasmFunc};
 
 /// PHP Runtime environment
 pub struct PhpRuntime {
-    interpreter: WasmInterpreter,
+    _interpreter: WasmInterpreter,
     script_path: String,
 }
 
@@ -21,7 +20,7 @@ impl PhpRuntime {
         let interpreter = WasmInterpreter::new(module.memory_pages)?;
         
         Ok(Self { 
-            interpreter,
+            _interpreter: interpreter,
             script_path: String::from(script_path),
         })
     }

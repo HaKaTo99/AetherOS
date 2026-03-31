@@ -7,7 +7,6 @@
 //! - Vulkan Rendering Submission
 
 use crate::drivers::gpu::vulkan::{GLOBAL_GPU, PipelineStage};
-use crate::drivers::gpu::vulkan::VulkanDriver;
 
 pub struct GameRuntime {
     pub name: &'static str,
@@ -24,7 +23,7 @@ impl GameRuntime {
 
     pub fn run_loop(&mut self) {
         let gpu = GLOBAL_GPU.lock();
-        let mut cmd = gpu.allocate_command_buffer();
+        let cmd = gpu.allocate_command_buffer();
 
         crate::println!("[Gaming] Starting Game: {}", self.name);
         

@@ -1,9 +1,7 @@
 //! Application Framework (Phase 14.2)
 //! SDK structures for third-party apps
 
-use crate::ui::{Rect, Widget};
 use alloc::string::String;
-use alloc::vec::Vec;
 
 /// Application metadata
 #[derive(Debug, Clone)]

@@ -3,14 +3,11 @@
 //! Visualisasi real-time kesehatan kernel dengan estetika Glassmorphism.
 //! Memberikan visibilitas total terhadap resource system dan harmoni mesh.
 
-use crate::ui::widget::{Widget, Rect, Label, Button};
+use crate::ui::widget::Rect;
 use crate::drivers::video::Color;
-use crate::enterprise::telemetry::TELEMETRY_AGENT;
 use crate::SMME;
 use crate::SCHEDULER;
 use crate::DEVICE_MESH;
-use alloc::string::String;
-use alloc::vec::Vec;
 
 pub struct FleetDashboard {
     pub area: Rect,

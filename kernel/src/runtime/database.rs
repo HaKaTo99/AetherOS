@@ -3,11 +3,11 @@
 
 use alloc::string::String;
 use alloc::vec::Vec;
-use crate::runtime::wasm::{WasmModule, WasmInterpreter, WasmValue, WasmType, WasmInstr, WasmFunc};
+use crate::runtime::wasm::{WasmModule, WasmInterpreter, WasmType, WasmInstr, WasmFunc};
 
 /// Database Runtime environment
 pub struct DatabaseRuntime {
-    interpreter: WasmInterpreter,
+    _interpreter: WasmInterpreter,
     db_name: String,
 }
 
@@ -21,7 +21,7 @@ impl DatabaseRuntime {
         let interpreter = WasmInterpreter::new(module.memory_pages)?;
         
         Ok(Self { 
-            interpreter,
+            _interpreter: interpreter,
             db_name: String::from(db_name),
         })
     }

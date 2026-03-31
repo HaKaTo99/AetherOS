@@ -2,12 +2,11 @@
 //! Bridges AI Models (Llama, Antigravity) to the Kernel via WASM
 
 use alloc::string::String;
-use alloc::vec::Vec;
-use crate::runtime::wasm::{WasmModule, WasmInterpreter, WasmValue, WasmType, WasmInstr, WasmFunc};
+use crate::runtime::wasm::{WasmModule, WasmInterpreter, WasmType, WasmInstr, WasmFunc};
 
 /// AI Agent Runtime environment
 pub struct AiAgentRuntime {
-    interpreter: WasmInterpreter,
+    _interpreter: WasmInterpreter,
     model_name: String,
 }
 
@@ -21,7 +20,7 @@ impl AiAgentRuntime {
         let interpreter = WasmInterpreter::new(module.memory_pages)?;
         
         Ok(Self { 
-            interpreter,
+            _interpreter: interpreter,
             model_name: String::from(model_name),
         })
     }

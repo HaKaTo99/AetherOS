@@ -619,7 +619,6 @@ impl OmniRuntime {
                     self.eval_expr(expr);
                     return;
                 },
-                _ => {}
             }
         }
     }

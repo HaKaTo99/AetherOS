@@ -1,9 +1,9 @@
 //! Scheduler Tests
 
 use super::log;
-use core::sync::atomic::{AtomicUsize, Ordering};
+use core::sync::atomic::AtomicUsize;
 
-static TASKS_COMPLETED: AtomicUsize = AtomicUsize::new(0);
+static _TASKS_COMPLETED: AtomicUsize = AtomicUsize::new(0);
 
 pub fn test_preemption() {
     log(format_args!("[TEST] Spawning 10 dummy tasks..."));

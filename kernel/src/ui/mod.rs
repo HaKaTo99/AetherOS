@@ -40,7 +40,6 @@ pub mod organic_ui; // [NEW] Organic UI Drivers (Phase 25.4)
 pub mod dashboard; // [NEW] Fleet Monitor Dashboard (Phase 26.3)
 
 pub use display::*;
-pub use widget::*;
 pub use layout::*;
 pub use window::{Window, WindowManager, WINDOW_MANAGER};
 

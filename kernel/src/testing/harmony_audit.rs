@@ -2,18 +2,24 @@
 //! Performs a system-wide synchronization and alignment check to certify the Aether Fabric.
 
 use crate::enterprise::audit::{AuditSeverity, log_security};
-use crate::hal;
 use crate::ai;
 use crate::mesh;
 use crate::security;
+use crate::testing::app_verification::AppVerificationProfile;
 
 pub struct HarmonyAudit;
 
 impl HarmonyAudit {
-    /// Perform a deep audit of all system layers
-    pub fn perform_full_audit() -> bool {
+    fn perform_audit(
+        include_app_verification: bool,
+        app_verification_profile: Option<AppVerificationProfile>,
+    ) -> bool {
         let mut success = true;
-        log_security(AuditSeverity::Info, "Audit", "--- STARTING MILITARY GRADE HARMONY AUDIT ---");
+        if include_app_verification {
+            log_security(AuditSeverity::Info, "Audit", "--- STARTING MILITARY GRADE HARMONY AUDIT (FULL) ---");
+        } else {
+            log_security(AuditSeverity::Info, "Audit", "--- STARTING MILITARY GRADE HARMONY AUDIT (QUICK) ---");
+        }
 
         // 1. Layer: HAL & Spatial Harmony
         {
@@ -66,12 +72,37 @@ impl HarmonyAudit {
             log_security(AuditSeverity::Info, "Audit", " -> [ SECURITY ]: PQC Enclave Verified.");
         }
 
-        // 5. Layer: Final App Verification (v10.0 Golden)
-        {
-            crate::testing::app_verification::AppVerification::run_comprehensive_test();
+        if include_app_verification {
+            // 6. Layer: Final App Verification (v10.0 Golden)
+            if let Some(profile) = app_verification_profile {
+                crate::testing::app_verification::AppVerification::run_with_profile(profile);
+            } else {
+                crate::testing::app_verification::AppVerification::run_comprehensive_test();
+            }
+        } else {
+            log_security(AuditSeverity::Info, "Audit", " -> [ APP VERIFY ]: Skipped in QUICK mode.");
         }
 
-        log_security(AuditSeverity::Info, "Audit", "--- HARMONY AUDIT COMPLETE: MILITARY GRADE CERTIFIED ---");
+        if include_app_verification {
+            log_security(AuditSeverity::Info, "Audit", "--- HARMONY AUDIT COMPLETE: MILITARY GRADE CERTIFIED (FULL) ---");
+        } else {
+            log_security(AuditSeverity::Info, "Audit", "--- HARMONY AUDIT COMPLETE: MILITARY GRADE CERTIFIED (QUICK) ---");
+        }
         success
+    }
+
+    /// Perform a lightweight harmony audit suitable for staged boot hardening.
+    pub fn perform_quick_audit() -> bool {
+        Self::perform_audit(false, None)
+    }
+
+    /// Perform a deep audit of all system layers.
+    pub fn perform_full_audit() -> bool {
+        Self::perform_audit(true, None)
+    }
+
+    /// Perform a deep audit with staged app verification profile.
+    pub fn perform_full_audit_staged(profile: AppVerificationProfile) -> bool {
+        Self::perform_audit(true, Some(profile))
     }
 }

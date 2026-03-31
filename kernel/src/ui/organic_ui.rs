@@ -13,7 +13,7 @@ impl OrganicUIDriver {
     }
 
     /// Morph UI elements based on physical surface topology.
-    pub fn morph_interface(surface_curvature: f32) {
+    pub fn morph_interface(_surface_curvature: f32) {
         // Apply geometric transformations to compensate for physical distortion
     }
 }

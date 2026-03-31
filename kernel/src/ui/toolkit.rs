@@ -1,7 +1,7 @@
 //! UI Toolkit for Third-Party Apps (Phase 14.2)
 //! Simplified widget API for app developers
 
-use crate::ui::{Rect, Window, WINDOW_MANAGER};
+use crate::ui::{Rect, WINDOW_MANAGER};
 use alloc::string::String;
 use alloc::vec::Vec;
 

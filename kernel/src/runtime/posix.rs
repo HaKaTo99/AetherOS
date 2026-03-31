@@ -105,7 +105,7 @@ impl VNode {
 
 /// Virtual File System
 pub struct Vfs {
-    root: VNode,
+    _root: VNode,
     fd_table: BTreeMap<i32, String>, // fd -> path
     next_fd: i32,
 }
@@ -118,7 +118,7 @@ impl Vfs {
         root.children.push(VNode::dir("tmp"));
         root.children.push(VNode::dir("home"));
 
-        Self { root, fd_table: BTreeMap::new(), next_fd: 3 }
+        Self { _root: root, fd_table: BTreeMap::new(), next_fd: 3 }
     }
 
     pub fn open(&mut self, path: &str) -> Result<i32, PosixError> {
@@ -133,7 +133,7 @@ impl Vfs {
         Ok(())
     }
 
-    pub fn read(&self, fd: i32, buf: &mut [u8]) -> Result<usize, PosixError> {
+    pub fn read(&self, fd: i32, _buf: &mut [u8]) -> Result<usize, PosixError> {
         let _path = self.fd_table.get(&fd).ok_or(PosixError::EBADF)?;
         // Would look up VNode and read data
         Ok(0)

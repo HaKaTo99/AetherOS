@@ -1,9 +1,7 @@
 //! Native Terminal Tools Runtime (Phase 16.2)
 //! Implements PTY (Pseudo-Terminal) support and basic shell utilities.
 
-use alloc::string::String;
 use alloc::vec::Vec;
-use spin::Mutex;
 
 /// Pseudo-Terminal (PTY) State
 pub struct PseudoTerminal {

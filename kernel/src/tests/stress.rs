@@ -4,8 +4,7 @@
 use super::log;
 use alloc::vec::Vec;
 use crate::{
-    kernel_tick, kernel_reset, kernel_init,
-    SMME, SCHEDULER, NETWORK, MIGRATION_MANAGER, LOAD_BALANCER,
+    SMME, NETWORK,
 };
 
 /// Run stability stress tests (Legacy + 24h Sim)

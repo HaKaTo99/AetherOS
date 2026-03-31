@@ -1,7 +1,6 @@
 //! UI Components (Phase 13.1)
 //! Menu system, file picker, notification system
 
-use crate::ui::Rect;
 use alloc::string::String;
 use alloc::vec::Vec;
 use spin::Mutex;
