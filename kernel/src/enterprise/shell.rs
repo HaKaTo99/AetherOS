@@ -1,7 +1,6 @@
 //! Aether Interactive Shell (no-alloc stable parser)
 
 use crate::hal;
-use alloc::string::ToString;
 use core::sync::atomic::{AtomicUsize, Ordering};
 
 const SOFT_CLEAR_LINES: usize = 24;
