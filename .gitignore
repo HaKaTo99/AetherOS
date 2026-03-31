@@ -50,3 +50,8 @@ out/
 *.vdi
 *.vbox
 *.vbox-prev
+
+# === Local Operational Workdirs ===
+vendor/
+vbox_vms/AetherOS-Kernel/
+prompt
