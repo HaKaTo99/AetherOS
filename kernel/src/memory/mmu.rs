@@ -1,8 +1,8 @@
+#![cfg(target_arch = "aarch64")]
 //! MMU (Memory Management Unit) Setup for AArch64
 //! Enables virtual memory with W^X protection
 
-use crate::memory::paging::{PageTable, PageDescriptor, Mapper};
-use core::arch::asm;
+use crate::memory::paging::PageTable;
 
 // Linker symbols
 extern "C" {
@@ -166,7 +166,7 @@ impl Mmu {
     }
 
     /// Unmap a page (for stack guards)
-    pub unsafe fn unmap_page(virt_addr: usize) {
+    pub unsafe fn unmap_page(_virt_addr: usize) {
         #[cfg(target_arch = "aarch64")]
         {
             let tables = &mut *core::ptr::addr_of_mut!(PAGE_TABLES);

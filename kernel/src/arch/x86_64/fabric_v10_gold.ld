@@ -1,26 +1,36 @@
-ENTRY(_start)
+ENTRY(_multiboot_entry)
 
 PHDRS
 {
-    boot   PT_LOAD FLAGS(5); /* Read + Execute */
-    text   PT_LOAD FLAGS(5); /* Read + Execute */
-    rodata PT_LOAD FLAGS(4); /* Read Only */
-    data   PT_LOAD FLAGS(6); /* Read + Write */
+    pvh   PT_NOTE;
+    boot  PT_LOAD;
+    text  PT_LOAD;
+    rodata PT_LOAD;
+    data  PT_LOAD;
 }
 
 SECTIONS {
-    /* Map kernel at 1MiB VA */
+    /* Map kernel at 1MiB VA/PA */
     . = 1M;
 
-    .boot : ALIGN(4K) {
+    .note.pvh : {
+        KEEP(*(.note.pvh))
+    } :pvh :boot
+
+    .boot : {
+        __boot_start = .;
         KEEP(*(.multiboot_header))
         KEEP(*(.boot_code))
+        __boot_end = .;
     } :boot
+
+
+
 
     .text : ALIGN(4K) {
         __text_start = .;
-        KEEP(*(._start))
-        KEEP(*(.text._start))
+        *(._start)
+        *(.text._start)
         *(.text .text.*)
         __text_end = .;
     } :text
@@ -34,6 +44,8 @@ SECTIONS {
     .data : ALIGN(4K) {
         __data_start = .;
         *(.data .data.*)
+        *(.got .got.*)
+        *(.got.plt .got.plt.*)
         __data_end = .;
     } :data
 
@@ -44,26 +56,27 @@ SECTIONS {
         __bss_end = .;
     } :data
 
+
     /* --- SMME Heap Segments (Military Grade Mapping) --- */
-    /* Reserve 128MB at 16MB VA to ensure no segment overlaps in 512MB RAM */
-    . = ALIGN(1M); 
-    __heap_virtual_base = . < 0x01000000 ? 0x01000000 : ALIGN(4K);
-    . = __heap_virtual_base;
+    /* Use NOLOAD and do NOT assign to a PT_LOAD segment to avoid binary bloat */
     
     .heap (NOLOAD) : ALIGN(4K)
     {
         __heap_start = .;
-        . = . + (128 * 1024 * 1024); 
+        . = . + (16 * 1024 * 1024); /* 16MB is enough for demo stability */
         __heap_end = .;
-    } :data
+    }
+
+
 
     /* Rigid Discard: Destroy all rogue metadata that causes misalignment */
     /DISCARD/ :
     {
-        *(.note .note.*)
+        *(.note.GNU-stack)
         *(.comment)
         *(.eh_frame)
         *(.eh_frame_hdr)
         *(.rel.eh_frame)
     }
 }
+

@@ -2,7 +2,6 @@
 //! 
 //! Implements strict timing checks to ensure soft real-time performance.
 
-use core::sync::atomic::{AtomicU64, Ordering};
 
 pub struct DeadlineScheduler;
 
@@ -16,7 +15,7 @@ impl DeadlineScheduler {
     }
 
     /// Enforce a strict deadline for a task
-    pub fn enforce_deadline(task_id: u64, deadline_tick: u64, current_tick: u64) -> Result<(), &'static str> {
+    pub fn enforce_deadline(_task_id: u64, deadline_tick: u64, current_tick: u64) -> Result<(), &'static str> {
         if current_tick > deadline_tick {
              Err("Deadline Missed")
         } else {

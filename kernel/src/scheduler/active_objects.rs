@@ -236,6 +236,7 @@ impl PriorityQueue {
     }
 
     /// Get highest priority ready task
+    #[allow(dead_code)]
     fn pop_highest(&mut self) -> Option<u32> {
         for level in 0..PRIORITY_LEVELS {
             if self.counts[level] > 0 {
@@ -429,6 +430,7 @@ impl ActiveObjectScheduler {
     }
 
     /// Find highest priority ready task
+    #[allow(dead_code)]
     fn find_next_task(&self) -> Option<usize> {
         // First check priority queue
         if let Some(task_id) = self.ready_queue.peek_highest() {
@@ -638,8 +640,6 @@ impl ActiveObjectScheduler {
         let mut old_priority = 0u8;
         let mut new_priority = 0u8;
         let mut task_id = 0u32;
-        let mut is_ready = false;
-
         if let Some(Some(blocker)) = self.objects.get_mut(blocker_id as usize) {
             if waiter_priority < blocker.priority {
                 task_id = blocker.id;
@@ -649,8 +649,7 @@ impl ActiveObjectScheduler {
                 // Boost priority
                 blocker.boost_priority(waiter_priority);
                 new_priority = blocker.priority;
-                is_ready = blocker.state == ObjectState::Ready;
-                should_insert = is_ready;
+                should_insert = blocker.state == ObjectState::Ready;
             }
         }
         

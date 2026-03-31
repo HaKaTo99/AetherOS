@@ -5,7 +5,6 @@
 //! verified with Dilithium signatures, and then activated by switching the boot flag.
 
 use crate::security::crypto::{AetherQuantumProvider, QuantumSecurity, SecurityLevel};
-use alloc::vec::Vec;
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Partition {

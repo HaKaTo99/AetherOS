@@ -1,7 +1,6 @@
 //! User Mode Demo
 //! Manually switches to EL0 to execute a small piece of code and trigger a syscall.
 
-use core::arch::global_asm;
 
 // Shellcode that will run in User Mode
 // 1. mov x0, #1337      (Argument for syscall)

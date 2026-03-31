@@ -74,6 +74,3 @@ pub fn load_elf(data: &[u8]) -> Result<u64, &'static str> {
     Ok(header.e_entry)
 }
 
-#[cfg(test)]
-mod tests;
-

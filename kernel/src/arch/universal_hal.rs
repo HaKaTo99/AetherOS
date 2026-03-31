@@ -18,14 +18,14 @@ pub struct HardwareNode {
 
 pub struct UniversalHAL {
     nodes: Vec<HardwareNode>,
-    capabilities: Vec<HardwareCapability>,
+    _capabilities: Vec<HardwareCapability>,
 }
 
 impl UniversalHAL {
     pub const fn new() -> Self {
         Self {
             nodes: Vec::new(),
-            capabilities: Vec::new(),
+            _capabilities: Vec::new(),
         }
     }
 
@@ -33,7 +33,7 @@ impl UniversalHAL {
         self.nodes.push(node);
     }
 
-    pub fn query_capability(&self, cap: HardwareCapability) -> bool {
+    pub fn query_capability(&self, _cap: HardwareCapability) -> bool {
         // Implementation for future sentient auto-discovery
         false
     }

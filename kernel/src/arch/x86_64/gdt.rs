@@ -7,16 +7,16 @@ use x86_64::structures::gdt::{Descriptor, GlobalDescriptorTable, SegmentSelector
 use x86_64::structures::tss::TaskStateSegment;
 use x86_64::VirtAddr;
 
-pub const DOUBLE_FAULT_IST_INDEX: u16 = 0;
+pub const DOUBLE_FAULT_IST_INDEX: u16 = 1;
 
 /// Task State Segment (TSS) for handling Double Faults on a dedicated stack
 static TSS: Lazy<TaskStateSegment> = Lazy::new(|| {
     let mut tss = TaskStateSegment::new();
-    tss.interrupt_stack_table[DOUBLE_FAULT_IST_INDEX as usize] = {
-        const STACK_SIZE: usize = 4096 * 5;
+    tss.interrupt_stack_table[DOUBLE_FAULT_IST_INDEX as usize - 1] = {
+        const STACK_SIZE: usize = 4096 * 16;
         static mut STACK: [u8; STACK_SIZE] = [0; STACK_SIZE];
 
-        let stack_start = VirtAddr::from_ptr(unsafe { addr_of!(STACK) });
+        let stack_start = VirtAddr::from_ptr(addr_of!(STACK));
         stack_start + STACK_SIZE // Stack top
     };
     tss

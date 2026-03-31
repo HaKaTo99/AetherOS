@@ -1,6 +1,7 @@
 //! x86_64 Platform Implementation (QEMU/PC)
 
 use super::Platform;
+use crate::drivers::input::{InputEvent, KeyCode, KeyState};
 
 use core::arch::asm;
 
@@ -27,6 +28,21 @@ impl VgaWriter {
     pub fn write_byte(&mut self, byte: u8) {
         match byte {
             b'\n' => self.new_line(),
+            b'\r' => {
+                self.column_position = 0;
+            }
+            8 => {
+                if self.column_position > 0 {
+                    self.column_position -= 1;
+                    let row = VGA_HEIGHT - 1;
+                    let col = self.column_position;
+                    let color_byte = self.color_attribute;
+                    unsafe {
+                        *self.buffer.add(row * VGA_WIDTH + col) =
+                            (color_byte as u16) << 8 | (b' ' as u16);
+                    }
+                }
+            }
             byte => {
                 if self.column_position >= VGA_WIDTH {
                     self.new_line();
@@ -177,28 +193,86 @@ impl X86Platform {
         Self {}
     }
 
-    /// Pompa data dari hardware ke internal buffer (Phase 10.0 Harmony)
-    pub fn poll_hardware(&self) {
+    fn init_ps2_keyboard_minimal(&self) {
         let _guard = InterruptGuard::new();
         unsafe {
-            // 1. Poll Serial Port (Drain entire FIFO for high throughput)
-            let mut limit = 0;
-            while (inb(0x3F8 + 5) & 1) != 0 && limit < 16 {
-                let c = inb(0x3F8);
-                self.process_input_byte(c);
-                limit += 1;
+            // Flush output buffer first
+            for _ in 0..64 {
+                if (inb(0x64) & 0x01) == 0 {
+                    break;
+                }
+                let _ = inb(0x60);
             }
 
-            // 2. Poll PS/2 Keyboard
-            if (inb(0x64) & 1) != 0 {
-                let scancode = inb(0x60);
-                // Military Grade: Scancode validation
-                if scancode != 0 && scancode != 0xFF {
-                    if let Some(c) = self.map_ps2_to_ascii(scancode) {
-                        self.process_input_byte(c);
+            let mut spins = 0usize;
+            while (inb(0x64) & 0x02) != 0 && spins < 100_000 {
+                core::hint::spin_loop();
+                spins += 1;
+            }
+            outb(0x64, 0xAE);
+
+            spins = 0;
+            while (inb(0x64) & 0x02) != 0 && spins < 100_000 {
+                core::hint::spin_loop();
+                spins += 1;
+            }
+            outb(0x60, 0xF4);
+
+            for _ in 0..8 {
+                if (inb(0x64) & 0x01) == 0 {
+                    break;
+                }
+                let _ = inb(0x60);
+            }
+        }
+    }
+
+    /// Pompa data dari hardware ke internal buffer (Phase 10.0 Harmony)
+    pub fn poll_hardware(&self) {
+        // Path A: official PS/2 driver events (set-1)
+        unsafe {
+            let mut event_limit = 0;
+            while event_limit < 32 {
+                match crate::drivers::input::ps2::KEYBOARD.poll() {
+                    Some(InputEvent::Keyboard { key, state }) if state == KeyState::Pressed => {
+                        if let Some(c) = self.map_keycode_to_ascii(key) {
+                            self.process_input_byte(c);
+                        }
+                        event_limit += 1;
                     }
+                    Some(_) => {
+                        event_limit += 1;
+                    }
+                    None => break,
                 }
             }
+        }
+    }
+
+    fn map_keycode_to_ascii(&self, key: KeyCode) -> Option<u8> {
+        match key {
+            KeyCode::Enter => Some(b'\n'),
+            KeyCode::Space => Some(b' '),
+            KeyCode::Backspace => Some(8),
+            KeyCode::Num0 => Some(b'0'), KeyCode::Num1 => Some(b'1'), KeyCode::Num2 => Some(b'2'),
+            KeyCode::Num3 => Some(b'3'), KeyCode::Num4 => Some(b'4'), KeyCode::Num5 => Some(b'5'),
+            KeyCode::Num6 => Some(b'6'), KeyCode::Num7 => Some(b'7'), KeyCode::Num8 => Some(b'8'),
+            KeyCode::Num9 => Some(b'9'),
+            KeyCode::A => Some(b'a'), KeyCode::B => Some(b'b'), KeyCode::C => Some(b'c'),
+            KeyCode::D => Some(b'd'), KeyCode::E => Some(b'e'), KeyCode::F => Some(b'f'),
+            KeyCode::G => Some(b'g'), KeyCode::H => Some(b'h'), KeyCode::I => Some(b'i'),
+            KeyCode::J => Some(b'j'), KeyCode::K => Some(b'k'), KeyCode::L => Some(b'l'),
+            KeyCode::M => Some(b'm'), KeyCode::N => Some(b'n'), KeyCode::O => Some(b'o'),
+            KeyCode::P => Some(b'p'), KeyCode::Q => Some(b'q'), KeyCode::R => Some(b'r'),
+            KeyCode::S => Some(b's'), KeyCode::T => Some(b't'), KeyCode::U => Some(b'u'),
+            KeyCode::V => Some(b'v'), KeyCode::W => Some(b'w'), KeyCode::X => Some(b'x'),
+            KeyCode::Y => Some(b'y'), KeyCode::Z => Some(b'z'),
+            KeyCode::Minus => Some(b'-'), KeyCode::Equal => Some(b'='),
+            KeyCode::LBracket => Some(b'['), KeyCode::RBracket => Some(b']'),
+            KeyCode::Backslash => Some(b'\\'), KeyCode::Semicolon => Some(b';'),
+            KeyCode::Quote => Some(b'\''), KeyCode::Comma => Some(b','),
+            KeyCode::Period => Some(b'.'), KeyCode::Slash => Some(b'/'),
+            _ => None,
         }
     }
 
@@ -206,30 +280,72 @@ impl X86Platform {
         // [MILITARY GRADE DIAGNOSTICS] Log Ring 0 Input (Uncomment for deep audit)
         // crate::enterprise::AUDIT_LOGGER.lock().log_raw(format!("Input: 0x{:02x}", c));
 
-        // System Hotkey Interception
-        if c == b'd' || c == b'D' {
-            let mut dashboard = crate::ui::dashboard::FLEET_DASHBOARD.lock();
-            dashboard.active = !dashboard.active;
-            if dashboard.active {
-                dashboard.render();
-            }
-            return;
-        }
-
         // Normal char goes to queue
         INPUT_QUEUE.lock().push(c);
     }
 
+    #[allow(dead_code)]
     fn map_ps2_to_ascii(&self, scancode: u8) -> Option<u8> {
-        if scancode & 0x80 != 0 { return None; }
+        // Deterministic mode: default to Set-1 make codes only.
+        if scancode == 0xE0 || scancode == 0xF0 || scancode & 0x80 != 0 {
+            return None;
+        }
+
+        // Full US QWERTY Set 1 scancode to ASCII (unshifted)
         match scancode {
             0x1C => Some(b'\n'), 0x39 => Some(b' '), 0x0E => Some(8),
-            0x02..=0x0B => { if scancode == 0x0B { Some(b'0') } else { Some(b'0' + (scancode - 1)) } },
-            0x0C => Some(b'-'), 0x35 => Some(b'/'), 0x37 => Some(b'*'), 0x4E => Some(b'+'),
-            0x20 => Some(b'd'), 0x21 => Some(b'f'),
+            0x02 => Some(b'1'), 0x03 => Some(b'2'), 0x04 => Some(b'3'), 0x05 => Some(b'4'),
+            0x06 => Some(b'5'), 0x07 => Some(b'6'), 0x08 => Some(b'7'), 0x09 => Some(b'8'),
+            0x0A => Some(b'9'), 0x0B => Some(b'0'),
+            0x0C => Some(b'-'), 0x0D => Some(b'='),
+            0x10 => Some(b'q'), 0x11 => Some(b'w'), 0x12 => Some(b'e'), 0x13 => Some(b'r'),
+            0x14 => Some(b't'), 0x15 => Some(b'y'), 0x16 => Some(b'u'), 0x17 => Some(b'i'),
+            0x18 => Some(b'o'), 0x19 => Some(b'p'),
+            0x1A => Some(b'['), 0x1B => Some(b']'),
+            0x1E => Some(b'a'), 0x1F => Some(b's'), 0x20 => Some(b'd'), 0x21 => Some(b'f'),
+            0x22 => Some(b'g'), 0x23 => Some(b'h'), 0x24 => Some(b'j'), 0x25 => Some(b'k'),
+            0x26 => Some(b'l'), 0x27 => Some(b';'), 0x28 => Some(b'\''),
+            0x29 => Some(b'`'),
+            0x2B => Some(b'\\'),
+            0x2C => Some(b'z'), 0x2D => Some(b'x'), 0x2E => Some(b'c'), 0x2F => Some(b'v'),
+            0x30 => Some(b'b'), 0x31 => Some(b'n'), 0x32 => Some(b'm'),
+            0x33 => Some(b','), 0x34 => Some(b'.'), 0x35 => Some(b'/'),
+            // Numpad and fallback for symbols
+            0x37 => Some(b'*'), 0x4E => Some(b'+'), 0x4A => Some(b'-'),
+            // Extended/fallback for missing symbols (assign to unused scancodes or numpad/fn keys)
+            0x56 => Some(b'|'), // <\|> key (ISO)
+            0x73 => Some(b'_'), // Fallback for _
+            0x7D => Some(b'{'), // Fallback for {
+            0x7E => Some(b'}'), // Fallback for }
+            0x41 => Some(b','), // Numpad ,
+            0x5B => Some(b'~'), // F11 (as ~ fallback)
+            0x5C => Some(b'!'), // F12 (as ! fallback)
+            0x5D => Some(b'@'), // F13 (as @ fallback)
+            0x5E => Some(b'#'), // F14 (as # fallback)
+            0x5F => Some(b'$'), // F15 (as $ fallback)
+            0x60 => Some(b'%'), // F16 (as % fallback)
+            0x61 => Some(b'^'), // F17 (as ^ fallback)
+            0x62 => Some(b'&'), // F18 (as & fallback)
+            0x63 => Some(b'*'), // F19 (as * fallback)
+            0x64 => Some(b'('), // F20 (as ( fallback)
+            0x65 => Some(b')'), // F21 (as ) fallback)
+            0x66 => Some(b'?'), // F22 (as ? fallback)
+            0x67 => Some(b'"'), // F23 (as " fallback)
+            0x68 => Some(b':'), // Fallback for :
+            0x69 => Some(b';'), // Fallback for ;
+            0x6A => Some(b'<'), // Fallback for <
+            0x6B => Some(b'>'), // Fallback for >
+            0x6C => Some(b'['), // Fallback for [
+            0x6D => Some(b']'), // Fallback for ]
+            0x6E => Some(b'/'), // Fallback for /
+            0x6F => Some(b'\\'), // Fallback for \
+            0x70 => Some(b'+'), // Fallback for +
+            0x71 => Some(b'='), // Fallback for =
+            // Shifted symbols are not handled here (would require shift state tracking)
             _ => None,
         }
     }
+
 }
 
 // IO Helpers
@@ -240,32 +356,42 @@ unsafe fn outb(port: u16, val: u8) {
 
 #[inline]
 unsafe fn inb(port: u16) -> u8 {
-    // Military Grade: Port Range Validation
-    if port > 0xFFFF { return 0; }
     let ret: u8;
     asm!("in al, dx", out("al") ret, in("dx") port, options(nostack, nomem, preserves_flags));
     ret
 }
 
-/// Military Grade RAII Interrupt Guard
-struct InterruptGuard;
+/// Military Grade RAII Interrupt Guard (State Aware)
+struct InterruptGuard {
+    enabled: bool,
+}
 
 impl InterruptGuard {
     fn new() -> Self {
-        unsafe { asm!("cli", options(nomem, nostack)); }
-        InterruptGuard
+        let rflags: u64;
+        unsafe {
+            asm!("pushfq; pop {}", out(reg) rflags, options(nomem, preserves_flags));
+            asm!("cli", options(nomem, nostack));
+        }
+        // IF bit is bit 9
+        Self { enabled: (rflags & (1 << 9)) != 0 }
     }
 }
 
 impl Drop for InterruptGuard {
     fn drop(&mut self) {
-        unsafe { asm!("sti", options(nomem, nostack)); }
+        if self.enabled {
+            unsafe { asm!("sti", options(nomem, nostack)); }
+        }
     }
 }
+
 
 impl Platform for X86Platform {
     fn init(&self) {
         SERIAL.init();
+        unsafe { crate::drivers::input::ps2::KEYBOARD.init(); }
+        self.init_ps2_keyboard_minimal();
         self.puts("X86_64 HAL Initialized (v10.2 Supreme Grade)\n");
     }
 
@@ -293,16 +419,13 @@ impl Platform for X86Platform {
 
     fn get_char(&self) -> u8 {
         loop {
-            // Pump hardware
-            self.poll_hardware();
-            
-            // Check queue
             if let Some(c) = INPUT_QUEUE.lock().pop() {
                 return c;
             }
-            
-            // Background maintenance while waiting
-            crate::kernel_tick();
+
+            self.poll_hardware();
+
+            // Keep input path deterministic and low-latency while waiting.
             core::hint::spin_loop();
         }
     }
@@ -313,7 +436,10 @@ impl Platform for X86Platform {
     }
 
     fn clear(&self) {
-        SERIAL.clear();
+        unsafe {
+            let vga_ptr = core::ptr::addr_of_mut!(VGA);
+            (*vga_ptr).clear_with_color(0x0F);
+        }
         let mut queue = INPUT_QUEUE.lock();
         queue.head = 0;
         queue.tail = 0;

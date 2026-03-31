@@ -37,7 +37,7 @@ fn sys_write(fd: usize, buf_ptr: usize, count: usize) -> isize {
         log_security(AuditSeverity::Critical, "Syscall", e);
         return -13; // EACCES
     }
-    let username = rbac.get_current_user().map(|u| u.username.as_str()).unwrap_or("Unknown");
+    let username = rbac.get_current_user().map(|u| u.username).unwrap_or("Unknown");
 
     // For now, assume fd 1 (stdout) and 2 (stderr) go to serial console
     if fd == 1 || fd == 2 {
