@@ -7,6 +7,19 @@ on:
 jobs:
   smoke:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        scenario:
+          - name: default
+            mem_mb: 1024
+            smp_cores: 2
+            cpu_model: qemu64
+            timeout: 25
+          - name: low-mem
+            mem_mb: 512
+            smp_cores: 1
+            cpu_model: qemu64
+            timeout: 30
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -14,8 +27,35 @@ jobs:
       - name: Install QEMU
         run: |
           sudo apt-get update
-          sudo apt-get install -y qemu-system-x86 qemu-system-aarch64 || true
+          sudo apt-get install -y qemu-system-x86 qemu-system-aarch64
 
-      - name: Smoke check QEMU
+      - name: Setup Rust nightly with rust-src
+        uses: dtolnay/rust-toolchain@nightly
+        with:
+          toolchain: nightly
+          components: rust-src
+          targets: x86_64-unknown-none
+
+      - name: Run QEMU smoke test
         run: |
-          qemu-system-x86_64 --version || qemu-system-aarch64 --version
+          chmod +x scripts/qemu-smoke.sh
+          MEM_MB=${{ matrix.scenario.mem_mb }} \
+          SMP_CORES=${{ matrix.scenario.smp_cores }} \
+          CPU_MODEL=${{ matrix.scenario.cpu_model }} \
+          TIMEOUT_SECONDS=${{ matrix.scenario.timeout }} \
+            scripts/qemu-smoke.sh
+
+      - name: Rename log per scenario
+        if: always()
+        run: |
+          mkdir -p target
+          if [ -f target/qemu-smoke.log ]; then
+            mv target/qemu-smoke.log target/qemu-smoke-${{ matrix.scenario.name }}.log
+          fi
+
+      - name: Upload QEMU smoke log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: qemu-smoke-log-${{ matrix.scenario.name }}
+          path: target/qemu-smoke-${{ matrix.scenario.name }}.log

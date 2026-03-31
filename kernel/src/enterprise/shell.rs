@@ -1,437 +1,741 @@
-//! Aether Interactive Shell (Phase 38.2)
-//!
-//! Encapsulates the boot-time login and command handling logic.
+//! Aether Interactive Shell (no-alloc stable parser)
 
 use crate::hal;
-use alloc::string::String;
-use alloc::vec::Vec;
-use crate::runtime::android::{ApkManifest, APK_INSTALLER};
-use crate::runtime::posix::Vfs;
-use crate::compat::win32::{Win32Loader, sys_win32_create_process};
+use alloc::string::ToString;
+use core::sync::atomic::{AtomicUsize, Ordering};
+
+const SOFT_CLEAR_LINES: usize = 24;
+const INPUT_MAX: usize = 64;
+const LETTERS_MAX: usize = 64;
+const ACTIVE_COMMANDS: [&str; 5] = ["help", "calc", "clear", "exit", "meshstatus"];
+const SHELL_POLICY_STAGE_LABEL: &str = "Stage-7 lockdown";
+const BRIDGE_AUDIT_THROTTLE_TICKS: usize = 16;
+const UNKNOWN_AUDIT_THROTTLE_TICKS: usize = 64;
+const POLICY_SELF_CHECK_TAG: &str = "shell-command-policy";
+const BRIDGE_COMMANDS: [&str; 23] = [
+    "omni", "python", "node", "java", "rustc", "php",
+    "linux", "unix", "windows", "mac", "harmony", "symbian", "webos",
+    "blender", "vlc", "apk",
+    "intent", "identity", "evolve", "tactical", "captrade", "onemind", "bci",
+];
+const COMMAND_PREFIXES: &[(&[u8], &str)] = &[
+    (b"help", "help"),
+    (b"exit", "exit"),
+    (b"clear", "clear"),
+    (b"calc", "calc"),
+    (b"meshstatus", "meshstatus"),
+    (b"omni", "omni"),
+    (b"python", "python"),
+    (b"node", "node"),
+    (b"java", "java"),
+    (b"rustc", "rustc"),
+    (b"php", "php"),
+    (b"linux", "linux"),
+    (b"unix", "unix"),
+    (b"windows", "windows"),
+    (b"mac", "mac"),
+    (b"harmony", "harmony"),
+    (b"symbian", "symbian"),
+    (b"webos", "webos"),
+    (b"blender", "blender"),
+    (b"vlc", "vlc"),
+    (b"apk", "apk"),
+    (b"intent", "intent"),
+    (b"identity", "identity"),
+    (b"evolve", "evolve"),
+    (b"tactical", "tactical"),
+    (b"captrade", "captrade"),
+    (b"onemind", "onemind"),
+    (b"bci", "bci"),
+];
 
 pub struct AetherShell;
 
+static LAST_BRIDGE_AUDIT_TICK: AtomicUsize = AtomicUsize::new(0);
+static LAST_UNKNOWN_AUDIT_TICK: AtomicUsize = AtomicUsize::new(0);
+
+enum CommandExec {
+    Handled,
+    Exit,
+    Unknown,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+enum CommandPolicy {
+    Active,
+    BridgeDenied,
+    Unknown,
+}
+
+struct LineInput {
+    buf: [u8; INPUT_MAX],
+    len: usize,
+}
+
+impl LineInput {
+    const fn new() -> Self {
+        Self { buf: [0; INPUT_MAX], len: 0 }
+    }
+
+    fn is_empty(&self) -> bool {
+        self.len == 0
+    }
+
+    fn as_slice(&self) -> &[u8] {
+        &self.buf[..self.len]
+    }
+}
+
+fn build_marker() -> &'static str {
+    option_env!("AETHER_BUILD_ID").unwrap_or("INPUT-STABLE-UNSTAMPED")
+}
+
+pub fn self_test_core_commands() {
+    let platform = hal::get_platform();
+    let cases: [(&[u8], &str); 8] = [
+        (b"1", "help"),
+        (b"2", "calc"),
+        (b"3", "clear"),
+        (b"0", "exit"),
+        (b"help", "help"),
+        (b"calc", "calc"),
+        (b"clear", "clear"),
+        (b"exit", "exit"),
+    ];
+
+    let mut passed = 0usize;
+    for (input, expected) in cases {
+        if resolve_core_command(input) == expected {
+            passed += 1;
+        }
+    }
+
+    platform.puts("[SMOKE] shell-core ");
+    if passed == cases.len() {
+        platform.puts("PASS\r\n");
+    } else {
+        platform.puts("FAIL\r\n");
+    }
+}
+
 impl AetherShell {
-    /// Starts the interactive shell session.
-    ///
-    /// Versi demo: tidak ada login/password, langsung masuk ke Sovereign Shell.
-    /// Perbaikan ekstrem: bypass OmniLang input, pakai pembacaan serial blokir langsung.
     pub fn start() {
         let platform = hal::get_platform();
 
-
-
         platform.puts("--- AetherOS v10.1 Sovereign Shell ---\r\n");
+        platform.puts("[BUILD] ");
+        platform.puts(build_marker());
+        platform.puts("\r\n");
         platform.puts("[AUTHORITY] Welcome, Architect Herman Krisnanto.\r\n");
-        platform.puts("Type 'help' for commands.\r\n");
+        print_policy_self_check(platform);
+        platform.puts("Type 'help' (or 1) for commands.\r\n");
+        platform.puts("Shortcuts: 1=help, 2=calc, 3=clear, 0=exit\r\n");
 
         loop {
             platform.puts("\r\nAetherShell> ");
-            let input = read_line(platform);
-            let cmd = input.trim();
+            let line = read_line(platform);
+            if line.is_empty() {
+                continue;
+            }
 
-            if cmd == "exit" {
-                break;
-            } else if cmd == "help" {
-                platform.puts("\r\nAvailable Commands:\r\n");
-                platform.puts("  omni [code]   : Compile and run OmniLang code\r\n");
-                platform.puts("  blender [file]: Start headless render job (.blend)\r\n");
-                platform.puts("  vlc [file]    : Play multimedia resource\r\n");
-                platform.puts("  apk [flags]   : Android App Bridge (--install, --list, --run)\r\n");
-                platform.puts("  linux [flags] : POSIX Compatibility Layer (--shell, --run)\r\n");
-                platform.puts("  unix [flags]  : Classic UNIX (BSD/SysV) Compatibility Bridge\r\n");
-                platform.puts("  windows [args]: Win32 Execution Bridge (--run)\r\n");
-                platform.puts("  mac [args]    : Darwin (macOS/iOS) Bridge (--run)\r\n");
-                platform.puts("  harmony [args]: HarmonyOS Distributed Ability Bridge (--run)\r\n");
-                platform.puts("  symbian [args]: EPOC/Symbian OS Legacy Bridge (--run)\r\n");
-                platform.puts("  python [file] : Python 3.12 Engine (interpreted via POSIX)\r\n");
-                platform.puts("  node [file]   : Node.js/QuickJS Runtime (JavaScript/TypeScript)\r\n");
-                platform.puts("  java [class]  : Java/Kotlin Virtual Machine (ART/Dalvik)\r\n");
-                platform.puts("  rustc [file]  : Native Rust Compiler & Toolchain\r\n");
-                platform.puts("  php [file]    : PHP 8.3 & Laravel Runtime\r\n");
-                platform.puts("  webos [args]  : WebOS Sandboxed Container Bridge (--launch)\r\n");
-                platform.puts("  intent [mode] : Sectoral AI context switch (--sector)\r\n");
-                platform.puts("  identity [cmd]: SSI Identity management (--create)\r\n");
-                platform.puts("  evolve        : Trigger Autonomous Evolution Core self-diagnostic\r\n");
-                platform.puts("  tactical [cmd]: Military-Grade Mesh Controller (--stealth, --flash)\r\n");
-                platform.puts("  captrade [cmd]: Global Ability Economy (--bid, --ask)\r\n");
-                platform.puts("  onemind [cmd] : Universal Intelligence Fabric (--sync)\r\n");
-                platform.puts("  bci [cmd]      : Neural Link Synthesis Bridge (--sync)\r\n");
-                platform.puts("  calc          : Run simple calculator demo\r\n");
-                platform.puts("  clear         : Clear screen\r\n");
-                platform.puts("  exit          : Shutdown shell\r\n");
-            } else if cmd.starts_with("omni ") {
-                let source = &cmd[5..];
-                platform.puts("\r\n[OmniBridge] Compiling...\r\n");
-                if let Ok(output) = crate::runtime::omnilang_bridge::OmniBridge::compile_and_run(source) {
-                    platform.puts("[Output] ");
-                    platform.puts(&output);
-                    platform.puts("\r\n");
-                }
-            } else if cmd.starts_with("blender ") {
-                let filename = cmd[8..].trim();
-                platform.puts("\r\n[Blender] Initializing Compute Node...\r\n");
-                let mut node = crate::runtime::media::blender::BlenderComputeNode::new();
-                match node.start_render(filename) {
-                    Ok(res) => {
-                         platform.puts(&res);
-                         platform.puts("\r\n");
-                    },
-                    Err(e) => {
-                         platform.puts("Error: ");
-                         platform.puts(e);
-                         platform.puts("\r\n");
+            let core = resolve_core_command(line.as_slice());
+            match execute_command(platform, core) {
+                CommandExec::Handled => {}
+                CommandExec::Exit => break,
+                CommandExec::Unknown => {
+                    platform.puts("\r\nUnknown command. Type 'help'.\r\n");
+                    platform.puts("[DEBUG] Raw input: ");
+                    for b in line.as_slice() {
+                        platform.puts(&format!("{:02X} ", b));
                     }
-                }
-            } else if cmd.starts_with("vlc ") {
-                let filename = cmd[4..].trim();
-                platform.puts("\r\n[VLC] Initializing Universal Media Player...\r\n");
-                if let Ok(mut player) = crate::runtime::MediaRuntime::new(filename) {
-                    let _ = player.play();
-                } else {
-                    platform.puts("Error: Failed to load Media Runtime.\r\n");
-                }
-            } else if cmd.starts_with("apk ") {
-                let args = cmd[4..].trim();
-                if args == "--list" {
-                    platform.puts("\r\n[Android] Installed APKs:\r\n");
-                    let installer = crate::runtime::android::APK_INSTALLER.lock();
-                    for app in installer.list() {
-                        platform.puts("  - ");
-                        platform.puts(app);
-                        platform.puts("\r\n");
+                    platform.puts(" | ");
+                    for b in line.as_slice() {
+                        let c = *b as char;
+                        if c.is_ascii_graphic() || c == ' ' {
+                            platform.puts(&format!("{}", c));
+                        } else {
+                            platform.puts(".");
+                        }
                     }
-                    if installer.list().is_empty() {
-                         platform.puts("  (No apps installed)\r\n");
-                    }
-                } else if args.starts_with("--install ") {
-                    let pkg = args[10..].trim();
-                    platform.puts("\r\n[Android] Installing: ");
-                    platform.puts(pkg);
-                    platform.puts("...\r\n");
-                    
-                    let manifest = crate::runtime::android::ApkManifest {
-                        package: String::from(pkg),
-                        version_code: 1,
-                        version_name: String::from("1.0"),
-                        min_sdk: 33,
-                        main_activity: String::from("MainActivity"),
-                    };
-                    
-                    let mut installer = crate::runtime::android::APK_INSTALLER.lock();
-                    if let Ok(_) = installer.install(manifest, alloc::vec![]) {
-                        platform.puts("[Android] Success: APK installed to /data/app/\r\n");
-                    } else {
-                        platform.puts("[Android] Error: Installation failed.\r\n");
-                    }
-                } else if args.starts_with("--run ") {
-                    let pkg = args[6..].trim();
-                    platform.puts("\r\n[Android] Starting Activity: ");
-                    platform.puts(pkg);
-                    platform.puts("\r\n");
-                    
-                    let installer = crate::runtime::android::APK_INSTALLER.lock();
-                    if let Some(app) = installer.find(pkg) {
-                        platform.puts("[Android] Initializing ART (Android Runtime)...\r\n");
-                        platform.puts("[Android] Loading DEX: ");
-                        platform.puts(&app.manifest.package);
-                        platform.puts("\r\n");
-                        platform.puts("[Android] Execution: MainActivity.onCreate()\r\n");
-                        platform.puts("[Android] Process Lifecycle: OK.\r\n");
-                    } else {
-                        platform.puts("[Android] Error: App not found.\r\n");
-                    }
-                } else {
-                    platform.puts("Usage: apk [--install <pkg> | --list | --run <pkg>]\r\n");
-                }
-            } else if cmd.starts_with("linux ") {
-                let args = cmd[6..].trim();
-                if args == "--shell" {
-                    platform.puts("\r\n[Linux] Initializing POSIX Environment...\r\n");
-                    let _vfs = Vfs::new();
-                    platform.puts("[Linux] VFS (dev, proc, tmp, home) mounted.\r\n");
-                    platform.puts("[Linux] aether@fabric:~$ _\r\n");
-                } else if args.starts_with("--run ") {
-                    let bin = args[6..].trim();
-                    platform.puts("\r\n[Linux] Loading ELF binary: ");
-                    platform.puts(bin);
-                    platform.puts("\r\n");
-                    platform.puts("[Linux] Mapping segments... Done.\r\n");
-                    platform.puts("[Linux] Executing: posix_spawn()\r\n");
-                } else {
-                    platform.puts("Usage: linux [--shell | --run <bin>]\r\n");
-                }
-            } else if cmd.starts_with("unix ") {
-                let args = cmd[5..].trim();
-                platform.puts("\r\n[UNIX] Classic POSIX/BSD Compatibility Layer (Phase 15.1)...\r\n");
-                if args == "--shell" {
-                    platform.puts("[UNIX] Spawning Bourne-Compatible Shell (sh)...\r\n");
-                    platform.puts("unix# ");
-                } else if args.starts_with("--run ") {
-                    let bin = args[6..].trim();
-                    platform.puts("[UNIX] Executing ELF/Static Binary: ");
-                    platform.puts(bin);
-                    platform.puts("\r\n");
-                    platform.puts("[UNIX] Status: System V Syscall Mapping OK.\r\n");
-                } else {
-                    platform.puts("Usage: unix [--shell | --run <bin>]\r\n");
-                }
-            } else if cmd.starts_with("windows ") {
-                let args = cmd[8..].trim();
-                if args.starts_with("--run ") {
-                    let exe = args[6..].trim();
-                    platform.puts("\r\n[Windows] Initializing Win32 Bridge...\r\n");
-                    if sys_win32_create_process(exe) {
-                        let mut loader = Win32Loader::new();
-                        loader.load_pe(alloc::vec![0; 100].as_slice());
-                        loader.resolve_imports();
-                        platform.puts("[Windows] Process started successfully.\r\n");
-                    }
-                } else {
-                    platform.puts("Usage: windows [--run <exe>]\r\n");
-                }
-            } else if cmd.starts_with("mac ") {
-                let args = cmd[4..].trim();
-                platform.puts("\r\n[Darwin] Accessing macOS/iOS Compatibility Bridge (Phase 28.5)...\r\n");
-                if args.starts_with("--run ") {
-                    let bin = args[6..].trim();
-                    platform.puts("[Darwin] Initializing Mach-O Execution Environment...\r\n");
-                    platform.puts("[Darwin] Loading Binary: ");
-                    platform.puts(bin);
-                    platform.puts("\r\n");
-                    platform.puts("[Darwin] Status: Mach-O Segment Mapping SUCCESS.\r\n");
-                } else {
-                    platform.puts("Usage: mac [--run <app>]\r\n");
-                }
-            } else if cmd.starts_with("harmony ") {
-                let args = cmd[8..].trim();
-                platform.puts("\r\n[HarmonyOS] Active Ability Bridge (Phase 28.6)...\r\n");
-                if args.starts_with("--run ") {
-                    let hap = args[6..].trim();
-                    platform.puts("[HarmonyOS] Loading Package: ");
-                    platform.puts(hap);
-                    platform.puts("\r\n");
-                    let mut loader = crate::compat::harmony::HarmonyLoader::new();
-                    loader.load_hap(&[]); // Simulation
-                    loader.execute_ability(hap);
-                } else {
-                    platform.puts("Usage: harmony --run <hap_package>\r\n");
-                }
-            } else if cmd.starts_with("symbian ") {
-                let args = cmd[8..].trim();
-                platform.puts("\r\n[Symbian] EPOC32 Legacy Bridge (Phase 28.5)...\r\n");
-                if args.starts_with("--run ") {
-                    let app = args[6..].trim();
-                    platform.puts("[Symbian] Initializing E32 Active Scheduler...\r\n");
-                    platform.puts("[Symbian] Mapping binary: ");
-                    platform.puts(app);
-                    platform.puts("\r\n");
-                    let mut loader = crate::compat::epoc::EpocLoader::new();
-                    loader.load_e32(&[]); // Simulation
-                    loader.execute();
-                } else {
-                    platform.puts("Usage: symbian --run <e32_binary>\r\n");
-                }
-            } else if cmd.starts_with("webos ") {
-                let args = cmd[6..].trim();
-                platform.puts("\r\n[WebOS] Application Container Bridge (Phase 28.6)...\r\n");
-                if args.starts_with("--launch ") {
-                    let app_id = args[9..].trim();
-                    let mut runtime = crate::compat::webos::WebOSRuntime::new();
-                    runtime.launch_app(app_id);
-                    platform.puts("[WebOS] Lunar Bus Sync: OK.\r\n");
-                } else {
-                    platform.puts("Usage: webos --launch <app_id>\r\n");
-                }
-            } else if cmd.starts_with("python ") {
-                let file = cmd[7..].trim();
-                platform.puts("\r\n[Python 3.12] Initializing Interpreter (POSIX Bridge)...\r\n");
-                platform.puts("[Python] Loading: ");
-                platform.puts(file);
-                platform.puts("\r\n[Python] Status: Execution SUCCESS.\r\n");
-            } else if cmd.starts_with("node ") {
-                let file = cmd[5..].trim();
-                platform.puts("\r\n[Node.js/QuickJS] Initializing V8-Lite Engine (Phase 18)...\r\n");
-                platform.puts("[Node] Loading: ");
-                platform.puts(file);
-                platform.puts("\r\n[Node] Status: Garbage Collection & Execution OK.\r\n");
-            } else if cmd.starts_with("java ") {
-                let class_name = cmd[5..].trim();
-                platform.puts("\r\n[JVM/ART] Starting Android Runtime (Dalvik-Bridge)...\r\n");
-                platform.puts("[JVM] Loading Class: ");
-                platform.puts(class_name);
-                platform.puts("\r\n[JVM] Status: Bytecode verification SUCCESS.\r\n");
-            } else if cmd.starts_with("rustc ") {
-                let file = cmd[6..].trim();
-                platform.puts("\r\n[Rustc] Accessing Native Toolchain...\r\n");
-                platform.puts("[Rustc] Compiling: ");
-                platform.puts(file);
-                platform.puts("\r\n[Rustc] Output: Aether Native Binary (SMME-Aware) Generated.\r\n");
-            } else if cmd.starts_with("php ") {
-                let file = cmd[4..].trim();
-                platform.puts("\r\n[PHP 8.3] Starting PHP-FPM Bridge (Phase 19)...\r\n");
-                platform.puts("[PHP] Executing: ");
-                platform.puts(file);
-                platform.puts("\r\n[PHP] Status: Laravel-ready Environment OK.\r\n");
-            } else if cmd.starts_with("intent ") {
-                let args = cmd[7..].trim();
-                if args.starts_with("--sector ") {
-                    let sector_name = args[9..].trim();
-                    let mut engine = crate::runtime::ai::sectoral::SECTORAL_ENGINE.lock();
-                    let mode = match sector_name {
-                        "industrial" => crate::runtime::ai::sectoral::SectorMode::Industrial,
-                        "medical" => crate::runtime::ai::sectoral::SectorMode::Medical,
-                        "military" => crate::runtime::ai::sectoral::SectorMode::Military,
-                        "research" => crate::runtime::ai::sectoral::SectorMode::Research,
-                        _ => crate::runtime::ai::sectoral::SectorMode::General,
-                    };
-                    engine.set_mode(mode);
-                    platform.puts("\r\n[SectoralAI] Policy: ");
-                    platform.puts(&engine.get_policy_description());
-                    platform.puts("\r\n");
-                } else {
-                    platform.puts("Usage: intent --sector [industrial|medical|military|research|general]\r\n");
-                }
-            } else if cmd.starts_with("identity ") {
-                let args = cmd[9..].trim();
-                if args.starts_with("--create ") {
-                    let owner = args[9..].trim();
-                    let mut manager = crate::security::identity::ssi::SSI_MANAGER.lock();
-                    let did = manager.generate_local_did(owner);
-                    platform.puts("\r\n[SSI] DID Generated: ");
-                    platform.puts(&did);
-                    platform.puts("\r\n[SSI] Controller: ");
-                    platform.puts(owner);
-                    platform.puts("\r\n[SSI] PQC Anchor: Kyber-768/Dilithium-3 Verified.\r\n");
-                } else {
-                    platform.puts("Usage: identity --create <owner_name>\r\n");
-                }
-            } else if cmd == "evolve" {
-                platform.puts("\r\n[Evolution] Accessing Singularity Era Core (Phase 30.1)...\r\n");
-                let mut core = crate::runtime::ai::evolution::EVOLUTION_CORE.lock();
-                platform.puts("[Evolution] Running Diagnostic: ");
-                platform.puts(&core.run_self_diagnostic());
-                platform.puts("\r\n");
-                
-                platform.puts("[Evolution] Generation: ");
-                let gen_str = format!("{}", core.generation);
-                platform.puts(&gen_str);
-                platform.puts("\r\n");
-                
-                platform.puts("[Evolution] Triggering adaptation in background...\r\n");
-                core.trigger_adaptation();
-                platform.puts("[Evolution] Status: ASCENDING.\r\n");
-            } else if cmd.starts_with("tactical ") {
-                let args = cmd[9..].trim();
-                platform.puts("\r\n[Tactical] Accessing Sovereign Tactical Mesh (Phase 29.1)...\r\n");
-                let mut controller = crate::mesh::tactical::TACTICAL_CONTROLLER.lock();
-                if args == "--stealth" {
-                    controller.enable_stealth_mode();
-                    platform.puts("[Tactical] Stealth Mode: ACTIVE (Radio Silence).\r\n");
-                } else if args.starts_with("--flash ") {
-                    let msg = args[8..].trim();
-                    controller.send_secure_flash(msg.as_bytes());
-                    platform.puts("[Tactical] FLASH SENT: ");
-                    platform.puts(msg);
                     platform.puts("\r\n");
                 }
-            } else if cmd.starts_with("captrade ") {
-                let args = cmd[9..].trim();
-                platform.puts("\r\n[CapTrade] Accessing Global Ability Market...\r\n");
-                let mut manager = crate::distributed::CAPTRADE_MANAGER.lock();
-                if args.starts_with("--bid ") {
-                    let parts: Vec<&str> = args[6..].split_whitespace().collect();
-                    if parts.len() >= 2 {
-                        let res_type = match parts[0] {
-                            "storage" => crate::distributed::market::ResourceType::Storage(1024),
-                            _ => crate::distributed::market::ResourceType::Compute(10),
-                        };
-                        let price = parts[1].parse::<u64>().unwrap_or(10);
-                        manager.place_bid(1, res_type, price);
-                        platform.puts("[CapTrade] BID PLACED SUCCESS.\r\n");
-                    }
-                } else if args.starts_with("--ask ") {
-                    let parts: Vec<&str> = args[6..].split_whitespace().collect();
-                    if parts.len() >= 2 {
-                        let res_type = match parts[0] {
-                            "storage" => crate::distributed::market::ResourceType::Storage(1024),
-                            _ => crate::distributed::market::ResourceType::Compute(10),
-                        };
-                        let price = parts[1].parse::<u64>().unwrap_or(10);
-                        manager.place_ask(1, res_type, price);
-                        platform.puts("[CapTrade] ASK PLACED SUCCESS.\r\n");
-                    }
-                } else {
-                    platform.puts("Usage: captrade [--bid <type> <price> | --ask <type> <price>]\r\n");
-                }
-            } else if cmd.starts_with("onemind ") {
-                let args = cmd[8..].trim();
-                platform.puts("\r\n[OneMind] Initiating Collective Intelligence Sync...\r\n");
-                if args == "--sync" {
-                    let mut fabric = crate::runtime::ai::onemind::ONEMIND_FABRIC.lock();
-                    fabric.ingest_local_sensory();
-                    let count = fabric.sync_global_mesh();
-                    platform.puts("[OneMind] Sync Success. Aggregated ");
-                    platform.puts(&alloc::format!("{}", count));
-                    platform.puts(" sensory nodes into the Fabric.\r\n");
-                    platform.puts(&fabric.get_status());
-                    platform.puts("\r\n");
-                } else {
-                    platform.puts("Usage: onemind --sync\r\n");
-                }
-            } else if cmd.starts_with("bci ") {
-                let args = cmd[4..].trim();
-                platform.puts("\r\n[BCI] Accessing Neural Harmony Link (Phase 29)...\r\n");
-                if args == "--sync" {
-                    platform.puts("[BCI] Calibrating Neural Signals...\r\n");
-                    platform.puts("[BCI] Signal Strength: 98% (Phase-Locked).\r\n");
-                    platform.puts("[BCI] Neural Link Online. Thinking is Input.\r\n");
-                } else {
-                    platform.puts("Usage: bci --sync\r\n");
-                }
-            } else if cmd == "calc" {
-                 // Calculator Logic
-                 platform.puts("\r\n[Calculator] Mode Active (Press Ctrl+C to exit - simulation)\r\n");
-                 // ... (Simplified calculator logic could go here or be a separate function)
-                 platform.puts("Calculator demo skipped for shell responsiveness.\r\n");
-            } else if cmd == "clear" {
-                platform.clear();
-            } else if !cmd.is_empty() {
-                platform.puts("\r\nUnknown command. Type 'help'.\r\n");
             }
         }
 
         platform.puts("\r\nShutting down...\r\n");
         platform.shutdown();
     }
+
+    pub fn handle_command(cmd: &str) {
+        let platform = hal::get_platform();
+        match execute_command(platform, resolve_core_command(cmd.as_bytes())) {
+            CommandExec::Exit => {
+                platform.puts("\r\nShutting down...\r\n");
+                platform.shutdown();
+            }
+            CommandExec::Handled => {}
+            CommandExec::Unknown => platform.puts("\r\nUnknown command. Type 'help'.\r\n"),
+        }
+    }
 }
 
-// Helper: baca satu baris dari serial (blocking), echo, handle backspace.
-fn read_line(platform: &dyn hal::Platform) -> alloc::string::String {
-    let mut buf = alloc::string::String::new();
-    loop {
-        let c = platform.get_char(); // blocking sampai ada data
-        // filter noise
-        if c == 0 || c == 0xFF { continue; }
+fn is_bridge_command(cmd: &str) -> bool {
+    BRIDGE_COMMANDS.iter().any(|name| *name == cmd)
+}
 
-        // newline: selesai
+fn classify_command_policy(cmd: &str) -> CommandPolicy {
+    if ACTIVE_COMMANDS.iter().any(|name| *name == cmd) {
+        CommandPolicy::Active
+    } else if is_bridge_command(cmd) {
+        CommandPolicy::BridgeDenied
+    } else {
+        CommandPolicy::Unknown
+    }
+}
+
+fn has_duplicate_entries(entries: &[&str]) -> bool {
+    for (i, lhs) in entries.iter().enumerate() {
+        for rhs in entries.iter().skip(i + 1) {
+            if lhs == rhs {
+                return true;
+            }
+        }
+    }
+    false
+}
+
+fn prefixes_are_lowercase_ascii() -> bool {
+    for (prefix, _) in COMMAND_PREFIXES {
+        for b in *prefix {
+            if !b.is_ascii_lowercase() {
+                return false;
+            }
+        }
+    }
+    true
+}
+
+fn prefix_command_names_have_duplicates() -> bool {
+    for (i, (_, lhs)) in COMMAND_PREFIXES.iter().enumerate() {
+        for (_, rhs) in COMMAND_PREFIXES.iter().skip(i + 1) {
+            if lhs == rhs {
+                return true;
+            }
+        }
+    }
+    false
+}
+
+fn policy_tables_are_consistent() -> bool {
+    // 0) no duplicates in command declaration tables
+    if has_duplicate_entries(&ACTIVE_COMMANDS) || has_duplicate_entries(&BRIDGE_COMMANDS) {
+        return false;
+    }
+    if prefix_command_names_have_duplicates() {
+        return false;
+    }
+
+    // 0.1) resolver prefix assumptions
+    if !prefixes_are_lowercase_ascii() {
+        return false;
+    }
+
+    // 1) active and bridge tables must be disjoint
+    for active in ACTIVE_COMMANDS {
+        if BRIDGE_COMMANDS.iter().any(|bridge| *bridge == active) {
+            return false;
+        }
+    }
+
+    // 2) every declared command must exist in resolver prefix table
+    for active in ACTIVE_COMMANDS {
+        if !COMMAND_PREFIXES.iter().any(|(_, cmd)| *cmd == active) {
+            return false;
+        }
+    }
+    for bridge in BRIDGE_COMMANDS {
+        if !COMMAND_PREFIXES.iter().any(|(_, cmd)| *cmd == bridge) {
+            return false;
+        }
+    }
+
+    // 3) resolver table entries must map to known policy commands
+    for (_, cmd) in COMMAND_PREFIXES {
+        let is_active = ACTIVE_COMMANDS.iter().any(|name| name == cmd);
+        let is_bridge = BRIDGE_COMMANDS.iter().any(|name| name == cmd);
+        if !is_active && !is_bridge {
+            return false;
+        }
+    }
+
+    true
+}
+
+fn print_policy_self_check(platform: &dyn hal::Platform) {
+    platform.puts("[POLICY] ");
+    platform.puts(POLICY_SELF_CHECK_TAG);
+    platform.puts(": ");
+
+    if policy_tables_are_consistent() {
+        platform.puts("PASS\r\n");
+    } else {
+        platform.puts("FAIL\r\n");
+        crate::enterprise::audit::log_security(
+            crate::enterprise::audit::AuditSeverity::Critical,
+            POLICY_SELF_CHECK_TAG,
+            "Shell command policy table integrity check failed",
+        );
+    }
+}
+
+fn execute_command(platform: &dyn hal::Platform, cmd: &str) -> CommandExec {
+    match classify_command_policy(cmd) {
+        CommandPolicy::Active => match cmd {
+            "help" => {
+                print_help(platform);
+                CommandExec::Handled
+            }
+            "calc" => {
+                print_calc(platform);
+                CommandExec::Handled
+            }
+            "clear" => {
+                soft_clear(platform);
+                CommandExec::Handled
+            }
+            "meshstatus" => {
+                use crate::mesh::GLOBAL_MESH;
+                GLOBAL_MESH.lock().debug_print_status();
+                CommandExec::Handled
+            }
+            "exit" => CommandExec::Exit,
+            _ => CommandExec::Unknown,
+        },
+        CommandPolicy::BridgeDenied => {
+            bridge_disabled(platform, cmd);
+            CommandExec::Handled
+        }
+        CommandPolicy::Unknown => {
+            maybe_audit_unknown_command(platform, cmd);
+            CommandExec::Unknown
+        }
+    }
+}
+
+fn read_line(platform: &dyn hal::Platform) -> LineInput {
+    let mut line = LineInput::new();
+
+    loop {
+        let raw = platform.get_char();
+        if raw == 0 || raw == 0xFF {
+            continue;
+        }
+
+        let c = raw & 0x7F;
+
         if c == b'\r' || c == b'\n' {
             platform.puts("\r\n");
             break;
         }
 
-        // backspace
         if c == 8 || c == 127 {
-            if !buf.is_empty() {
-                buf.pop();
+            if line.len > 0 {
+                line.len -= 1;
                 platform.puts("\x08 \x08");
             }
             continue;
         }
 
-        // normal char
-        buf.push(c as char);
-        platform.put_char(c);
+        // Izinkan semua karakter ASCII printable (0x20..=0x7E) dan simbol umum
+        if c < 0x20 || c > 0x7E {
+            continue;
+        }
+
+        if line.len < INPUT_MAX {
+            line.buf[line.len] = c;
+            line.len += 1;
+            platform.put_char(c);
+        }
     }
-    buf
+
+    line
+}
+
+fn resolve_core_command(input: &[u8]) -> &'static str {
+    // Skip leading whitespace
+    let mut start = 0;
+    while start < input.len() && (input[start] == b' ' || input[start] == b'\t') {
+        start += 1;
+    }
+    let mut input = &input[start..];
+
+    // Extract first token only (stop at whitespace)
+    let mut end = 0;
+    while end < input.len() && input[end] != b' ' && input[end] != b'\t' {
+        end += 1;
+    }
+    input = &input[..end];
+
+    // Trim trailing punctuation (common in smoketests, e.g., ';', ':', ',')
+    while input.len() > 0 {
+        let last = input[input.len() - 1];
+        if last == b';' || last == b':' || last == b',' {
+            input = &input[..input.len() - 1];
+        } else {
+            break;
+        }
+    }
+
+    // Find prefix match
+    for &(prefix, cmd) in COMMAND_PREFIXES {
+        if input.len() >= prefix.len() && input[..prefix.len()].eq_ignore_ascii_case(prefix) {
+            if input.len() == prefix.len() {
+                return cmd;
+            }
+        }
+    }
+
+    // Fallback: original logic for shortcuts (1,2,3,0)
+    let mut has_alpha = false;
+    let mut has_0 = false;
+    let mut has_1 = false;
+    let mut has_2 = false;
+    let mut has_3 = false;
+    let mut letters = [0u8; LETTERS_MAX];
+    let mut n = 0usize;
+    for &b in input {
+        let c = (b & 0x7F).to_ascii_lowercase();
+        match c {
+            b'0' => has_0 = true,
+            b'1' => has_1 = true,
+            b'2' => has_2 = true,
+            b'3' => has_3 = true,
+            b'a'..=b'z' => has_alpha = true,
+            _ => {}
+        }
+        if n < LETTERS_MAX && c.is_ascii_alphabetic() {
+            letters[n] = c;
+            n += 1;
+        }
+    }
+
+    if !has_alpha {
+        if has_0 { return "exit"; }
+        if has_3 { return "clear"; }
+        if has_2 { return "calc"; }
+        if has_1 { return "help"; }
+    }
+
+    if n == 0 {
+        return "";
+    }
+
+    let ls = &letters[..n];
+
+    if starts_with(ls, b"help") || starts_with(ls, b"hlp") || starts_with(ls, b"hep") || contains(ls, b"help") {
+        return "help";
+    }
+    if starts_with(ls, b"exit") || starts_with(ls, b"ex") || contains(ls, b"exit") {
+        return "exit";
+    }
+    if starts_with(ls, b"clear") || starts_with(ls, b"cl") || contains(ls, b"clear") {
+        return "clear";
+    }
+    if starts_with(ls, b"calc") || starts_with(ls, b"ca") || contains(ls, b"calc") {
+        return "calc";
+    }
+
+    // Last-resort first-letter fallback for noisy keyboard stream
+    match ls[0] {
+        b'h' => "help",
+        b'e' => "exit",
+        b'c' => {
+            if n >= 2 && ls[1] == b'l' {
+                "clear"
+            } else {
+                "calc"
+            }
+        }
+        _ => "",
+    }
+}
+
+fn starts_with(haystack: &[u8], needle: &[u8]) -> bool {
+    if needle.len() > haystack.len() {
+        return false;
+    }
+    for i in 0..needle.len() {
+        if haystack[i] != needle[i] {
+            return false;
+        }
+    }
+    true
+}
+
+fn contains(haystack: &[u8], needle: &[u8]) -> bool {
+    if needle.is_empty() {
+        return true;
+    }
+    if needle.len() > haystack.len() {
+        return false;
+    }
+
+    let limit = haystack.len() - needle.len();
+    for i in 0..=limit {
+        let mut ok = true;
+        for j in 0..needle.len() {
+            if haystack[i + j] != needle[j] {
+                ok = false;
+                break;
+            }
+        }
+        if ok {
+            return true;
+        }
+    }
+    false
+}
+
+fn bridge_disabled(platform: &dyn hal::Platform, name: &str) {
+    maybe_audit_bridge_denial(platform, name);
+
+    platform.puts("[BRIDGE DISABLED] ");
+    platform.puts(name);
+    platform.puts(": production shell blocks bridge execution (");
+    platform.puts(SHELL_POLICY_STAGE_LABEL);
+    platform.puts(").\r\n");
+}
+
+fn maybe_audit_bridge_denial(platform: &dyn hal::Platform, name: &str) {
+    let now = platform.get_ticks() as usize;
+    let last = LAST_BRIDGE_AUDIT_TICK.load(Ordering::Relaxed);
+    if now.wrapping_sub(last) >= BRIDGE_AUDIT_THROTTLE_TICKS
+        && LAST_BRIDGE_AUDIT_TICK
+            .compare_exchange(last, now, Ordering::Relaxed, Ordering::Relaxed)
+            .is_ok()
+    {
+        crate::enterprise::audit::log_security(
+            crate::enterprise::audit::AuditSeverity::Warning,
+            name,
+            "Shell bridge command denied by stage policy",
+        );
+    }
+}
+
+fn maybe_audit_unknown_command(platform: &dyn hal::Platform, cmd: &str) {
+    // Ignore empty resolver outputs to avoid noise from blank input paths.
+    if cmd.is_empty() {
+        return;
+    }
+
+    let now = platform.get_ticks() as usize;
+    let last = LAST_UNKNOWN_AUDIT_TICK.load(Ordering::Relaxed);
+    if now.wrapping_sub(last) >= UNKNOWN_AUDIT_THROTTLE_TICKS
+        && LAST_UNKNOWN_AUDIT_TICK
+            .compare_exchange(last, now, Ordering::Relaxed, Ordering::Relaxed)
+            .is_ok()
+    {
+        crate::enterprise::audit::log_security(
+            crate::enterprise::audit::AuditSeverity::Warning,
+            cmd,
+            "Unknown shell command observed",
+        );
+    }
+}
+
+#[cfg(test)]
+mod shell_policy_tests {
+    use super::{
+        classify_command_policy, policy_tables_are_consistent, resolve_core_command,
+        CommandPolicy, ACTIVE_COMMANDS, BRIDGE_COMMANDS, COMMAND_PREFIXES,
+    };
+
+    #[test]
+    fn classify_active_command_policy() {
+        assert_eq!(classify_command_policy("help"), CommandPolicy::Active);
+        assert_eq!(classify_command_policy("meshstatus"), CommandPolicy::Active);
+    }
+
+    #[test]
+    fn classify_bridge_denied_policy() {
+        assert_eq!(classify_command_policy("omni"), CommandPolicy::BridgeDenied);
+        assert_eq!(classify_command_policy("windows"), CommandPolicy::BridgeDenied);
+    }
+
+    #[test]
+    fn classify_unknown_policy() {
+        assert_eq!(classify_command_policy("no-such-cmd"), CommandPolicy::Unknown);
+        assert_eq!(classify_command_policy(""), CommandPolicy::Unknown);
+    }
+
+    #[test]
+    fn command_tables_are_disjoint() {
+        for active in ACTIVE_COMMANDS {
+            assert!(
+                !BRIDGE_COMMANDS.iter().any(|bridge| *bridge == active),
+                "command '{}' appears in both active and bridge-denied tables",
+                active
+            );
+        }
+    }
+
+    #[test]
+    fn command_tables_are_covered_by_prefix_table() {
+        for active in ACTIVE_COMMANDS {
+            assert!(
+                COMMAND_PREFIXES.iter().any(|(_, cmd)| *cmd == active),
+                "active command '{}' missing from prefix table",
+                active
+            );
+        }
+
+        for bridge in BRIDGE_COMMANDS {
+            assert!(
+                COMMAND_PREFIXES.iter().any(|(_, cmd)| *cmd == bridge),
+                "bridge command '{}' missing from prefix table",
+                bridge
+            );
+        }
+    }
+
+    #[test]
+    fn resolver_shortcuts_and_trimming_are_stable() {
+        assert_eq!(resolve_core_command(b"1"), "help");
+        assert_eq!(resolve_core_command(b"2"), "calc");
+        assert_eq!(resolve_core_command(b"3"), "clear");
+        assert_eq!(resolve_core_command(b"0"), "exit");
+
+        assert_eq!(resolve_core_command(b"   help"), "help");
+        assert_eq!(resolve_core_command(b"calc;"), "calc");
+        assert_eq!(resolve_core_command(b"exit:"), "exit");
+        assert_eq!(resolve_core_command(b"clear,"), "clear");
+    }
+
+    #[test]
+    fn resolver_covers_all_declared_commands() {
+        for (_, cmd) in COMMAND_PREFIXES {
+            assert_eq!(resolve_core_command(cmd.as_bytes()), *cmd);
+        }
+    }
+
+    #[test]
+    fn resolver_and_policy_stay_consistent() {
+        for active in ACTIVE_COMMANDS {
+            let resolved = resolve_core_command(active.as_bytes());
+            assert_eq!(resolved, active);
+            assert_eq!(classify_command_policy(resolved), CommandPolicy::Active);
+        }
+
+        for bridge in BRIDGE_COMMANDS {
+            let resolved = resolve_core_command(bridge.as_bytes());
+            assert_eq!(resolved, bridge);
+            assert_eq!(classify_command_policy(resolved), CommandPolicy::BridgeDenied);
+        }
+    }
+
+    #[test]
+    fn command_tables_have_no_duplicates() {
+        // Active and bridge command tables must be unique internally.
+        for (i, lhs) in ACTIVE_COMMANDS.iter().enumerate() {
+            for rhs in ACTIVE_COMMANDS.iter().skip(i + 1) {
+                assert_ne!(lhs, rhs, "duplicate active command '{}'", lhs);
+            }
+        }
+
+        for (i, lhs) in BRIDGE_COMMANDS.iter().enumerate() {
+            for rhs in BRIDGE_COMMANDS.iter().skip(i + 1) {
+                assert_ne!(lhs, rhs, "duplicate bridge command '{}'", lhs);
+            }
+        }
+
+        // Prefix output names must be unique as resolver source of truth.
+        for (i, (_, lhs)) in COMMAND_PREFIXES.iter().enumerate() {
+            for (_, rhs) in COMMAND_PREFIXES.iter().skip(i + 1) {
+                assert_ne!(lhs, rhs, "duplicate resolver command '{}'", lhs);
+            }
+        }
+    }
+
+    #[test]
+    fn resolver_prefixes_are_lowercase_ascii() {
+        for (prefix, cmd) in COMMAND_PREFIXES {
+            for b in *prefix {
+                assert!(
+                    b.is_ascii_lowercase(),
+                    "resolver prefix for '{}' contains non-lowercase byte 0x{:02X}",
+                    cmd,
+                    b
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn command_prefix_table_matches_policy_tables_exactly() {
+        // Every prefix command must be either active or bridge-denied.
+        for (_, cmd) in COMMAND_PREFIXES {
+            let is_active = ACTIVE_COMMANDS.iter().any(|name| name == cmd);
+            let is_bridge = BRIDGE_COMMANDS.iter().any(|name| name == cmd);
+            assert!(
+                is_active || is_bridge,
+                "prefix command '{}' not represented in policy tables",
+                cmd
+            );
+        }
+
+        // All policy commands must exist in the resolver prefix table.
+        for cmd in ACTIVE_COMMANDS {
+            assert!(
+                COMMAND_PREFIXES.iter().any(|(_, p)| *p == cmd),
+                "active command '{}' missing from resolver prefix table",
+                cmd
+            );
+        }
+        for cmd in BRIDGE_COMMANDS {
+            assert!(
+                COMMAND_PREFIXES.iter().any(|(_, p)| *p == cmd),
+                "bridge command '{}' missing from resolver prefix table",
+                cmd
+            );
+        }
+    }
+
+    #[test]
+    fn policy_tables_self_check_passes() {
+        assert!(policy_tables_are_consistent());
+    }
+}
+
+fn print_help(platform: &dyn hal::Platform) {
+    platform.puts("\r\n=== AetherShell Capability Profile ===\r\n");
+    platform.puts("  Stage policy: production bridge lockdown active (");
+    platform.puts(SHELL_POLICY_STAGE_LABEL);
+    platform.puts(").\r\n");
+    platform.puts("\r\nActive commands:\r\n");
+    for cmd in ACTIVE_COMMANDS {
+        platform.puts("  [active] ");
+        platform.puts(cmd);
+        platform.puts("\r\n");
+    }
+
+    platform.puts("\r\nDisabled bridge commands:\r\n");
+    for cmd in BRIDGE_COMMANDS {
+        platform.puts("  [disabled] ");
+        platform.puts(cmd);
+        platform.puts("\r\n");
+    }
+
+    platform.puts("\r\nShortcuts: 1=help, 2=calc, 3=clear, 0=exit\r\n");
+    platform.puts("Bridge policy: disabled commands return [BRIDGE DISABLED].\r\n");
+}
+
+fn print_calc(platform: &dyn hal::Platform) {
+    platform.puts("\r\n[Calculator] Mode Active (Press Ctrl+C to exit - simulation)\r\n");
+    platform.puts("Calculator demo skipped for shell responsiveness.\r\n");
+}
+
+fn soft_clear(platform: &dyn hal::Platform) {
+    for _ in 0..SOFT_CLEAR_LINES {
+        platform.puts("\r\n");
+    }
 }

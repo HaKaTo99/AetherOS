@@ -58,12 +58,6 @@ struct FreeBlock {
     next: *mut FreeBlock,
 }
 
-impl FreeBlock {
-    const fn null() -> *mut FreeBlock {
-        ptr::null_mut()
-    }
-}
-
 /// Memory Pool with proper free list management
 pub struct MemoryPool {
     base: usize,
@@ -134,14 +128,34 @@ impl MemoryPool {
             self.base + old
         };
 
-        // Write Head Canary
+        // Supreme Stability: Stack Collision Guard
+        let current_rsp: usize;
         unsafe {
-            ptr::write(addr as *mut u64, 0xDEAD_BEEF_C0DE_FEED);
-            // Write Tail Canary (at the end of requested data, before alignment padding)
-            ptr::write((addr + 8 + size) as *mut u64, 0xFEED_C0DE_BEEF_DEAD);
+            core::arch::asm!("mov {}, rsp", out(reg) current_rsp);
+        }
+        
+        // If the allocated address is within 1MB of the current stack, 
+        // it's a critical safety violation indicating corrupted metadata.
+        if (addr >= current_rsp.saturating_sub(1024 * 1024)) && (addr <= current_rsp + 1024 * 1024) {
+             crate::hal::get_platform().puts("\r\n!!! CRITICAL: SMME STACK COLLISION DETECTED !!!\r\n");
+             crate::hal::get_platform().puts(&alloc::format!("Attempted to use address 0x{:X} while RSP is 0x{:X}\n", addr, current_rsp));
+             panic!("SMME Integrity Violation: Metadata corruption detected.");
+        }
+
+        // Supreme Stability: Verify address is actually within this pool's bounds
+        if addr < self.base || addr + aligned_size > self.base + self.size {
+             return Err(AllocationError::InvalidAddress);
+        }
+        
+        // Write Unique Head Canary (based on base address to identify pool)
+        let head_canary = 0xDEAD0000_00000000 | (self.base as u64 & 0xFFFFFFFF);
+        unsafe {
+            ptr::write(addr as *mut u64, head_canary);
+            ptr::write((addr + aligned_size - 8) as *mut u64, 0xFEED_C0DE_BEEF_DEAD);
         }
         
         Ok(addr + 8) // Return pointer to data (after head canary)
+
     }
 
     /// Find and remove a suitable block from the free list
@@ -156,7 +170,8 @@ impl MemoryPool {
             
             if current.size >= size {
                 // Found a suitable block
-                if current.size >= size + core::mem::size_of::<FreeBlock>() + 16 {
+                // Supreme Stability: Increase split threshold to ensure split blocks are usable and safe
+                if current.size >= size + 32 {
                     // Split the block if it's large enough
                     let new_block_addr = (current_ptr as usize) + size;
                     let new_block = unsafe { &mut *(new_block_addr as *mut FreeBlock) };
@@ -190,6 +205,7 @@ impl MemoryPool {
         None
     }
 
+
     /// Phase 2: Commit physical memory
     pub fn commit(&self, addr: usize, size: usize) -> Result<(), AllocationError> {
         if addr < self.base || addr + size > self.base + self.size {
@@ -217,7 +233,14 @@ impl MemoryPool {
         unsafe {
             let head = ptr::read(addr as *const u64);
             let tail = ptr::read((addr + 8 + size) as *const u64);
-            if head != 0xDEAD_BEEF_C0DE_FEED || tail != 0xFEED_C0DE_BEEF_DEAD {
+            // Head canary encodes pool identity in lower 32 bits:
+            // 0xDEAD0000_00000000 | (pool_base & 0xFFFF_FFFF)
+            let expected_head_prefix = 0xDEAD0000_00000000u64;
+            let expected_head_low = (self.base as u64) & 0xFFFF_FFFF;
+            let valid_head = (head & 0xFFFF0000_00000000u64) == expected_head_prefix
+                && (head & 0x00000000_FFFFFFFFu64) == expected_head_low;
+
+            if !valid_head || tail != 0xFEED_C0DE_BEEF_DEAD {
                 crate::enterprise::audit::log_security(
                     crate::enterprise::audit::AuditSeverity::Critical,
                     "SMME", "Memory Corruption Detected (Canary Breach)!"
@@ -390,7 +413,7 @@ pub struct SymbianModernMemoryEngine {
     history_index: AtomicUsize,
     
     // Layer 3: Distributed (placeholder for v0.4)
-    distributed_enabled: bool,
+    _distributed_enabled: bool,
     
     // Tracking allocations for deallocation
     // Maps address to (pool_id, size) - simplified approach
@@ -403,23 +426,26 @@ impl SymbianModernMemoryEngine {
         
         Self {
             // Quantum Fortress v10.0: Localized Heap for Harmony Mapping
-            // Starting at 16MB to avoid conflict with kernel (1MB-2MB) and low memory
-            l0_pool: MemoryPool::new(0x0100_0000, 16 * 1024 * 1024),      
-            l1_pool: MemoryPool::new(0x0200_0000, 32 * 1024 * 1024),     
-            l2_pool: MemoryPool::new(0x0400_0000, 64 * 1024 * 1024),     
+            // Starting at 128MB to avoid any conflict with kernel (1MB-32MB) 
+            l0_pool: MemoryPool::new(0x0800_0000, 16 * 1024 * 1024),      
+            l1_pool: MemoryPool::new(0x0900_0000, 32 * 1024 * 1024),     
+            l2_pool: MemoryPool::new(0x0B00_0000, 64 * 1024 * 1024),     
+
             allocation_history: [ATOMIC_ZERO; 16],
             history_index: AtomicUsize::new(0),
-            distributed_enabled: false,
+            _distributed_enabled: false,
         }
     }
 
     /// Get pool for a given address
     fn get_pool_for_address(&self, addr: usize) -> Option<&MemoryPool> {
-        if addr >= 0x0100_0000 && addr < 0x0200_0000 {
+        // Keep lookup tied to the actual configured pool windows to avoid
+        // stale hardcoded ranges when pool layout changes.
+        if addr >= self.l0_pool.base && addr < self.l0_pool.base + self.l0_pool.size {
             Some(&self.l0_pool)
-        } else if addr >= 0x0200_0000 && addr < 0x0400_0000 {
+        } else if addr >= self.l1_pool.base && addr < self.l1_pool.base + self.l1_pool.size {
             Some(&self.l1_pool)
-        } else if addr >= 0x0400_0000 && addr < 0x0800_0000 {
+        } else if addr >= self.l2_pool.base && addr < self.l2_pool.base + self.l2_pool.size {
             Some(&self.l2_pool)
         } else {
             None
@@ -458,6 +484,13 @@ impl SymbianModernMemoryEngine {
 
         // Two-phase allocation
         let addr = pool.reserve(size)?;
+
+        // Supreme Stability: Strict address range validation
+        // Heap pools are at 128MB+, anything below is strictly forbidden
+        if addr < 0x0800_0000 {
+             return Err(AllocationError::InvalidAddress);
+        }
+
         pool.commit(addr, size)?;
 
         // Update history for prediction
@@ -672,5 +705,29 @@ mod tests {
         
         let predicted = smme.predict_next_size();
         assert_eq!(predicted, 4096);
+    }
+
+    #[test]
+    fn test_pool_lookup_uses_configured_ranges() {
+        let smme = SymbianModernMemoryEngine::new(1 << 30);
+
+        // Start addresses of each pool must map correctly.
+        assert!(core::ptr::eq(
+            smme.get_pool_for_address(smme.l0_pool.base).unwrap(),
+            &smme.l0_pool
+        ));
+        assert!(core::ptr::eq(
+            smme.get_pool_for_address(smme.l1_pool.base).unwrap(),
+            &smme.l1_pool
+        ));
+        assert!(core::ptr::eq(
+            smme.get_pool_for_address(smme.l2_pool.base).unwrap(),
+            &smme.l2_pool
+        ));
+
+        // End boundaries are exclusive.
+        assert!(smme.get_pool_for_address(smme.l0_pool.base + smme.l0_pool.size).is_none());
+        assert!(smme.get_pool_for_address(smme.l1_pool.base + smme.l1_pool.size).is_none());
+        assert!(smme.get_pool_for_address(smme.l2_pool.base + smme.l2_pool.size).is_none());
     }
 }
