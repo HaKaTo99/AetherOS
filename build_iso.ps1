@@ -30,7 +30,6 @@ Copy-Item $KernelPath "$IsoDir\boot\aetheros_kernel" -Force
 
 # Copy GRUB modules from WSL
 Write-Host "Copying GRUB modules from WSL..." -ForegroundColor Yellow
-$wslCmd = "sudo cp /usr/lib/grub/i386-pc/*.mod /mnt/d/GitHub/AetherOS/iso/boot/grub/i386-pc/ 2>/dev/null || echo 'Using PowerShell fallback'"
 
 # Try using grub-mkrescue directly (it should work without explicit modules if structure is correct)
 Write-Host "Creating ISO with GRUB..." -ForegroundColor Yellow
