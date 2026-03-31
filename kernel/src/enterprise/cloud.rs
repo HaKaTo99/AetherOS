@@ -2,7 +2,6 @@
 //! Implements Cloud-Init support and metadata service interaction.
 
 use alloc::string::String;
-use alloc::collections::BTreeMap;
 use spin::Mutex;
 
 #[derive(Debug, Clone)]

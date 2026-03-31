@@ -8,7 +8,6 @@
 //! kernel communication is resistant to quantum computer attacks.
 
 use alloc::vec::Vec;
-use alloc::string::String;
 use crate::enterprise::audit::{AuditSeverity, log_security};
 
 /// Security Level for the Kernel
@@ -146,7 +145,7 @@ pub static CRYPTO_ENGINE: spin::Mutex<AetherQuantumProvider> = spin::Mutex::new(
 
 /// Helper: Initialize the security subsystem and enforce "Advance" level
 pub fn init() {
-    use crate::print; // Use kernel printer
+     // Use kernel printer
     crate::println!("[Security] Initializing Quantum Crypto Engine...");
     crate::println!("[Security] Mode: Professional Harmony (Kyber-768 + Dilithium-3)");
     crate::println!("[Security] Certification: Military Grade v10.0 [ OK ]");

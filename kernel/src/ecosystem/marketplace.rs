@@ -2,7 +2,6 @@
 //! Enables decentralized P2P resource trading and capability exchange.
 
 use alloc::vec::Vec;
-use alloc::string::String;
 use spin::Mutex;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

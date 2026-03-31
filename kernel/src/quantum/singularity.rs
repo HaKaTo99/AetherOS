@@ -4,8 +4,6 @@
 //! dan penegakan harmoni sistem di tingkat kemanusiaan/peradaban.
 
 use crate::enterprise::audit;
-use crate::enterprise::telemetry::TELEMETRY_AGENT;
-use crate::SCHEDULER;
 use crate::SMME;
 use alloc::string::String;
 use spin::Mutex;
@@ -13,7 +11,7 @@ use spin::Mutex;
 pub struct EvolutionCore {
     iteration: u64,
     stability_coefficient: f64,
-    governance_active: bool,
+    _governance_active: bool,
 }
 
 impl EvolutionCore {
@@ -21,7 +19,7 @@ impl EvolutionCore {
         Self {
             iteration: 42, // Angka dasar harmoni
             stability_coefficient: 0.9999, // Diamond Grade
-            governance_active: true,
+            _governance_active: true,
         }
     }
 

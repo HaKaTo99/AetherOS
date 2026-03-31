@@ -45,7 +45,7 @@ pub enum TlsState {
 
 pub struct TlsSession {
     state: TlsState,
-    cipher_suite: u16,
+    _cipher_suite: u16,
     session_key: [u8; 32],
 }
 
@@ -53,7 +53,7 @@ impl TlsSession {
     pub const fn new() -> Self {
         Self {
             state: TlsState::Idle,
-            cipher_suite: 0x1301, // TLS_AES_128_GCM_SHA256
+            _cipher_suite: 0x1301, // TLS_AES_128_GCM_SHA256
             session_key: [0u8; 32],
         }
     }
@@ -92,14 +92,14 @@ impl TlsSession {
 /// Encrypted device-to-device communication wrapper
 pub struct SecureChannel {
     tls: TlsSession,
-    peer_cert_hash: [u8; 32], // SHA-256 of peer certificate
+    _peer_cert_hash: [u8; 32], // SHA-256 of peer certificate
 }
 
 impl SecureChannel {
     pub fn new() -> Self {
         Self {
             tls: TlsSession::new(),
-            peer_cert_hash: [0u8; 32],
+            _peer_cert_hash: [0u8; 32],
         }
     }
 

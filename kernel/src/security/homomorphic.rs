@@ -5,7 +5,6 @@
 //! usage without ever decrypting user behavior data.
 
 use alloc::vec::Vec;
-use crate::security::crypto::{AetherQuantumProvider, QuantumSecurity, SecurityLevel};
 
 /// Encrypted floating point or integer value
 #[derive(Debug, Clone)]

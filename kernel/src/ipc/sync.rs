@@ -22,7 +22,7 @@ impl<T> SpinLock<T> {
         }
     }
 
-    pub fn lock(&self) -> SpinLockGuard<T> {
+    pub fn lock(&self) -> SpinLockGuard<'_, T> {
         // Acquire spinlock
         while self.locked.compare_exchange_weak(
             false, true, Ordering::Acquire, Ordering::Relaxed
@@ -36,7 +36,7 @@ impl<T> SpinLock<T> {
         SpinLockGuard { lock: self }
     }
 
-    pub fn try_lock(&self) -> Option<SpinLockGuard<T>> {
+    pub fn try_lock(&self) -> Option<SpinLockGuard<'_, T>> {
         if self.locked.compare_exchange(
             false, true, Ordering::Acquire, Ordering::Relaxed
         ).is_ok() {
@@ -95,7 +95,7 @@ impl<T> Mutex<T> {
         }
     }
 
-    pub fn lock(&self) -> MutexGuard<T> {
+    pub fn lock(&self) -> MutexGuard<'_, T> {
         // Fast path: try to acquire immediately
         if self.locked.compare_exchange(
             false, true, Ordering::Acquire, Ordering::Relaxed
@@ -124,7 +124,7 @@ impl<T> Mutex<T> {
         }
     }
 
-    pub fn try_lock(&self) -> Option<MutexGuard<T>> {
+    pub fn try_lock(&self) -> Option<MutexGuard<'_, T>> {
         if self.locked.compare_exchange(
             false, true, Ordering::Acquire, Ordering::Relaxed
         ).is_ok() {
@@ -307,7 +307,7 @@ impl<T> RwLock<T> {
         }
     }
 
-    pub fn read(&self) -> RwLockReadGuard<T> {
+    pub fn read(&self) -> RwLockReadGuard<'_, T> {
         loop {
             let state = self.state.load(Ordering::Acquire);
             if state >= 0 {
@@ -324,7 +324,7 @@ impl<T> RwLock<T> {
         }
     }
 
-    pub fn try_read(&self) -> Option<RwLockReadGuard<T>> {
+    pub fn try_read(&self) -> Option<RwLockReadGuard<'_, T>> {
         loop {
             let state = self.state.load(Ordering::Acquire);
             if state < 0 {
@@ -338,7 +338,7 @@ impl<T> RwLock<T> {
         }
     }
 
-    pub fn write(&self) -> RwLockWriteGuard<T> {
+    pub fn write(&self) -> RwLockWriteGuard<'_, T> {
         loop {
             if self.state.compare_exchange(
                 0, -1, Ordering::Acquire, Ordering::Relaxed
@@ -349,7 +349,7 @@ impl<T> RwLock<T> {
         }
     }
 
-    pub fn try_write(&self) -> Option<RwLockWriteGuard<T>> {
+    pub fn try_write(&self) -> Option<RwLockWriteGuard<'_, T>> {
         if self.state.compare_exchange(
             0, -1, Ordering::Acquire, Ordering::Relaxed
         ).is_ok() {

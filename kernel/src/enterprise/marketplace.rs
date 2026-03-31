@@ -49,7 +49,7 @@ impl MarketplaceManager {
     pub fn match_bids(&mut self) -> usize {
         let mut matches = 0;
         // Simplified matching: for demo, we clear offers that meet "ideal" criteria
-        let before_count = self.active_offers.len();
+        let _before_count = self.active_offers.len();
         self.active_offers.retain(|offer| {
             if offer.price_at < 100 { // Assume bids > 100 always clear
                 true

@@ -4,7 +4,6 @@
 use alloc::string::String;
 use alloc::vec::Vec;
 use spin::Mutex;
-use core::fmt;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum AuditSeverity {

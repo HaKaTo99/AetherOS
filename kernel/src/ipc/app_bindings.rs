@@ -1,7 +1,6 @@
 //! IPC Bindings for Applications (Phase 14.2)
 //! High-level IPC API for third-party apps
 
-use crate::ipc::qc::{QcPacket, RpcMethod};
 use alloc::string::String;
 use alloc::vec::Vec;
 
@@ -17,7 +16,7 @@ impl IpcHandle {
     }
 
     /// Send a typed message to another app
-    pub fn send(&self, method: &str, payload: &[u8]) -> Result<(), &'static str> {
+    pub fn send(&self, _method: &str, _payload: &[u8]) -> Result<(), &'static str> {
         if !self.connected { return Err("Not connected"); }
         // Would route through QuantumBus
         Ok(())

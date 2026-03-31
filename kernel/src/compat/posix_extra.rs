@@ -1,7 +1,6 @@
 //! POSIX Extra Compatibility (Phase 27.1)
 //! Adds broader POSIX support for mainstream applications.
 
-use alloc::string::String;
 use crate::enterprise::audit::{AuditSeverity, log_security};
 
 /// Simulated POSIX fork/exec

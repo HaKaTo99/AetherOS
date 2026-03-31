@@ -1,7 +1,6 @@
 //! Enterprise Security (Phase 18.2 / 26.1)
 //! Implements Military-Grade Role-Based Access Control (RBAC), BitFlags Permissions, and Audit Logging.
 
-use alloc::string::String;
 use alloc::collections::BTreeMap;
 use spin::Mutex;
 use crate::enterprise::audit::{AuditSeverity, log_security};
@@ -34,51 +33,93 @@ impl UserRole {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub struct UserIdentity {
     pub uid: u32,
-    pub username: String,
+    pub username: &'static str,
     pub role: UserRole,
     pub permissions: u64,
 }
 
+const ROOT_USER: UserIdentity = UserIdentity {
+    uid: 0,
+    username: "root",
+    role: UserRole::Admin,
+    permissions: PERM_ROOT,
+};
+
+const ARCHITECT_USER: UserIdentity = UserIdentity {
+    uid: 777,
+    username: "herman",
+    role: UserRole::Admin,
+    permissions: PERM_ROOT,
+};
+
 /// The Access Control System (Military Grade)
 pub struct AccessControl {
     users: BTreeMap<u32, UserIdentity>,
+    boot_users: [UserIdentity; 2],
     current_user: Option<u32>,
+    runtime_ready: bool,
 }
 
 impl AccessControl {
     pub const fn new() -> Self {
         Self {
             users: BTreeMap::new(),
+            boot_users: [ROOT_USER, ARCHITECT_USER],
             current_user: None,
+            runtime_ready: false,
         }
     }
 
+    /// Boot-safe initialization: avoids dynamic map insertion during early boot.
     pub fn init(&mut self) {
-        // [ROOT IDENTITY]
-        self.users.insert(0, UserIdentity {
-            uid: 0,
-            username: String::from("root"),
-            role: UserRole::Admin,
-            permissions: PERM_ROOT,
-        });
+        self.current_user = None;
+        self.runtime_ready = false;
+        log_security(
+            AuditSeverity::Info,
+            "System",
+            "Identity Mesh (RBAC) Boot-Safe initialized (static identities active).",
+        );
+    }
 
-        // [ARCHITECT ACCESS] - Herman Krisnanto
-        // UID 777 has absolute sovereignty across the Fabric.
-        self.users.insert(777, UserIdentity {
-            uid: 777,
-            username: String::from("herman"),
-            role: UserRole::Admin,
-            permissions: PERM_ROOT,
-        });
+    /// Runtime upgrade: populates dynamic map after system is fully stable.
+    pub fn init_runtime(&mut self) {
+        if self.runtime_ready {
+            return;
+        }
 
-        log_security(AuditSeverity::Info, "System", "Identity Mesh (RBAC) Initialized. Architect 'herman' synchronized.");
+        self.users.clear();
+        self.users.insert(ROOT_USER.uid, ROOT_USER);
+        self.users.insert(ARCHITECT_USER.uid, ARCHITECT_USER);
+        self.runtime_ready = true;
+
+        log_security(
+            AuditSeverity::Info,
+            "System",
+            "Identity Mesh (RBAC) Runtime mode enabled (dynamic map online).",
+        );
+    }
+
+    fn find_user_by_uid(&self, uid: u32) -> Option<&UserIdentity> {
+        if self.runtime_ready {
+            self.users.get(&uid)
+        } else {
+            self.boot_users.iter().find(|u| u.uid == uid)
+        }
+    }
+
+    fn find_user_by_name(&self, username: &str) -> Option<&UserIdentity> {
+        if self.runtime_ready {
+            self.users.values().find(|u| u.username == username)
+        } else {
+            self.boot_users.iter().find(|u| u.username == username)
+        }
     }
 
     pub fn login(&mut self, username: &str) -> bool {
-        if let Some(user) = self.users.values().find(|u| u.username == username) {
+        if let Some(user) = self.find_user_by_name(username) {
             self.current_user = Some(user.uid);
             log_security(AuditSeverity::Info, username, "Login successful.");
             true
@@ -91,14 +132,14 @@ impl AccessControl {
     /// Authorize based on granular BitFlags
     pub fn authorize(&self, required_perms: u64) -> bool {
         if let Some(uid) = self.current_user {
-            if let Some(user) = self.users.get(&uid) {
+            if let Some(user) = self.find_user_by_uid(uid) {
                 let success = (user.permissions & required_perms) == required_perms;
                 if !success {
-                    log_security(AuditSeverity::Critical, &user.username, "Access denied: Missing BitFlags requirements.");
+                    log_security(AuditSeverity::Critical, user.username, "Access denied: Missing BitFlags requirements.");
                 } else {
                     // Log sensitive operations even if authorized
                     if required_perms & (PERM_ADMIN | PERM_DEPLOY | PERM_AUDIT) != 0 {
-                        log_security(AuditSeverity::Info, &user.username, "Sensitive operation authorized.");
+                        log_security(AuditSeverity::Info, user.username, "Sensitive operation authorized.");
                     }
                 }
                 success
@@ -119,7 +160,7 @@ impl AccessControl {
     }
     
     pub fn get_current_user(&self) -> Option<&UserIdentity> {
-        self.current_user.and_then(|uid| self.users.get(&uid))
+        self.current_user.and_then(|uid| self.find_user_by_uid(uid))
     }
 
     /// Zero-Trust Identity Mesh (Phase 26.5)

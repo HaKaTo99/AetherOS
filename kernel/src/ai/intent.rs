@@ -51,8 +51,8 @@ impl IntentParser {
     fn analyze_intent(&mut self) {
         let mut dev_score = 0;
         let mut sec_score = 0;
-        let mut media_score = 0;
-        let mut distributed_score = 0;
+        let media_score = 0;
+            let mut _distributed_score = 0;
 
         for &id in self.syscall_history.iter() {
             match id as usize {
@@ -65,12 +65,12 @@ impl IntentParser {
                 200..=220 => sec_score += 5, 
                 
                 // Distributed/Grid markers (Mock IDs 400+)
-                400..=450 => distributed_score += 8,
+                    400..=450 => _distributed_score += 8,
                 
                 // AI Sync & Quantum markers
                 crate::syscall::SYS_AI_SYNC => {
                     dev_score += 2;
-                    distributed_score += 2;
+                        _distributed_score += 2;
                 }
                 
                 _ => {}

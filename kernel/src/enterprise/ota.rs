@@ -22,7 +22,7 @@ pub struct OTAManager {
     current_version: String,
     target_version: Option<String>,
     state: UpdateState,
-    update_buffer: Vec<u8>,
+    _update_buffer: Vec<u8>,
 }
 
 impl OTAManager {
@@ -31,7 +31,7 @@ impl OTAManager {
             current_version: String::new(), // Initialized as empty in const context
             target_version: None,
             state: UpdateState::Idle,
-            update_buffer: Vec::new(),
+            _update_buffer: Vec::new(),
         }
     }
 
@@ -99,7 +99,7 @@ impl OTAManager {
 
     /// Notify the mesh about a new update available
     pub fn broadcast_update(&self) {
-        let mut mesh = DEVICE_MESH.lock();
+        let mesh = DEVICE_MESH.lock();
         let msg = format!("OTA_AVAIL:{}", 0); // Simplified version check
         mesh.broadcast_message(&msg);
         log_security(AuditSeverity::Info, "System", "OTA update availability broadcasted to the mesh.");
