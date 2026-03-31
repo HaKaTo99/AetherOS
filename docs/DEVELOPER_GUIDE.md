@@ -20,6 +20,31 @@ cd kernel
 cargo run --release
 ```
 
+### R35 Stable Shell Baseline (VirtualBox)
+Gunakan baseline ini sebagai verifikasi cepat bahwa jalur input shell stabil.
+
+```powershell
+cargo build -p aetheros-kernel --release
+.\tools\build_iso.ps1 -KernelSource target/x86_64-unknown-none/release/aetheros-kernel -WslDistro Ubuntu
+```
+
+Setelah boot, validasi di `AetherShell>`:
+- `1` -> `help`
+- `2` -> `calc`
+- `3` -> `clear`
+- `0` -> `exit`
+- Enter pada baris kosong -> prompt baru (perilaku normal)
+
+### Optional: Input Diagnostics Mode
+Mode ini hanya untuk troubleshooting (default tetap OFF agar output bersih).
+
+```powershell
+cargo build -p aetheros-kernel --release --features debug-input
+.\tools\build_iso.ps1 -KernelSource target/x86_64-unknown-none/release/aetheros-kernel -WslDistro Ubuntu
+```
+
+Saat aktif, shell menampilkan trace input (`[KEY]` / `[TRACE]`) untuk audit jalur keyboard.
+
 ---
 
 ## 🚀 2. Getting Started (Full Setup)

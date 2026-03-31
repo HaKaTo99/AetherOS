@@ -31,6 +31,51 @@ AetherOS v10.0 menggunakan **Cognitive Boot Sequence** yang dioptimalkan untuk Q
    ```
 2. **Access Shell**: Gunakan terminal serial untuk berinteraksi dengan **AetherAI** di Ring 0.
 
+### VirtualBox Workflow (Single ISO)
+Gunakan satu file ISO tetap agar tidak tertukar versi saat debugging:
+
+- Panduan awam lengkap: [VM Single ISO Beginner Guide](docs/guides/VM_SINGLE_ISO_BEGINNER_GUIDE.md)
+
+```powershell
+.\tools\rebuild_vm_iso.ps1 -WslDistro Ubuntu
+```
+
+- Script ini akan:
+   1. build kernel release,
+   2. copy kernel terbaru ke staging `iso/boot/aetheros_kernel`,
+   3. rebuild `out/aetheros.iso`.
+- Di VirtualBox, selalu **Power Off** VM (bukan Save State) sebelum overwrite ISO.
+- Setelah boot, cek marker `[BUILD]` di layar untuk memastikan versi terbaru benar-benar ter-load.
+
+#### 15-Detik Checklist (Sebelum Boot)
+1. Jalankan: `.\tools\rebuild_vm_iso.ps1 -WslDistro Ubuntu`
+2. Pastikan output berakhir dengan `ISO ready:` tanpa error.
+3. VM status: **Powered Off** (bukan Saved).
+4. Optical media menunjuk ke `out/aetheros.iso`.
+5. Setelah boot, verifikasi baris `[BUILD]` sesuai revisi terbaru sebelum mengetes command.
+
+### Smoke Test (CI parity, Linux)
+```bash
+chmod +x scripts/qemu-smoke.sh
+scripts/qemu-smoke.sh
+```
+- Build dengan Rust nightly + target `x86_64-unknown-none`, lalu boot via QEMU headless.
+- Log tersimpan di `target/qemu-smoke.log`; tes lulus jika marker `AetherShell>` muncul.
+
+### Smoke Test (Windows/PowerShell)
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/qemu-smoke.ps1
+```
+- Menggunakan toolchain Rust nightly, QEMU headless, log di `target/qemu-smoke.log`. Marker bisa dioverride via env `REQUIRED_MARKERS` (baris-per-baris).
+
+### Debug Preset (GDB attach)
+```bash
+chmod +x scripts/qemu-debug.sh
+scripts/qemu-debug.sh
+# lalu di terminal lain: gdb -ex "target remote :1234" target/x86_64-unknown-none/release/aetheros-kernel
+```
+- QEMU berjalan dengan `-s -S` sehingga kernel berhenti di awal; lanjutkan via GDB.
+
 ---
 
 ## 💎 Key Features: The Sovereign Fabric (v10.2)

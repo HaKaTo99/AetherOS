@@ -11,5 +11,4 @@ rustflags = [
     "-C", "relocation-model=static",
     "-C", "code-model=kernel",
     "-C", "no-redzone",
-    "-C", "target-feature=-mmx,-sse,+soft-float",
 ]

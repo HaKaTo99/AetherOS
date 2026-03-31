@@ -5,13 +5,31 @@ members = [
     "compiler",
     "booter",
 ]
-default-run = "aetheros-kernel"
+
+[patch.crates-io]
+bitvec = { path = "patches/bitvec/bitvec" }
+
 
 [profile.dev]
 panic = "abort"
+opt-level = 0
 
 [profile.release]
 panic = "abort"
 opt-level = 3
 lto = true
 codegen-units = 1
+strip = false
+overflow-checks = false
+debug = false
+
+# Production Profile - Optimized for stability and performance
+[profile.production]
+inherits = "release"
+lto = "fat"
+codegen-units = 1
+opt-level = 3
+debug = false
+panic = "abort"
+strip = true
+

@@ -1,25 +1,90 @@
-# Build Bootable ISO for AetherOS (x86_64)
-# Requires: cargo install bootimage
+# Build BIOS-bootable ISO via GRUB (uses WSL tools)
 
-$KernelPath = "kernel"
-$Target = "x86_64-unknown-none"
+param(
+    [string]$KernelSource = "",
+    [string]$OutputIso = "out/aetheros.iso",
+    [string]$WslDistro = ""
+)
 
-Write-Host "Building Kernel..."
-cargo build --manifest-path "$KernelPath/Cargo.toml" --release --target $Target
-
-if ($LASTEXITCODE -ne 0) {
-    Write-Error "Kernel build failed!"
-    exit 1
+function Convert-ToWslPath {
+    param([string]$Path)
+    $full = [System.IO.Path]::GetFullPath($Path)
+    $drive = $full.Substring(0,1).ToLowerInvariant()
+    $rest = $full.Substring(2) -replace "\\", "/"
+    return "/mnt/$drive/$rest"
 }
 
-Write-Host "Creating Bootable Disk Image..."
-# Assuming bootimage is installed
-# If not: cargo install bootimage
-cargo bootimage --manifest-path "$KernelPath/Cargo.toml" --release --target $Target
-
-if ($LASTEXITCODE -ne 0) {
-    Write-Error "Bootimage generation failed. Ensure 'cargo install bootimage' is run."
-    exit 1
+function Invoke-WslCommand {
+    param([string]$Command)
+    $distro = $WslDistro
+    if (-not $distro) { $distro = "Ubuntu" }
+    $baseArgs = @("-d", $distro, "--", "bash", "-c", $Command)
+    wsl @baseArgs
+    if ($LASTEXITCODE -ne 0) { throw "WSL command failed: $Command" }
 }
 
-Write-Host "Success! Image available in target/x86_64-unknown-none/release/bootimage-aetheros-kernel.bin"
+$repoRoot = Split-Path $PSScriptRoot
+$isoDir = Join-Path $repoRoot "iso"
+$kernelTarget = Join-Path $isoDir "boot/aetheros_kernel"
+
+function Resolve-RepoPath {
+    param(
+        [string]$Path,
+        [string]$RepoRoot
+    )
+
+    if ([string]::IsNullOrWhiteSpace($Path)) {
+        return $Path
+    }
+
+    if ([System.IO.Path]::IsPathRooted($Path)) {
+        return [System.IO.Path]::GetFullPath($Path)
+    }
+
+    return [System.IO.Path]::GetFullPath((Join-Path $RepoRoot $Path))
+}
+
+$resolvedKernelSource = Resolve-RepoPath -Path $KernelSource -RepoRoot $repoRoot
+$resolvedOutputIso = Resolve-RepoPath -Path $OutputIso -RepoRoot $repoRoot
+
+if (-not (Test-Path $isoDir)) { throw "ISO staging directory not found: $isoDir" }
+
+if ($resolvedKernelSource) {
+    Copy-Item -Path $resolvedKernelSource -Destination $kernelTarget -Force
+} elseif (-not (Test-Path $kernelTarget)) {
+    throw "Kernel payload missing at $kernelTarget. Provide -KernelSource to copy it in."
+}
+
+if (-not (Get-Command wsl -ErrorAction SilentlyContinue)) {
+    throw "WSL is required for grub-mkrescue/xorriso on Windows."
+}
+
+$wslRepoRoot = Convert-ToWslPath $repoRoot
+$wslOutPath = Convert-ToWslPath (Split-Path $resolvedOutputIso)
+$wslIsoOut = Convert-ToWslPath $resolvedOutputIso
+$wslIsoDir = Convert-ToWslPath $isoDir
+
+# Ensure output directory exists inside WSL
+Invoke-WslCommand "mkdir -p $wslOutPath"
+
+# Check deps; if missing, instruct user to install
+$depCheck = @(
+    "command -v grub-mkrescue >/dev/null",
+    "command -v xorriso >/dev/null",
+    "command -v mformat >/dev/null"
+) -join " && "
+
+
+# Always use Ubuntu as default distro for dependency check
+$distro = $WslDistro
+if (-not $distro) { $distro = "Ubuntu" }
+$depArgs = @("-d", $distro, "--", "bash", "-c", $depCheck)
+wsl @depArgs 2>$null
+if ($LASTEXITCODE -ne 0) {
+    throw "Missing deps in WSL. Run: sudo apt update && sudo apt install -y grub-pc-bin xorriso mtools"
+}
+
+# Build ISO using existing GRUB tree under iso/
+Invoke-WslCommand "cd $wslRepoRoot && grub-mkrescue -o $wslIsoOut $wslIsoDir"
+
+Write-Host "ISO created at $resolvedOutputIso"
