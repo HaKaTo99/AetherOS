@@ -62,7 +62,19 @@ powershell -ExecutionPolicy Bypass -File D:\GitHub\AetherOS\QUICKSTART_AETHEROS.
 ### Production Binary
 ```
 powershell
-qemu-system-x86_64 -kernel D:\GitHub\AetherOS\target\x86_64-unknown-none\release\aetheros-kernel -m 2048M -display gtk
+powershell -ExecutionPolicy Bypass -File D:\GitHub\AetherOS\run_aetheros_production.ps1 -Action dev
+```
+
+### Production Headless
+```
+powershell
+powershell -ExecutionPolicy Bypass -File D:\GitHub\AetherOS\run_aetheros_production.ps1 -Action headless
+```
+
+### Build Kernel (Production Profile)
+```
+powershell
+powershell -ExecutionPolicy Bypass -File D:\GitHub\AetherOS\run_aetheros_production.ps1 -Action build
 ```
 
 ### Command Line
@@ -80,7 +92,7 @@ make iso-image
 
 # Or manual
 mkdir -p iso/boot/grub
-cp kernel/target/x86_64-unknown-none/release/aetheros-kernel iso/boot/aetheros_kernel
+cp target/x86_64-unknown-none/production/aetheros-kernel iso/boot/aetheros_kernel
 grub-mkrescue -o aetheros.iso iso
 ```
 
