@@ -18,6 +18,7 @@ pub mod gpu;   // [NEW] Phase 3: VirtIO GPU Driver
 pub mod media; // [NEW] Media Subsystem (Phase 13.3)
 pub mod usb;   // [NEW] USB Subsystem (Phase 11)
 pub mod bci;   // [NEW] BCI Subsystem (Phase 19.4)
+pub mod net;   // [NEW] Network Subsystem
 #[cfg(target_arch = "x86_64")]
 pub mod debug_exit; // [NEW] Debug Exit Driver
 

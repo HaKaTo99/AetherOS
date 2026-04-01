@@ -1,17 +1,10 @@
+pub mod npu;            // Akselerator Hardware AI Tensor (PCIe)
+pub mod omnilang_bridge;  // Bridge Kompilator OmniLang ke Binari ELF Mesin
 pub mod llm;    // [NEW] Phase 22 (v5.3) Local LLM
 pub mod genai;  // [NEW] Phase 22 (v5.3) Generative AI
 pub mod intent; // [NEW] Phase 27.5 Cognitive Intent Parser
 pub mod intent_model; // [NEW] Priority #2 TinyML Model
 pub mod fabric; // [NEW] Phase 27.4 AI-Native Industrial Fabric
-
-pub struct NpuDriver;
-impl NpuDriver {
-    pub fn new() -> Self { Self }
-    pub fn init(&mut self) -> Result<(), &'static str> { Ok(()) }
-    pub fn process_step(&mut self) -> Option<()> { None }
-}
-
-pub static GLOBAL_NPU: spin::Mutex<NpuDriver> = spin::Mutex::new(NpuDriver);
 
 /// Initialize Universal Intelligence Layer components (Phase 27.x)
 pub fn init_intelligence() {
@@ -27,10 +20,11 @@ pub fn init_intelligence() {
         fabric.optimize_workload();
     }
 
-    // 2. Initialize NPU Driver
+    // 2. Initialize Hardware NPU Driver
     {
-        let mut npu = GLOBAL_NPU.lock();
-        let _ = npu.init();
+        use crate::ai::npu::NpuDriver;
+        let mut npu_device = npu::GLOBAL_NPU.lock();
+        let _ = npu_device.init();
     }
 
     // 3. Initialize Intent Parser (Phase 27.5)

@@ -170,8 +170,8 @@ impl MemoryPool {
             
             if current.size >= size {
                 // Found a suitable block
-                // Supreme Stability: Increase split threshold to ensure split blocks are usable and safe
-                if current.size >= size + 32 {
+                // Supreme Stability: Zero-Leak split boundary. Split harus presisi ke 16-byte (batas struktur FreeBlock).
+                if current.size >= size + 16 {
                     // Split the block if it's large enough
                     let new_block_addr = (current_ptr as usize) + size;
                     let new_block = unsafe { &mut *(new_block_addr as *mut FreeBlock) };

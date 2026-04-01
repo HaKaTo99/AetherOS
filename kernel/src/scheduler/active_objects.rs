@@ -607,8 +607,18 @@ impl ActiveObjectScheduler {
         }
         
         #[cfg(target_arch = "x86_64")]
-        {
-            let _ = (from_idx, to_idx); // suppress unused warnings
+        unsafe {
+            let objects_ptr = self.objects.as_mut_ptr();
+            
+            let from_opt = &mut *objects_ptr.add(from_idx);
+            let to_opt = &*objects_ptr.add(to_idx);
+            
+            if let (Some(from), Some(to)) = (from_opt.as_mut(), to_opt.as_ref()) {
+                crate::arch::x86_64::__switch_context(
+                    &mut from.context,
+                    &to.context,
+                );
+            }
         }
     }
 

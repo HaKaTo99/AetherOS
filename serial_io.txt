@@ -1,27 +1,8 @@
 c[?7l[2J[0mSeaBIOS (version rel-1.17.0-0-gb52ca86e094d-prebuilt.qemu.org)
 
 
-iPXE (http://ipxe.org) 00:03.0 CA00 PCI2.10 PnP PMM+3EFD1F90+3EF31F90 CA00
+iPXE (http://ipxe.org) 00:03.0 CA00 PCI2.10 PnP PMM+3EFD1E30+3EF31E30 CA00
 Press Ctrl-B to configure iPXE (PCI 00:03.0)...                                                                               
 
 
-Booting from Hard Disk...
-Boot failed: could not read the boot disk
-
-Booting from Floppy...
-Boot failed: could not read the boot disk
-
-Booting from DVD/CD...
-X86_64 HAL Initialized (v10.2 Supreme Grade)
-[x86_64] GDT/IDT Initialized. Stability Guard Active.
-AetherOS Supreme Grade Booting...
-[HAL] X86_64 Architecture Ready.
-Kernel OK (ULTRA_FAST_DEMO)
-[FAST] Skipping enterprise audit, mesh, AI, tests...
---- AetherOS v10.1 Sovereign Shell ---
-[BUILD] INPUT-STABLE-2026-02-27-065032
-[AUTHORITY] Welcome, Architect Herman Krisnanto.
-Type 'help' (or 1) for commands.
-Shortcuts: 1=help, 2=calc, 3=clear, 0=exit
-
-AetherShell> 
+Booting from ROM..

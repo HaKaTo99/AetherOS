@@ -1,4 +1,4 @@
-﻿#![no_std]
+#![no_std]
 #![feature(abi_x86_interrupt)]
 #![allow(static_mut_refs)]
 //! # xAetherOS Quantum Microkernel v10.2.0 "Supreme Grade"
@@ -33,6 +33,7 @@ pub mod panic;
 #[cfg(target_arch = "aarch64")]
 pub mod debug;
 pub mod hal;
+pub mod reliability; // [NEW] Chaos Engineering
 pub mod virt;
 pub mod testing;
 pub mod loader;
@@ -430,13 +431,17 @@ pub fn kernel_init(dtb_ptr: usize) {
             }
             platform.puts("[STAGE-4] Mesh init OK.\n");
 
+            platform.puts("[STAGE-4] AI init begin.\n");
             crate::ai::init_intelligence();
             platform.puts("[STAGE-4] AI init OK.\n");
 
+            platform.puts("[STAGE-4] Crypto init begin.\n");
             crate::security::crypto::init();
             platform.puts("[STAGE-4] Crypto init OK.\n");
 
+            platform.puts("[STAGE-4] Shell self-test begin.\n");
             crate::enterprise::shell::self_test_core_commands();
+            platform.puts("[STAGE-4] Shell handoff begin.\n");
             use crate::enterprise::AetherShell;
             AetherShell::start();
             return;
@@ -1018,7 +1023,8 @@ pub fn kernel_init(dtb_ptr: usize) {
             // 14. Phase 19: Internet of Abilities (v5.0)
             {
                 // 19.2 AI-Native OS
-                use crate::ai::GLOBAL_NPU;
+                use crate::ai::npu::GLOBAL_NPU;
+                use crate::ai::npu::NpuDriver;
                 let mut npu = GLOBAL_NPU.lock();
                 let _ = npu.init();
 
@@ -1162,10 +1168,8 @@ pub fn kernel_init(dtb_ptr: usize) {
 
                     // 3. Mesh Sync
                     use crate::net::mesh::sync::SyncManager;
-                    if let Ok(msg) = SyncManager::sync_with_peer(0) {
-                        platform.puts("[MeshSync] ");
-                        platform.puts(msg.as_str());
-                        platform.puts("\r\n");
+                    if let Ok(_enc_msg) = SyncManager::sync_with_peer(0, b"DataSync_Init") {
+                        platform.puts("[MeshSync] PQC Encrypted Synchronization Dispatched!\r\n");
                     }
                 }
 
@@ -1350,10 +1354,7 @@ pub fn kernel_tick() {
 
     // 8. Phase 19: Internet of Abilities Background Tasks
     {
-        use crate::ai::GLOBAL_NPU;
-        if let Some(_completed_job) = GLOBAL_NPU.lock().process_step() {
-             // Job progress...
-        }
+        // NPU processing is hardware-interrupt driven now; asynchronous polling removed.
 
         use crate::quantum::GLOBAL_QPU;
         let _qpu = GLOBAL_QPU.lock(); 

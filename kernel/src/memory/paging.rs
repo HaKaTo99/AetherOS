@@ -36,6 +36,7 @@ impl PageDescriptor {
     pub const TABLE: u64 = 1 << 1; 
     pub const BLOCK: u64 = 0 << 1; 
     pub const ACCESS: u64 = 1 << 10;
+    pub const ENCRYPTED: u64 = 1 << 47; // AMD SEV / Intel TDX C-bit stub
 }
 
 /// A 4KB Page Table containing 512 entries
@@ -99,6 +100,17 @@ impl Mapper {
         
         // Set other flags (Access, etc)
         entry.set_flags(flags);
+    }
+    
+    /// Map a virtual address to a physical address with Hardware Memory Encryption (AMD SEV/Intel TDX)
+    pub fn map_memory_encrypted(&mut self, virt: usize, phys: usize, flags: u64) {
+        // Automatically inject the Hardware Encryption Bit (C-bit)
+        self.map_memory(virt, phys, flags | PageDescriptor::ENCRYPTED);
+        
+        crate::enterprise::audit::log_security(
+            crate::enterprise::audit::AuditSeverity::Info,
+            "MMU", &alloc::format!("Map Encrypted Page: VA 0x{:X} -> PA 0x{:X} (C-bit Activated)", virt, phys)
+        );
     }
 }
 

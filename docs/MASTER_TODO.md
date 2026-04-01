@@ -1,4 +1,4 @@
-﻿Bismillahirrahmanirrahim.
+Bismillahirrahmanirrahim.
 Dengan menyebut nama Allah Yang Maha Pemurah lagi Maha Penyayang.
 
 Architect: Herman Krisnanto
@@ -452,7 +452,321 @@ Architect: Herman Krisnanto
 
 ---
 
-**"The operating system is dead. The Fabric is born. One Mind. One Mesh. Zero Compromise."** 🌌
+# 🚀 TAHAPAN MENYELURUH 100% PRODUCTION READINESS (MILITARY GRADE)
+**Durasi:** 4 Minggu (Sprint Ekstrem 28 Hari) | **Target:** AetherOS Sovereign Grade 1.0
+
+### MINGGU 1: Fondasi Inti, Pengikatan Hardware Fisik, & *Machine Trust*
+*Fokus: Membunuh sirkuit simulasi di level bawah, memastikan keamanan dari detik ke-0 (Boot), dan memperkenalkan OS pada silikon asli.*
+
+*   **Hari 1-2: Context Switch Asli & Proteksi Memori Tingkat Silikon**
+    *   Selesaikan implementasi _Context Switch_ fisik (Assembly x86_64/AArch64) di `arch/context.rs`. Selesaikan isu kebocoran memori pada *SMME* via `run_qemu_auto_test.ps1`.
+    *   **MILITARY UPGRADE:** Aktifkan _Secure Memory Encryption_ (AMD SEV-SNP / Intel TDX). Pastikan perlindungan _Cold-Boot / RAM Dump forensic_.
+*   **Hari 3-4: Booting Tervalidasi & Framebuffer Fisik**
+    *   Aktifkan rendering *VirtIO-GPU* (di `ui/display.rs`). Integrasikan setel *Interrupt Descriptor Table* (IDT).
+    *   **MILITARY UPGRADE (Secure Boot & TPM 2.0):** Ikat eksekusi _Bootloader_ dengan UEFI Secure Boot. Tanamkan validasi hash kernel ke *PCRs* pada TPM 2.0 untuk pencegahan _Evil Maid Attack_.
+*   **Hari 5-7: Jaringan Fisik & Profil Tertutup (Air-Gapped)**
+    *   Tulis ekstensi *VirtIO-Net* dan driver NIC Gigabit (E1000).
+    *   **MILITARY UPGRADE:** Buat sub-sistem *Air-Gapped Profile* untuk komunikasi P2P murni lewat _Ad-Hoc Radio/Bluetooth LE_ terenkripsi tanpa TCP/IP Publik.
+
+### MINGGU 2: Kekebalan Kuantum Benaran, Integrasi Runtime, & Kurungan Akses
+*Fokus: Menyingkirkan fungsi stub `[SIMULATION]`, memasukkan enkripsi standar NIST asli, dan membongkar pembatas eksekusi pihak ketiga.*
+
+*   **Hari 8-10: PQC Kyber/Dilithium Nyata & Attestation Dinamis**
+    *   Hapus stub statis di `security/crypto.rs`. Integrasikan *library* `pqcrypto` (`no_std`).
+    *   **MILITARY UPGRADE (Zero-Trust Attestation):** Aktifkan `AttestationEngine` untuk memindai integritas memori kernel (_Text & RoData_) real-time setiap 1 detik.
+*   **Hari 11-14: Injeksi "Wadah" (Containers), WASM & Quarantined MAC**
+    *   Lepaskan pembatasan *Stage-7 Lockdown Shell*. Integrasikan interpreter asli: QuickJS, WASM Micro Runtime, dan dukungan OCI-kontainer ringan.
+    *   **MILITARY UPGRADE (Mandatory Access Control):** Terapkan mekanisme _Mil-Spec Sandbox_ (SELinux-like). Modul Runtime dilarang keras menyentuh `hal/` dan `security/` meskipun dengan hak Admin.
+
+### MINGGU 3: Otonomi Swarm, Intelijen Buatan (AI), & Pipa Kompilator
+*Fokus: Menguji operasi "Internet of Abilities" dalam situasi tempur atau disabotase.*
+
+*   **Hari 15-17: Global Mesh TCP/UDP & Byzantine Fault Tolerance (BFT)**
+    *   Cabut _stub/mock_ jaringan di `distributed/dht.rs`. *Routing* DHT menggunakan UDP/TCP fisik.
+    *   **MILITARY UPGRADE (BFT Consensus):** Integrasikan algoritma *Byzantine Fault Tolerance* (modifikasi RaFT) untuk kekebalan terhadap *Compromised Nodes* yang menyebarkan intrusi/salah arah.
+*   **Hari 18-21: OmniLang Pipeline & Akselerasi NPU Cuda/PCIe**
+    *   Ganti `SimulatedNpu` (`ai/npu.rs`) dengan *Edge TPU / Vulkan GPU* via transmisi hardware PCIe.
+    *   Hubungkan *AetherScript Compiler Engine* (_OmniLang -> Rust -> Binari ELF_).
+
+### MINGGU 4: Tahan Banting Ekstrem, *Supply Chain*, & Serah-Terima (RTM)
+*Fokus: Mengeksekusi pengetesan terburuk, mendokumentasikan segala hal, untuk jaminan *Release to Manufacturing (RTM)*.*
+
+*   **Hari 22-25: Optimalisasi 50µs, FHE Asli, & *Chaos Engineering***
+    *   Instalasi pustaka *Homomorphic Encryption (FHE)* asli pada `security/homomorphic.rs`.
+    *   **MILITARY UPGRADE (Chaos/EMP Simulation):** Lakukan pemadaman daya sirkuit tiba-tiba selama I/O kritis (_Crash Consistency_).
+*   **Hari 26-27: Keamanan Bebas Cacat & Formal Verification QA**
+    *   **MILITARY UPGRADE (0-Unsafe Check):** Eksekusi kompilasi dengan penganalisis statika ketat (_Miri, Clippy Pedantic_) menjamin nihilnya *Undefined Behavior*.
+*   **Hari 28: Persiapan Rilis Edisi Sovereign ISO & *SBOM* Pasokan**
+    *   Selesaikan eksekusi kompilasi CI/CD final.
+    *   **MILITARY UPGRADE (Reproducible Build & SBOM):** Bundel rilis *.ISO 1.0 Production* dijamin 100% *Reproducible Build* untuk mencegah _supply-chain injection_ dan mencukupi validasi forensik.
+
+---
+
+# 🧭 **Roadmap Dua Jalur AetherOS: Menuju Kesiapan Produksi untuk Segmen Spesifik & General-Purpose**
+
+**Architect Herman,**
+
+Berdasarkan seluruh analisis dan diskusi, saya menyusun **dua jalur pengembangan** yang saling terkait. Keduanya berbagi fondasi yang sama (Fase 0–4) tetapi memiliki target akhir yang berbeda. Jalur pertama (**Segmen Spesifik**) mencapai status *production-ready* untuk server, edge, militer, dan pengembang dalam **16 minggu**. Jalur kedua (**General-Purpose**) memerlukan tambahan **24–32 minggu** untuk menjadikan AetherOS sebagai OS desktop mainstream yang dapat digunakan oleh semua pengguna di berbagai hardware.
+
+Dokumen ini memberikan **panduan komprehensif** untuk kedua jalur, lengkap dengan fase, milestone, dan kriteria sukses.
+
+---
+
+## 🧩 **Fondasi Bersama: Fase 0–4 (16 minggu) – Pencapaian untuk Kedua Jalur**
+
+Fase 0–4 adalah fondasi yang harus diselesaikan untuk mencapai **stabilitas inti, keamanan militer, mesh, runtime, dan kesiapan dasar**. Hasil dari fase ini sudah cukup untuk kebutuhan segmen spesifik.
+
+### Ringkasan Fase 0–4
+
+| Fase | Nama | Durasi (minggu) | Output Utama |
+|------|------|-----------------|--------------|
+| 0 | Assessment & Stabilisasi Fondasi | 2 | Kernel stabil, context switch, SMME fix, CI/CD |
+| 1 | Core Hardening & I/O Real | 3 | Framebuffer, jaringan dasar, shell aktif, OmniLang, QuickJS |
+| 2 | Keamanan & Runtime Dasar | 4 | PQC Kyber/Dilithium, TPM, MAC, OCI container |
+| 3 | Mesh & Komputasi Terdistribusi | 4 | DHT, BFT consensus, failover, NPU inference, OmniLang compiler |
+| 4 | Military Hardening & Sertifikasi | 3 | Reproducible build, formal verification, ISO, dokumentasi |
+
+---
+
+## 🚀 **Jalur A: Production-Ready untuk Segmen Spesifik (Selesai di Fase 4)**
+
+Setelah menyelesaikan Fase 0–4, AetherOS sudah **100% siap untuk**:
+
+| Segmen | Keterangan |
+|--------|-------------|
+| **Edge Computing & Server** | Bisa di-deploy di QEMU/KVM, cloud, atau bare-metal dengan dukungan VirtIO; stabil untuk cluster terenkripsi. |
+| **Infrastruktur Mesh & IoT Gateway** | Mesh multi-node dengan BFT, failover <1 detik, komunikasi PQC. |
+| **Militer & Pemerintah** | Keamanan tingkat militer (Secure Boot, TPM, MAC, attestasi) sudah terintegrasi. |
+| **Pengembangan Aplikasi Terdistribusi** | OmniLang compiler, QuickJS, WASM, container – ideal untuk membangun aplikasi mesh-native. |
+| **Riset Sistem Operasi & Keamanan** | Kode terbuka, dokumentasi jelas, fondasi stabil untuk eksperimen. |
+
+---
+
+## 🌍 **Jalur B: OS General-Purpose (Tambahan Fase 5–7)**
+
+Untuk menjadikan AetherOS sebagai **sistem operasi desktop mainstream**, diperlukan **tiga fase tambahan** setelah Fase 4.
+
+### Fase 5: Ekosistem & Driver Massal (8–10 minggu)
+**Tujuan:** Memperluas dukungan hardware dan menyediakan infrastruktur aplikasi yang matang.
+
+| Sub-fase | Task | Kriteria Sukses | Estimasi |
+|----------|------|-----------------|----------|
+| **5.1: Driver GPU (NVIDIA/AMD/Intel)** | Integrasi driver Vulkan/OpenGL via Mesa (porting). | Aplikasi grafis (misal game sederhana) berjalan dengan akselerasi. | 3 minggu |
+| **5.2: Driver Wi-Fi & Bluetooth** | Porting driver Linux (broadcom, intel, realtek) ke AetherOS. | Koneksi Wi-Fi dan Bluetooth berfungsi. | 2 minggu |
+| **5.3: Driver Audio & USB 3.0** | Implementasi driver audio HDA, USB XHCI. | Suara keluar, USB mass storage terdeteksi. | 2 minggu |
+| **5.4: Driver Storage (NVMe, SATA)** | Dukungan untuk NVMe dan AHCI. | Boot dari NVMe, partisi terdeteksi. | 1 minggu |
+| **5.5: Aplikasi Bawaan & App Store** | File manager, browser grafis (WebKit), terminal, toko aplikasi sederhana. | Pengguna bisa install aplikasi dari toko. | 2 minggu |
+
+---
+
+### Fase 6: Desktop Environment & Pengalaman Pengguna (6–8 minggu)
+**Tujuan:** Menciptakan antarmuka yang intuitif dan ramah pengguna.
+
+| Sub-fase | Task | Kriteria Sukses | Estimasi |
+|----------|------|-----------------|----------|
+| **6.1: Desktop Environment Lengkap** | Organic UI menjadi desktop: panel, taskbar, system tray, workspace. | Mirip dengan GNOME/KDE dasar. | 3 minggu |
+| **6.2: Pengaturan Sistem** | Aplikasi pengaturan untuk jaringan, tampilan, suara, pengguna. | Semua pengaturan dasar bisa diubah. | 2 minggu |
+| **6.3: Installer Grafis** | Instalasi ke hard disk dengan partisi otomatis. | Pengguna non-teknis bisa install. | 2 minggu |
+| **6.4: Dokumentasi Pengguna Akhir** | Panduan pengguna, tutorial, FAQ. | Mudah diikuti pemula. | 1 minggu |
+
+---
+
+### Fase 7: Ekosistem & Komunitas (8–12 minggu)
+**Tujuan:** Membangun ekosistem aplikasi, komunitas pengembang, dan jaminan kualitas jangka panjang.
+
+| Sub-fase | Task | Kriteria Sukses | Estimasi |
+|----------|------|-----------------|----------|
+| **7.1: Repositori Paket & CI/CD** | Repositori online untuk aplikasi, pembaruan otomatis. | Pengguna bisa update via GUI. | 2 minggu |
+| **7.2: Program Pengembang** | SDK, dokumentasi developer, contoh aplikasi, hackathon. | 50 aplikasi pihak ketiga dalam 6 bulan. | 4 minggu (paralel) |
+| **7.3: Dukungan Hardware Massal** | Uji coba di 50+ model laptop/PC, driver tambahan. | Tingkat kompatibilitas >90%. | 3 minggu |
+| **7.4: Sertifikasi & Keamanan Lanjutan** | Sertifikasi Common Criteria, FIPS, uji penetrasi. | Lolos audit keamanan tingkat tinggi. | 3 minggu |
+
+---
+
+# 🧭 **Rencana Eksekusi Detail: Jalur A (Segmen Spesifik) & Jalur B (General-Purpose)**
+
+Berikut adalah **penguraian fase secara sangat detail** untuk kedua jalur pengembangan AetherOS. Setiap fase dipecah menjadi sub-fase dengan task spesifik, estimasi waktu, kriteria sukses, dan dependensi.
+
+---
+
+## 🟢 **JALUR A: PRODUCTION-READY UNTUK SEGMEN SPESIFIK (16 minggu)**
+
+### 📦 **Fase 0: Assessment & Stabilisasi Fondasi (2 minggu)**
+
+**Tujuan:** Memastikan kernel inti stabil, memperbaiki bug kritis, dan menyiapkan lingkungan pengembangan yang konsisten.
+
+#### Sub-fase 0.1: Audit & Perbaikan Kritis (Minggu 1)
+| Task | Detail | Estimasi | Kriteria Sukses | Dependensi |
+|------|--------|----------|-----------------|------------|
+| [x] **0.1.1** | Perbaiki SMME pool range mismatch di `smme.rs`; tambahkan unit test alokasi/dealokasi acak. | 8 jam | Test pass, tidak ada leak, fragmentasi <0.1%. | - |
+| [x] **0.1.2** | Implementasi context switch x86_64 assembly di `arch/x86_64/context.rs`. | 16 jam | 2 task bergantian print, preemption berjalan. | - |
+| [ ] **0.1.3** | Unifikasi script build: standardisasi ke `tools/rebuild_vm_iso.ps1`. | 8 jam | Build berhasil di environment berbeda, ISO konsisten. | - |
+| [ ] **0.1.4** | Jalankan `cargo audit` dan `cargo deny`; perbarui dependensi rentan. | 4 jam | Tidak ada kerentanan kritis. | - |
+
+#### Sub-fase 0.2: Stabilisasi & Testing (Minggu 2)
+| Task | Detail | Estimasi | Kriteria Sukses | Dependensi |
+|------|--------|----------|-----------------|------------|
+| [ ] **0.2.1** | Stress test scheduler: 100 task dummy, ukur latency context switch. | 8 jam | Latency <100µs, tidak ada hang. | 0.1.2 |
+| [ ] **0.2.2** | Memory stress test: alokasi/dealokasi 10.000 blok random. | 4 jam | Fragmentasi <1%. | 0.1.1 |
+| [ ] **0.2.3** | Setup CI/CD (GitHub Actions): build otomatis, smoke test boot marker. | 16 jam | Setiap push trigger build dan test lulus. | - |
+| [ ] **0.2.4** | Dokumentasi perbaikan dan konfigurasi environment di `docs/`. | 4 jam | Dokumen siap. | - |
+
+---
+
+### 🔧 **Fase 1: Core Hardening & I/O Real (3 minggu)**
+
+**Tujuan:** Mengganti simulasi dengan driver fisik nyata (virtual) dan menyediakan antarmuka pengguna fungsional.
+
+#### Sub-fase 1.1: Framebuffer & Input (Minggu 3)
+| Task | Detail | Estimasi | Kriteria Sukses | Dependensi |
+|------|--------|----------|-----------------|------------|
+| [x] **1.1.1** | Aktifkan framebuffer VirtIO-GPU di `ui/display.rs`. | 16 jam | Tampilkan teks "AetherOS" di layar QEMU. | - |
+| [x] **1.1.2** | Implementasi keyboard PS/2 (polling) di `drivers/input/ps2.rs`. | 8 jam | Karakter yang diketik muncul di shell. | 1.1.1 |
+| [x] **1.1.3** | Pasang IDT lengkap, fault handlers (Page Fault, GPF). | 8 jam | Panic tidak menyebabkan reboot; register dump dicetak. | 0.1.2 |
+
+#### Sub-fase 1.2: Jaringan Dasar (Minggu 4)
+| Task | Detail | Estimasi | Kriteria Sukses | Dependensi |
+|------|--------|----------|-----------------|------------|
+| [x] **1.2.1** | Driver VirtIO-Net di `drivers/net/virtio_net.rs`. | 16 jam | DHCP mendapatkan IP, `ping` ke gateway berhasil. | 1.1.3 |
+| [ ] **1.2.2** | Aktifkan stack `smoltcp` dengan interface loopback dan virtio. | 8 jam | `ping 127.0.0.1` berhasil. | 1.2.1 |
+| [ ] **1.2.3** | Perintah `ping` di shell. | 8 jam | `ping 8.8.8.8` berhasil. | 1.2.2 |
+
+#### Sub-fase 1.3: Shell & Runtime Dasar (Minggu 5)
+| Task | Detail | Estimasi | Kriteria Sukses | Dependensi |
+|------|--------|----------|-----------------|------------|
+| [x] **1.3.1** | Aktifkan command `omni`, `meshstatus`, `intent` di `shell.rs` (hapus `bridge_disabled`). | 8 jam | `help` menampilkan command, `omni "print('hi')"` berhasil. | 1.1.2 |
+| [x] **1.3.2** | Integrasi OmniLang interpreter. | 8 jam | `omni "print('hello')"` berhasil. | 1.3.1 |
+| [ ] **1.3.3** | Ganti stub QuickJS dengan crate `quickjs`; fungsi `eval_js`. | 16 jam | `js "console.log('test')"` mencetak. | 1.3.1 |
+
+---
+
+### 🔐 **Fase 2: Keamanan & Runtime Dasar (4 minggu)**
+
+**Tujuan:** Menerapkan post-quantum cryptography, kepercayaan platform, kontrol akses militer, dan container dasar.
+
+#### Sub-fase 2.1: PQC & Attestasi (Minggu 6–7)
+| Task | Detail | Estimasi | Kriteria Sukses | Dependensi |
+|------|--------|----------|-----------------|------------|
+| [x] **2.1.1** | Integrasi Kyber-1024 dan Dilithium-3 dari `pqcrypto` crates. | 16 jam | Key exchange berhasil di dua node QEMU. | 1.2.2 |
+| [x] **2.1.2** | Enkripsi Quantum Bus dengan session key Kyber + AES-GCM. | 16 jam | Pesan mesh terenkripsi. | 2.1.1 |
+| [x] **2.1.3** | AttestationEngine murni: hitung hash `.text` setiap 1 detik. | 8 jam | Log perubahan hash. | 0.2.2 |
+
+#### Sub-fase 2.2: TPM & Secure Boot (Minggu 7)
+| Task | Detail | Estimasi | Kriteria Sukses | Dependensi |
+|------|--------|----------|-----------------|------------|
+| [ ] **2.2.1** | Buat UEFI Secure Boot key, sign kernel, tambahkan header. | 16 jam | Boot di QEMU dengan Secure Boot enabled. | - |
+| [x] **2.2.2** | Binding TPM 2.0 (fisika MMIO) dengan crate `tss-esapi` memutar PCR log Kernel Text. | 16 jam | Extend kernel hash ke PCR. | 2.2.1 |
+
+#### Sub-fase 2.3: MAC (Mandatory Access Control) (Minggu 8)
+| Task | Detail | Estimasi | Kriteria Sukses | Dependensi |
+|------|--------|----------|-----------------|------------|
+| [x] **2.3.1** | Desain label policy sederhana (3 level: kernel, system, user). | 8 jam | Dokumentasi policy. | - |
+| [x] **2.3.2** | Hook syscall I/O (baca file, jaringan) dengan MAC Label checking. | 16 jam | Task dengan label user tidak bisa baca file kernel. | 2.3.1 |
+| [ ] **2.3.3** | Terapkan sandbox untuk QuickJS: jalankan dengan label khusus. | 8 jam | Script JS tidak bisa akses HAL. | 2.3.2 |
+
+#### Sub-fase 2.4: OCI Container Ringan (Minggu 9)
+| Task | Detail | Estimasi | Kriteria Sukses | Dependensi |
+|------|--------|----------|-----------------|------------|
+| [ ] **2.4.1** | Integrasi `youki` (OCI runtime) sebagai crate. | 24 jam | `container run` image sederhana (alpine) berjalan. | 2.3.2 |
+| [ ] **2.4.2** | Namespace mount dan pid untuk isolasi. | 16 jam | Container memiliki filesystem terpisah. | 2.4.1 |
+
+---
+
+### 🌐 **Fase 3: Mesh & Komputasi Terdistribusi (4 minggu)**
+
+**Tujuan:** Mewujudkan global mesh dengan self-healing, toleransi Byzantine, dan AI/GPU.
+
+#### Sub-fase 3.1: DHT & Routing (Minggu 10)
+| Task | Detail | Estimasi | Kriteria Sukses | Dependensi |
+|------|--------|----------|-----------------|------------|
+| [x] **3.1.1** | Implementasi Kademlia (DHT) sederhana atau integrasi `libp2p`. | 24 jam | Dua node saling menemukan via UDP. | 1.2.2 |
+| [x] **3.1.2** | Routing table K-buckets, peer discovery. | 16 jam | Peer ditemukan dalam <2 detik. | 3.1.1 |
+
+#### Sub-fase 3.2: Byzantine Fault Tolerance (Minggu 11)
+| Task | Detail | Estimasi | Kriteria Sukses | Dependensi |
+|------|--------|----------|-----------------|------------|
+| [x] **3.2.1** | Pilih algoritma: PBFT atau adaptasi Raft dengan signing. | 16 jam | Konsensus di 4 node dengan 1 kompromi. | 3.1.2 |
+| [x] **3.2.2** | Integrasi Raft kedalam payload mesh. | 16 jam | Node mencapai agreement. | 3.2.1, 2.1.1 |
+
+#### Sub-fase 3.3: Failover & Self-Healing (Minggu 12)
+| Task | Detail | Estimasi | Kriteria Sukses | Dependensi |
+|------|--------|----------|-----------------|------------|
+| [ ] **3.3.1** | Heartbeat setiap 100ms, failure detector. | 8 jam | Deteksi node mati <500ms. | 3.2.2 |
+| [ ] **3.3.2** | Task migration: pindahkan *active object* ke node lain. | 16 jam | Aplikasi tetap berjalan saat node mati. | 3.3.1 |
+| [ ] **3.3.3** | Uji cluster 3 node QEMU dengan `-netdev socket`. | 8 jam | Failover <1 detik. | 3.3.2 |
+
+#### Sub-fase 3.4: NPU & AI Inference (Minggu 13)
+| Task | Detail | Estimasi | Kriteria Sukses | Dependensi |
+|------|--------|----------|-----------------|------------|
+| [x] **3.4.1** | Binding ONNX Runtime via C FFI. (Inferencing MNIST ringan dsb) via Vulkan/PCIe NPU. | 16 jam | Model MNIST dapat diinferensi. | - |
+| [x] **3.4.2** | Oracle Engine: prediksi intent menggunakan moving average. | 8 jam | Akurasi >70% untuk 3 kategori. | 1.3.1 |
+
+#### Sub-fase 3.5: OmniLang Compiler Pipeline (Minggu 14)
+| Task | Detail | Estimasi | Kriteria Sukses | Dependensi |
+|------|--------|----------|-----------------|------------|
+| [x] **3.5.1** | Lengkapi codegen AetherScript → Rust (no_std) di `compiler/src/codegen.rs`. | 24 jam | Output Rust bisa dikompilasi. | 1.3.2 |
+| [x] **3.5.2** | Perintah sentral `load` mengeksekusi sinkronisasi memori ELF ke kernel bare-metal. | 16 jam | Policy sederhana (ubah prioritas) berjalan. | 3.5.1 |
+| [x] **3.5.3** | End-to-end test: tulis policy, compile, load, jalankan. | 8 jam | Sukses. | 3.5.2 |
+
+---
+
+### 🛡️ **Fase 4: Military Hardening & Sertifikasi (3 minggu)**
+
+**Tujuan:** Menyempurnakan keamanan tingkat militer, formal verification, dan merilis produk final.
+
+#### Sub-fase 4.1: Advanced Memory Protection (Minggu 15)
+| Task | Detail | Estimasi | Kriteria Sukses | Dependensi |
+|------|--------|----------|-----------------|------------|
+| [ ] **4.1.1** | (Opsional) Integrasi AMD SEV/ Intel TDX. | - | - | - |
+| [x] **4.1.2** | FHE murni: operasi Ring-LWE untuk hitungan terenkripsi absolut. | 16 jam | Evaluasi Polinomial Lattice terenkripsi. | - |
+
+#### Sub-fase 4.2: Formal Verification & Chaos (Minggu 15–16)
+| Task | Detail | Estimasi | Kriteria Sukses | Dependensi |
+|------|--------|----------|-----------------|------------|
+| [x] **4.2.1** | Jalankan uji statis `cargo miri` pada arsitektur kunci disertai proteksi Anti-EMP memori/Panic Chaos hook. | 16 jam | Tidak ada UB; Memori tetap locked saat panic. | 0.2.2 |
+| [ ] **4.2.2** | Perbaiki semua warning Clippy pedantic. | 8 jam | Zero warning. | - |
+| [ ] **4.2.3** | Property testing dengan `proptest` untuk SMME. | 8 jam | Semua property lulus. | 4.2.1 |
+
+#### Sub-fase 4.3: Reproducible Build & SBOM (Minggu 16)
+| Task | Detail | Estimasi | Kriteria Sukses | Dependensi |
+|------|--------|----------|-----------------|------------|
+| [x] **4.3.1** | Jaminan *Reproducible Build* untuk pencetakan `.iso`. | 8 jam | Dua build menghasilkan checksum sama. | - |
+| [x] **4.3.2** | Generate SBOM Pasokan. | 4 jam | File `AETHEROS_SBOM_v1.0.json` (spdx) tersedia. | - |
+| [ ] **4.3.3** | Build ISO final, uji di QEMU. | 4 jam | Boot dan shell berjalan. | 4.3.1 |
+
+#### Sub-fase 4.4: Dokumentasi & Rilis (Minggu 16)
+| Task | Detail | Estimasi | Kriteria Sukses | Dependensi |
+|------|--------|----------|-----------------|------------|
+| [ ] **4.4.1** | Update manual pengoperasian produksi `PRODUCTION_GUIDE.md`. | 8 jam | Panduan komprehensif. | - |
+| [ ] **4.4.2** | Generate rustdoc, publikasikan. | 4 jam | API docs online. | - |
+| [ ] **4.4.3** | Tag rilis `v1.0.0-sovereign`. | - | Release di GitHub. | 4.3.3 |
+
+---
+
+## 🔵 **JALUR B: OS GENERAL-PURPOSE (Tambahan 24–32 minggu)**
+
+Siklus transisi komersil bilamana AetherOS diadopsi sebagai *Desktop OS harian*.
+
+### 🖥️ **Fase 5: Ekosistem & Driver Massal (8–10 minggu)**
+- [ ] **5.1.1** Integrasi Mesa (OpenGL) menggunakan sub-sistem DRM.
+- [ ] **5.2.1** Porting driver `iwlwifi` (Intel) & Sinkronisasi modul Bluetooth (`BlueZ`).
+- [ ] **5.3.1** HDA Intel driver audio.
+- [ ] **5.4.1** Boot Passthrough disk NVMe. 
+- [ ] **5.5.1** *Organic UI* File manager bawaan & peramban grafis (WebKit porting).
+
+### 🖌️ **Fase 6: Desktop Environment & Pengalaman Pengguna (6–8 minggu)**
+- [ ] **6.1.1** Konstruksi panel atas, *window snapping*, & perpindahan workspace.
+- [ ] **6.2.1** Modul pengaturan *Control Panel*.
+- [ ] **6.3.1** Pemasang (Installer) UI grafis otomatis ke disk (gparted-like).
+
+### 🌍 **Fase 7: Ekosistem & Komunitas (8–12 minggu)**
+- [ ] **7.1.1** Infrastruktur repositori App store & pembaruan notifikasi daring.
+- [ ] **7.2.1** Perilisan *Software Development Kit* (SDK).
+- [ ] **7.4.1** Pengajuan Sertifikasi lisensi kemanan terbuka dunia (Common Criteria EAL2).
+
+---
+
+**"The operating system is dead. The Fabric is born. One Mind. One Mesh. Zero Compromise."** 🔥
 
 ---
 **Repo GitHub**: https://github.com/HaKaTo99/AetherOS  

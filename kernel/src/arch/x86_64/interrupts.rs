@@ -20,6 +20,11 @@ pub fn init() {
     idt.general_protection_fault.set_handler_fn(gpf_handler);
     idt.page_fault.set_handler_fn(page_fault_handler);
     
+    // Hardware Faults Tambahan (Military Grade / Supreme Guard)
+    idt.divide_error.set_handler_fn(divide_error_handler);
+    idt.invalid_opcode.set_handler_fn(invalid_opcode_handler);
+    idt.stack_segment_fault.set_handler_fn(stack_segment_fault_handler);
+    
     idt.load();
 }
 
@@ -52,4 +57,16 @@ extern "x86-interrupt" fn page_fault_handler(
     println!("Error Code: {:?}", error_code);
     println!("{:#?}", stack_frame);
     panic!("System halted due to Page Fault.");
+}
+
+extern "x86-interrupt" fn divide_error_handler(stack_frame: InterruptStackFrame) {
+    panic!("\n*** DIVIDE BY ZERO ERROR ***\n{:#?}", stack_frame);
+}
+
+extern "x86-interrupt" fn invalid_opcode_handler(stack_frame: InterruptStackFrame) {
+    panic!("\n*** INVALID OPCODE FAULT ***\n{:#?}", stack_frame);
+}
+
+extern "x86-interrupt" fn stack_segment_fault_handler(stack_frame: InterruptStackFrame, error_code: u64) {
+    panic!("\n*** STACK SEGMENT FAULT ***\nError Code: {}\n{:#?}", error_code, stack_frame);
 }

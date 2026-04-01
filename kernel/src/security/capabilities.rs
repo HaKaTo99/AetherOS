@@ -37,7 +37,17 @@ impl Permissions {
     }
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+pub enum ClearanceLevel {
+    Ring3Untrusted = 0, // WASM / ART Runtime Sandbox
+    Confidential = 1,
+    Secret = 2,
+    TopSecret = 3,
+    Fortress = 4, // Sovereign Kernel Space
+}
+
 pub struct SecurityContext {
+    pub attributes: ClearanceLevel, // [NEW] Mandatory Access Control Level
     pub capabilities: [CapabilityToken; 16], // Fixed size for v1
     pub cap_count: usize,
 }
@@ -45,9 +55,42 @@ pub struct SecurityContext {
 impl SecurityContext {
     pub const fn new() -> Self {
         Self {
+            attributes: ClearanceLevel::Ring3Untrusted, // Default to lowest trust (MAC Sandbox)
             capabilities: [CapabilityToken { object_id: 0, permissions: Permissions::empty() }; 16],
             cap_count: 0,
         }
+    }
+    
+    /// Evluasi MAC (Mandatory Access Control) terpisah dari DAC/RBAC
+    pub fn enforce_mac(&self, required_clearance: ClearanceLevel) -> Result<(), &'static str> {
+        if self.attributes >= required_clearance {
+            Ok(())
+        } else {
+            crate::enterprise::audit::log_security(
+                crate::enterprise::audit::AuditSeverity::Critical,
+                "MAC_Sandbox", 
+                "Mandatory Access Violation! Untrusted payload attempted kernel access."
+            );
+            Err("MAC Violation: Insufficient Clearance")
+        }
+    }
+    
+    /// Hardware/HAL Boundary Protection (Quarantined MAC Sandbox)
+    pub fn enforce_hal_protection(&self, object_id: u32) -> Result<(), &'static str> {
+        let is_hal_device = object_id >= 0x1000 && object_id < 0x2000;
+        let is_security_enclave = object_id >= 0x2000 && object_id < 0x3000;
+
+        if self.attributes == ClearanceLevel::Ring3Untrusted {
+            if is_hal_device || is_security_enclave {
+                crate::enterprise::audit::log_security(
+                    crate::enterprise::audit::AuditSeverity::Critical,
+                    "MAC_Sandbox", 
+                    "Quarantined MAC Violation: Sandboxed Container tried to map HAL or Security Space!"
+                );
+                return Err("Quarantined MAC Violation");
+            }
+        }
+        Ok(())
     }
     
     pub fn has_permission(&self, object_id: u32, required: u32) -> bool {

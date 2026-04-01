@@ -3,6 +3,7 @@ pub mod boot;
 pub mod multiboot_header;
 pub mod gdt;
 pub mod interrupts;
+pub mod sme;
 
 use core::arch::global_asm;
 
@@ -20,11 +21,11 @@ global_asm!(
     "__switch_context:",
     // Save callee-saved registers to prev (rdi)
     "   mov [rdi + 0x00], rbx",
-    "   mov [rdi + 0x08], rbp",
-    "   mov [rdi + 0x10], r12",
-    "   mov [rdi + 0x18], r13",
-    "   mov [rdi + 0x20], r14",
-    "   mov [rdi + 0x28], r15",
+    "   mov [rdi + 0x08], r12",
+    "   mov [rdi + 0x10], r13",
+    "   mov [rdi + 0x18], r14",
+    "   mov [rdi + 0x20], r15",
+    "   mov [rdi + 0x28], rbp",
     // Save Stack Pointer
     "   mov [rdi + 0x30], rsp",
     // Save Return Address (already on stack) - optional, 
@@ -32,11 +33,11 @@ global_asm!(
     
     // Load registers from next (rsi)
     "   mov rbx, [rsi + 0x00]",
-    "   mov rbp, [rsi + 0x08]",
-    "   mov r12, [rsi + 0x10]",
-    "   mov r13, [rsi + 0x18]",
-    "   mov r14, [rsi + 0x20]",
-    "   mov r15, [rsi + 0x28]",
+    "   mov r12, [rsi + 0x08]",
+    "   mov r13, [rsi + 0x10]",
+    "   mov r14, [rsi + 0x18]",
+    "   mov r15, [rsi + 0x20]",
+    "   mov rbp, [rsi + 0x28]",
     // Load Stack Pointer
     "   mov rsp, [rsi + 0x30]",
     
@@ -49,4 +50,6 @@ pub fn init() {
     gdt::init();
     interrupts::init();
     crate::println!("[x86_64] GDT/IDT Initialized. Stability Guard Active.");
+    // Hardware Memory Encryption check
+    sme::SmeContext::enforce_memory_encryption();
 }
