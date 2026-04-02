@@ -1,4 +1,4 @@
-# xAetherOS v10.0: Oracle VirtualBox Automation Script
+# xAetherOS v10.2: Oracle VirtualBox Automation Script
 # Author: Antigravity (Sovereign AI Architect)
 # License: Military Grade Harmony Certification
 
@@ -7,7 +7,7 @@ $VM_NAME = "AetherOS_TheFabric"
 $RAW_IMAGE = "target\x86_64-unknown-none\release\bootimage-aetheros-kernel.bin"
 $VDI_IMAGE = "target\x86_64-unknown-none\release\aetheros_fabric.vdi"
 
-Write-Host "`n🌌 [xAetherOS v10.0]: Memulai Integrasi VirtualBox..." -ForegroundColor Cyan
+Write-Host "`n🌌 [xAetherOS v10.2]: Memulai Integrasi VirtualBox..." -ForegroundColor Cyan
 
 # 1. Check Source Binary
 if (-not (Test-Path $RAW_IMAGE)) {
@@ -46,7 +46,7 @@ Write-Host "🛡️ [4/5]: Menghubungkan Media Sovereignty (VDI)..." -Foreground
 & $VBOX_MANAGE storageattach $VM_NAME --storagectl "SATA Controller" --port 0 --device 0 --type hdd --medium $VDI_IMAGE
 
 # 6. Start VM
-Write-Host "🛡️ [5/5]: Meluncurkan AetherOS v10.0 di Oracle VirtualBox! 🚀" -ForegroundColor Green
+Write-Host "🛡️ [5/5]: Meluncurkan AetherOS v10.2 di Oracle VirtualBox! 🚀" -ForegroundColor Green
 & $VBOX_MANAGE startvm $VM_NAME --type separate
 
 Write-Host "`n✅ [SUCCESS]: VM Berhasil Diluncurkan." -ForegroundColor Green

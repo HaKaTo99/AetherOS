@@ -163,15 +163,47 @@ impl AccessControl {
         self.current_user.and_then(|uid| self.find_user_by_uid(uid))
     }
 
-    /// Zero-Trust Identity Mesh (Phase 26.5)
-    /// Validates identity through continuous attestation.
-    pub fn verify_mesh_identity(&self, node_id: u32, token: &[u8]) -> bool {
-        if token.len() > 0 && token[0] == 0xCC { // Mock check
-            log_security(AuditSeverity::Info, "Identity", &format!("Node {} identity verified via Zero-Trust Mesh.", node_id));
+    /// Zero-Trust Identity Mesh (Phase 26.5) - HARDENED
+    /// Validates identity through CRYSTALS-Dilithium signature attestation.
+    pub fn verify_mesh_identity(&self, node_id: u32, signature: &[u8], public_key: &[u8]) -> bool {
+        use crate::security::crypto::{CRYPTO_ENGINE, QuantumSecurity, SecurityLevel};
+        
+        let message = crate::alloc::format!("AETHER_MESH_AUTH_NODE_{}", node_id);
+        let crypto = CRYPTO_ENGINE.lock();
+        
+        if crypto.verify(message.as_bytes(), signature, public_key, SecurityLevel::Advance) {
+            log_security(
+                AuditSeverity::Info, 
+                "Identity", 
+                &crate::alloc::format!("Node {} identity verified via Post-Quantum Attestation.", node_id)
+            );
             true
         } else {
-            log_security(AuditSeverity::Critical, "Identity", &format!("Node {} identity verification FAILED!", node_id));
+            log_security(
+                AuditSeverity::Critical, 
+                "Identity", 
+                &crate::alloc::format!("Node {} identity verification FAILED! Potential Intrusion.", node_id)
+            );
+            // In high-security mode, a failed mesh auth could trigger a node isolation
             false
+        }
+    }
+
+    /// Incremental Hardening: Violation Tracker (v10.2 SUPREME)
+    pub fn report_violation(&self, user: &str, resource: &str) {
+        log_security(
+            AuditSeverity::Critical,
+            user,
+            &crate::alloc::format!("SECURITY VIOLATION: Unauthorized access to {}.", resource)
+        );
+        
+        // Military Grade: 3rd violation triggers system lockdown
+        static VIOLATION_COUNT: core::sync::atomic::AtomicUsize = core::sync::atomic::AtomicUsize::new(0);
+        let count = VIOLATION_COUNT.fetch_add(1, core::sync::atomic::Ordering::SeqCst);
+        
+        if count >= 3 {
+             crate::hal::get_platform().puts("\r\n!!! MILITARY GRADE LOCKDOWN: REPEATED SECURITY VIOLATIONS !!!\r\n");
+             panic!("Zero-Trust Policy: System Halted due to repeated unauthorized access attempts.");
         }
     }
 }

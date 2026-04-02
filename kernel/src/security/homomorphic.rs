@@ -26,8 +26,8 @@ impl HomomorphicEngine {
         
         let mut data = Vec::with_capacity(16);
         for i in 0..4 {
-            let error = (crate::arch::x86_64::dtb::get_entropy() % 3) as u32; // Gaussian Noise
-            let a = pk.get(i % pk.len()).unwrap_or(&0) as &u32; // Modulus ring
+            let error = (crate::hal::get_platform().get_entropy() % 3) as u32; // Gaussian Noise
+            let a = *pk.get(i % pk.len()).unwrap_or(&0) as u32; // Modulus ring
             // c = a * s + e + Delta * m
             matrix[i] = a.wrapping_mul(0x9A).wrapping_add(error).wrapping_add((value as u32) * delta);
             data.extend_from_slice(&matrix[i].to_le_bytes());

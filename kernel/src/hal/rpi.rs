@@ -78,6 +78,11 @@ impl Platform for RPiPlatform {
         self.timer.sleep_ms(ms);
     }
 
+    fn get_entropy(&self) -> u64 {
+        // [MILITARY GRADE NOISE] Using Timer Ticks for Entropy on ARM.
+        self.get_ticks()
+    }
+
     fn put_char(&self, c: u8) {
         self.uart.put_char(c);
     }

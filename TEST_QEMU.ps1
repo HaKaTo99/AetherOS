@@ -2,7 +2,7 @@
 # Tests kernel boot and input functionality
 
 Write-Host "========================================" -ForegroundColor Cyan
-Write-Host "AetherOS QEMU Test v1.0" -ForegroundColor Cyan
+Write-Host "AetherOS QEMU Test v10.2 Supreme Grade" -ForegroundColor Cyan
 Write-Host "========================================" -ForegroundColor Cyan
 Write-Host ""
 

@@ -23,6 +23,11 @@ impl Platform for StubPlatform {
         // Busy wait
     }
 
+    fn get_entropy(&self) -> u64 {
+        // [SIMULATION NOISE]
+        42
+    }
+
     fn put_char(&self, _c: u8) {
         // Mock output
     }

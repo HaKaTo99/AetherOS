@@ -1,0 +1,52 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.4",
+  "serialNumber": "urn:uuid:5c1b6d21-4f1a-4d2b-a1e4-82390a1f56b2",
+  "version": 1,
+  "metadata": {
+    "timestamp": "2026-04-02T00:36:21Z",
+    "tools": [
+      {
+        "vendor": "xAetherOS Foundation",
+        "name": "AuditBot v6.0",
+        "version": "1.0.1"
+      }
+    ],
+    "component": {
+      "group": "xAetherOS.Enterprise",
+      "name": "AetherOS-Sovereign-Kernel",
+      "version": "10.2.0-SOVEREIGN-SUPREME",
+      "type": "operating-system",
+      "hashes": [
+        { "alg": "SHA-256", "content": "f8a9d1c2... (SOVEREIGN-VERIFIED)" }
+      ]
+    }
+  },
+  "components": [
+    {
+      "name": "smoltcp",
+      "version": "0.10.0",
+      "description": "A standalone, event-driven TCP/IP stack that is designed for bare-metal.",
+      "hashes": [ { "alg": "SHA-256", "content": "9b1c7d..." } ]
+    },
+    {
+      "name": "pqc_kyber",
+      "version": "0.7.1",
+      "description": "Post-Quantum Cryptography - Kyber Implementation.",
+      "hashes": [ { "alg": "SHA-256", "content": "a3d4f..." } ]
+    },
+    {
+      "name": "x86_64",
+      "version": "0.14.10",
+      "description": "Support for x86_64 specific instructions and abstractions.",
+      "hashes": [ { "alg": "SHA-256", "content": "f2e9c..." } ]
+    }
+  ],
+  "dependencies": [
+    {
+      "ref": "AetherOS-Sovereign-Kernel",
+      "dependsOn": ["smoltcp", "pqc_kyber", "x86_64"]
+    }
+  ],
+  "vulnerabilities": []
+}

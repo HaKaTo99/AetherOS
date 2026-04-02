@@ -1,6 +1,6 @@
 #!/bin/bash
 # Virtual Installation Script for OmniLang Integration
-# Target: AetherOS v10.1 Kernel
+# Target: AetherOS v10.2 SUPREME Kernel
 
 echo "[Installer] Locating OmniLang Source at D:\GitHub\OmniLang..."
 if [ -d "D:/GitHub/OmniLang" ]; then

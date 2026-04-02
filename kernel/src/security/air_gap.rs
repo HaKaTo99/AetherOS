@@ -6,14 +6,14 @@ use crate::enterprise::audit::{AuditSeverity, log_security};
 
 pub struct AirGapEnforcer {
     is_active: bool,
-    strict_link_local: bool,
+    _strict_link_local: bool,
 }
 
 impl AirGapEnforcer {
     pub const fn new() -> Self {
         Self { 
             is_active: false,
-            strict_link_local: true,
+            _strict_link_local: true,
         }
     }
 

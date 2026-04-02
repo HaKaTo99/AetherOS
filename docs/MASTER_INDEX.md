@@ -1,39 +1,18 @@
-# 🗺️ Master Index Dokumentasi AetherOS
+# 🗺️ Master Index - Professional Structure
 
-Selamat datang di pusat pengetahuan **AetherOS**. Dokumen ini adalah peta navigasi otoritatif yang telah diaudit untuk menjamin harmoni total dan redundansi nol.
+**Primary Entry**: [LEARNING_PATH.md] (Beginner Track).
 
----
+**Sections**:
+## Beginner
+- QUICKSTART, VBOX_SETUP
 
-## 🌌 1. Visi & Strategi (High-Level)
-*Filosofi, masa depan, dan posisi pasar.*
-- **[Strategic Vision](STRATEGIC_VISION.md)**: Visi 2030, analisis kompetitif, dan roadmap Singularity.
-- **[Master Roadmap (TODO)](MASTER_TODO.md)**: Peta jalan detail dari Fase 1 hingga Fase 30.
-- **[Version History](VERSION_HISTORY.md)**: Evolusi sistem dari v1.0 hingga v10.2.
+## Core
+- DEVELOPER_GUIDE, PRODUCTION_GUIDE
 
----
+## Roadmap
+- MASTER_TODO, MASTER_TODO_REALIGNED
 
-## 🏛️ 2. Arsitektur & Internals
-*Spesifikasi teknis mendalam dan logika inti.*
-- **[Technical Architecture v30.0](AETHEROS_TECHNICAL_ARCH_V30.md)**: Arsitektur blok bangunan untuk era Singularity.
-- **[Core Capabilities](reference/CAPABILITIES.md)**: Daftar fitur definitif v10.2 (Supreme Grade).
-- **[Technical Deep-Dives](architecture/technical/)**: Penjelasan internals (SMME, MMU, Crypto, Scheduler, GDT).
-- **[Architecture Layers](architecture/)**: README per-lapisan (The Fabric, Singularity, Intelligence).
+## Technical
+- architecture/technical/smme.md etc.
 
----
-
-## 🚀 3. Ekosistem & Pengembangan
-*Panduan praktis untuk membangun di atas AetherOS.*
-- **[Developer Guide](DEVELOPER_GUIDE.md)**: Jalur cepat (Fast Track) v10.2, pembangunan, dan kontribusi.
-- **[OmniLang Handbook](OMNILANG_HANDBOOK.md)**: Spesifikasi bahasa, UI organik, dan model eksekusi.
-- **[Specialized Guides](guides/)**: Fuzzing, Simulasi, Aether Store, dan Deployment.
-
----
-
-## 📊 4. Verifikasi & Bisnis
-*Laporan kualitas dan strategi keberlanjutan.*
-- **[Implementation Reports](reports/)**: Verifikasi PALA, sertifikasi testing, dan checklist peluncuran.
-- **[Enterprise & Strategy](enterprise/)**: Distribusi, kemitraan hardware, dan kedaulatan data.
-- **[Archive](archive/)**: Catatan rilis lama dan audit historis.
-
----
-**"AetherOS: One Mind. One Mesh. Zero Compromise."** 🔥
+**No Redund**: Archive/reports link only. Harmonis for pemula.

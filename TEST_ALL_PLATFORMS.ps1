@@ -2,7 +2,7 @@
 # Tests: PowerShell, CMD, QEMU, VirtualBox
 
 Write-Host "========================================" -ForegroundColor Cyan
-Write-Host "AetherOS Platform Test Suite v1.0" -ForegroundColor Cyan
+Write-Host "AetherOS Platform Test Suite v10.2 Supreme Grade" -ForegroundColor Cyan
 Write-Host "========================================" -ForegroundColor Cyan
 Write-Host ""
 

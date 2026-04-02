@@ -1,7 +1,7 @@
 # AetherOS VirtualBox Test Script
 
 Write-Host "========================================" -ForegroundColor Cyan
-Write-Host "AetherOS VirtualBox Test v1.0" -ForegroundColor Cyan
+Write-Host "AetherOS VirtualBox Test v10.2 Supreme Grade" -ForegroundColor Cyan
 Write-Host "========================================" -ForegroundColor Cyan
 Write-Host ""
 

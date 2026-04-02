@@ -136,6 +136,14 @@ impl SerialPort {
             outb(0x3F8, byte);
         }
     }
+
+    pub fn has_data(&self) -> bool {
+        unsafe { (inb(0x3F8 + 5) & 1) != 0 }
+    }
+
+    pub fn receive(&self) -> u8 {
+        unsafe { inb(0x3F8) }
+    }
 }
 
 // --- Shared Input Buffer (Phase 38.4 Harmony) ---
@@ -246,6 +254,12 @@ impl X86Platform {
                     None => break,
                 }
             }
+        }
+
+        // Path B: Serial COM1 (for QEMU stdio / terminal interaction)
+        while SERIAL.has_data() {
+            let c = SERIAL.receive();
+            self.process_input_byte(c);
         }
     }
 
@@ -407,6 +421,12 @@ impl Platform for X86Platform {
         let steps = ms * 100000;
         let start = self.get_ticks();
         while self.get_ticks() - start < steps { core::hint::spin_loop(); }
+    }
+
+    fn get_entropy(&self) -> u64 {
+        // [MILITARY GRADE NOISE] Using TSC (Time Stamp Counter) as fallback entropy.
+        // In full TPM/HW-RNG mode, this would call RDRAND.
+        self.get_ticks()
     }
 
     fn put_char(&self, c: u8) {

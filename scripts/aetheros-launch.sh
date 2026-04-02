@@ -5,10 +5,10 @@ set -euo pipefail
 curl_opts=("--fail" "--max-time" "5" "--connect-timeout" "3" "-s")
 
 echo "=========================================="
-echo "🚀 AETHEROS v10.2 LAUNCH SEQUENCE"
+echo "🚀 AETHEROS v10.2 SUPREME LAUNCH SEQUENCE"
 echo "=========================================="
 echo "Timestamp: $(date -u)"
-echo "Version: v10.2.0"
+echo "Version: v10.2.0-supreme"
 echo "Build: $(git rev-parse --short HEAD || echo 'unknown')"
 echo ""
 
@@ -51,7 +51,7 @@ else
     exit 1
 fi
 
-echo "[5/5] 🚀 LAUNCHING AETHEROS v1.0..."
+echo "[5/5] 🚀 LAUNCHING AETHEROS v10.2 SUPREME..."
 
 echo "🎉 AETHEROS IS NOW LIVE!"
 echo "🌐 Website: https://aetheros.dev"

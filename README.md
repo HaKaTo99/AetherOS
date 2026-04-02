@@ -15,12 +15,14 @@
 
 ## 🚀 How to Run AetherOS (v10.2 Supreme)
 
-AetherOS v10.0 menggunakan **Cognitive Boot Sequence** yang dioptimalkan untuk QEMU, Raspberry Pi 4, dan hardware native.
+AetherOS v10.2 menggunakan **Cognitive Boot Sequence** yang dioptimalkan untuk QEMU, Raspberry Pi 4, dan hardware native.
 
-### Quick Launch (QEMU x86_64)
+### Fast Launch (Canonical Entry Point)
+AetherOS kini menggunakan satu pintu utama untuk mempermudah operasional:
+
 ```powershell
-# Jalankan script orkestrasi otomatis
-./run_fabric.ps1
+# Gunakan script Aether untuk Build, Run, atau Test
+.\Aether.ps1
 ```
 
 ### Manual Build & Launch
@@ -100,20 +102,13 @@ scripts/qemu-debug.sh
 ## 📂 Project Structure
 
 ```text
-AetherOS/
+├── Aether.ps1       # Entry Point Utama (Build, Run, Test)
+├── tools/           # Skrip Build Kanonikal (rebuild_vm_iso.ps1)
+├── scripts/         # Utilitas Testing (qemu-smoke.ps1)
 ├── boot/           # Konfigurasi bootloader (GRUB/UEFI)
-├── bsp/            # Board Support Packages (RPi4, x86_64)
-├── compiler/       # OmniLang Compiler (omnic)
-├── docs/           # Basis Pengetahuan Terfaktorisasi (v10.0)
-│   ├── architecture/ # Detail internals (The Fabric, Singularity)
-│   ├── enterprise/   # Laporan bisnis, strategi, dan kemitraan
-│   ├── guides/       # Panduan pengembang, deployment, dan simulasi
-│   ├── reference/    # Definisi kapabilitas v10.0 dan API
-│   ├── reports/      # Verifikasi PALA dan sertifikasi testing
-│   └── MASTER_INDEX.md # Gerbang Navigasi Tunggal
 ├── kernel/         # Source code kernel Rust (SMME, Scheduler, AI)
-├── scripts/        # Script pembantu build dan audit
-└── run_fabric.ps1  # Script orkestrasi peluncuran v10.0
+├── out/            # Output binari standar (aetheros.iso)
+└── docs/           # Basis Pengetahuan Terfaktorisasi (v10.0)
 ```
 
 ---

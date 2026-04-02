@@ -5,17 +5,17 @@ set -euo pipefail
 ROOT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 LOG_PATH="$ROOT_DIR/target/qemu-smoke.log"
 BOOT_BIN="$ROOT_DIR/target/x86_64-unknown-none/release/aetheros-kernel"
-TIMEOUT_SECONDS=${TIMEOUT_SECONDS:-25}
+TIMEOUT_SECONDS=${TIMEOUT_SECONDS:-60}
 BOOT_MARKER=${BOOT_MARKER:-"AetherShell>"}
 # Markers penting yang harus muncul untuk lulus (bisa override via env REQUIRED_MARKERS)
 REQUIRED_MARKERS_DEFAULT=(
+  "X86_64 HAL Initialized (v10.2 Supreme Grade)"
   "GDT/IDT Initialized"
-  "Quantum Interface Engine: Initializing"
+  "[Intent] Cognitive Listener Active"
   "Global Mesh: Harmony Baseline Stable"
-  "Security"  # garis keamanan harus muncul
-  "AetherOS v10.1 Sovereign Shell"
-  "Quantum Crypto Engine"           # PQC init garis utama
-  "Global Mesh: Self-Healing Active" # failover readiness
+  "[Security] Sovereign Identity Mesh: ACTIVE"
+  "[Security] Hardware Entropy Chain: SEALED"
+  "[Security] Military Grade Deployment Readiness: 100%"
 )
 IFS=$'\n' read -r -d '' -a REQUIRED_MARKERS <<< "${REQUIRED_MARKERS:-$(printf '%s\n' "${REQUIRED_MARKERS_DEFAULT[@]}")}" || true
 

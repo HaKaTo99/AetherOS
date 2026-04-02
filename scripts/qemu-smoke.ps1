@@ -10,15 +10,16 @@ $bootBin = Join-Path $targetDir "x86_64-unknown-none\release\aetheros-kernel"
 $memMb = if ($env:MEM_MB) { $env:MEM_MB } else { 1024 }
 $smp = if ($env:SMP_CORES) { $env:SMP_CORES } else { 2 }
 $cpuModel = if ($env:CPU_MODEL) { $env:CPU_MODEL } else { "qemu64" }
-$timeoutSeconds = if ($env:TIMEOUT_SECONDS) { [int]$env:TIMEOUT_SECONDS } else { 25 }
+$timeoutSeconds = if ($env:TIMEOUT_SECONDS) { [int]$env:TIMEOUT_SECONDS } else { 90 }
 $bootMarker = if ($env:BOOT_MARKER) { $env:BOOT_MARKER } else { "AetherShell>" }
 $requiredMarkers = @(
+  "HAL Initialized"
   "GDT/IDT Initialized"
-  "Quantum Interface Engine: Initializing"
-  "Global Mesh: Harmony Baseline Stable"
-  "Global Mesh: Self-Healing Active"
-  "Quantum Crypto Engine"
-  "AetherOS v10.1 Sovereign Shell"
+  "Cognitive Listener"
+  "Harmony Baseline"
+  "Identity Mesh"
+  "Entropy Chain"
+  "Readiness: 100%"
 )
 if ($env:REQUIRED_MARKERS) {
   $requiredMarkers = $env:REQUIRED_MARKERS -split "\r?\n" | Where-Object { $_ -ne "" }

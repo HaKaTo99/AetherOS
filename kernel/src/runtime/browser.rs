@@ -33,8 +33,9 @@ impl FirefoxContainer {
         self.url = String::from(url);
         
         // 1. Perform PQC Handshake (Simulation)
-        let keys = AetherQuantumProvider::generate_keypair(SecurityLevel::Advance);
-        let encapsulation = AetherQuantumProvider::encapsulate(&keys.public_key, SecurityLevel::Advance);
+        let crypto = crate::security::crypto::CRYPTO_ENGINE.lock();
+        let keys = crypto.generate_keypair(SecurityLevel::Advance);
+        let encapsulation = crypto.encapsulate(&keys.public_key, SecurityLevel::Advance);
         
         if encapsulation.shared_secret.len() == 32 {
             self.secure_context = true;

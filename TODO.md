@@ -1,20 +1,16 @@
-# TODO - Perbaikan Shell Command Resolution
+# AetherOS Stability Roadmap to 100% Prod
+High-Stability Implementation (User Approved)
 
-## Tujuan
-Perbaiki bug di shell.rs dimana command help, calc, clear, exit jatuh ke "Unknown" karena resolusi yang salah di `resolve_primary_command`.
+**Step 1: Fix Input Shell (serial COM1 + PS2)**
+- Edit kernel/src/hal/x86_64.rs: Add serial_poll().
+- Edit kernel/src/enterprise/shell.rs: Merge inputs.
 
-## Langkah-langkah:
+**Step 2: Detail Stage Docs**
+- Edit docs/BOOT_STAGES_GUIDE.md: Table 1-9.
 
-- [x] 1. Perbaiki fungsi `resolve_primary_command` - cek command lengkap bukan hanya 2 karakter
-- [x] 2. Build kernel - BERHASIL
-- [ ] 3. Build ISO baru
+**Step 3: Build/Test**
+- cargo build -p kernel --release
+- TEST_QEMU_INTERACTIVE.ps1
 
-## Detail Perbaikan:
+**Progress: 0/3**
 
-### 1. Fix resolve_primary_command (baris ~660)
-- Current: Hanya cek 2 karakter pertama
-- Fix: Validasi dengan `starts_with` untuk command lengkap
-- Status: SELESAI - Build berhasil
-
-### 2. Build ISO
-- Jalankan rebuild_vm_iso.ps1

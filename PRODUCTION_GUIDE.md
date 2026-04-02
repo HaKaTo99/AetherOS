@@ -3,17 +3,17 @@
 ## Build Kernel
 
 ### Development Build
-```
-powershell
-cd D:\GitHub\AetherOS\kernel
+```powershell
+# Jalankan dari root repositori
+cd kernel
 cargo build --release --target x86_64-unknown-none
 ```
 
 ### Production Build (Recommended)
-```
-powershell
-cd D:\GitHub\AetherOS
-cargo build --profile production --target x86_64-unknown-none
+Gunakan skrip kanonikal untuk memastikan build marker dan ISO tercipta dengan benar:
+
+```powershell
+.\Aether.ps1 -Action build
 ```
 
 Production build includes:
@@ -53,29 +53,17 @@ menuentry "AetherOS" {
 
 ## Run with QEMU
 
-### Development
-```
-powershell
-powershell -ExecutionPolicy Bypass -File D:\GitHub\AetherOS\QUICKSTART_AETHEROS.ps1
-```
-
-### Production Binary
-```
-powershell
-powershell -ExecutionPolicy Bypass -File D:\GitHub\AetherOS\run_aetheros_production.ps1 -Action dev
+### Unified Launcher (Recommended)
+```powershell
+# Cara termudah untuk build dan run
+.\Aether.ps1
 ```
 
-### Production Headless
-```
-powershell
-powershell -ExecutionPolicy Bypass -File D:\GitHub\AetherOS\run_aetheros_production.ps1 -Action headless
-```
-
-### Build Kernel (Production Profile)
-```
-powershell
-powershell -ExecutionPolicy Bypass -File D:\GitHub\AetherOS\run_aetheros_production.ps1 -Action build
-```
+### Legacy Launchers (Deprecated)
+Skrip berikut telah diubah menjadi wrapper dan akan dialihkan ke Aether.ps1:
+- `.\run_aetheros_production.ps1`
+- `.\PRODUCTION_LAUNCHER.ps1`
+- `.\run_aetheros.cmd`
 
 ### Command Line
 ```
@@ -85,16 +73,14 @@ cmd /c D:\GitHub\AetherOS\run_aetheros.cmd
 
 ## Create ISO Image
 
-```
-powershell
-# Using Makefile
-make iso-image
+### Standard Build Tool
+Gunakan alat terpadu untuk membangun ISO di lingkungan Windows (memerlukan WSL):
 
-# Or manual
-mkdir -p iso/boot/grub
-cp target/x86_64-unknown-none/production/aetheros-kernel iso/boot/aetheros_kernel
-grub-mkrescue -o aetheros.iso iso
+```powershell
+.\tools\rebuild_vm_iso.ps1 -WslDistro Ubuntu
 ```
+
+Output akan selalu berada di: `out\aetheros.iso`
 
 ## VirtualBox Setup
 

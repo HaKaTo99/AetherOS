@@ -28,7 +28,7 @@ pub enum DhcpState {
 pub struct DhcpClient {
     state: DhcpState,
     lease: Option<DhcpLease>,
-    transaction_id: u32,
+    _transaction_id: u32,
 }
 
 impl DhcpClient {
@@ -36,7 +36,7 @@ impl DhcpClient {
         Self {
             state: DhcpState::Init,
             lease: None,
-            transaction_id: 0x12345678,
+            _transaction_id: 0x12345678,
         }
     }
 

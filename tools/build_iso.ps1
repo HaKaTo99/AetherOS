@@ -1,10 +1,16 @@
-# Build BIOS-bootable ISO via GRUB (uses WSL tools)
+# Build BIOS-bootable ISO via GRUB (uses WSL tools for grub-mkrescue/xorriso)
 
 param(
     [string]$KernelSource = "",
     [string]$OutputIso = "out/aetheros.iso",
-    [string]$WslDistro = ""
+    [string]$WslDistro = "Ubuntu"
 )
+
+$ErrorActionPreference = "Stop"
+
+# Derive repo root from script location
+$ToolsRoot = $PSScriptRoot
+$RepoRoot = Split-Path $ToolsRoot -Parent
 
 function Convert-ToWslPath {
     param([string]$Path)
@@ -20,71 +26,64 @@ function Invoke-WslCommand {
     if (-not $distro) { $distro = "Ubuntu" }
     $baseArgs = @("-d", $distro, "--", "bash", "-c", $Command)
     wsl @baseArgs
-    if ($LASTEXITCODE -ne 0) { throw "WSL command failed: $Command" }
+    if ($LASTEXITCODE -ne 0) { throw "WSL command failed on ${distro}: $Command" }
 }
-
-$repoRoot = Split-Path $PSScriptRoot
-$isoDir = Join-Path $repoRoot "iso"
-$kernelTarget = Join-Path $isoDir "boot/aetheros_kernel"
 
 function Resolve-RepoPath {
     param(
         [string]$Path,
-        [string]$RepoRoot
+        [string]$Root
     )
-
-    if ([string]::IsNullOrWhiteSpace($Path)) {
-        return $Path
-    }
-
-    if ([System.IO.Path]::IsPathRooted($Path)) {
-        return [System.IO.Path]::GetFullPath($Path)
-    }
-
-    return [System.IO.Path]::GetFullPath((Join-Path $RepoRoot $Path))
+    if ([string]::IsNullOrWhiteSpace($Path)) { return $Path }
+    if ([System.IO.Path]::IsPathRooted($Path)) { return [System.IO.Path]::GetFullPath($Path) }
+    return [System.IO.Path]::GetFullPath((Join-Path $Root $Path))
 }
 
-$resolvedKernelSource = Resolve-RepoPath -Path $KernelSource -RepoRoot $repoRoot
-$resolvedOutputIso = Resolve-RepoPath -Path $OutputIso -RepoRoot $repoRoot
+# Standardize Paths
+$resolvedKernelSource = Resolve-RepoPath -Path $KernelSource -Root $RepoRoot
+$resolvedOutputIso = Resolve-RepoPath -Path $OutputIso -Root $RepoRoot
 
-if (-not (Test-Path $isoDir)) { throw "ISO staging directory not found: $isoDir" }
+# ISO Staging directory (canonical: iso/)
+$isoDir = Join-Path $RepoRoot "iso"
+$kernelTarget = Join-Path $isoDir "boot/aetheros_kernel"
 
-if ($resolvedKernelSource) {
+if (-not (Test-Path $isoDir)) { 
+    throw "ISO staging directory not found at $isoDir. Please ensure 'iso/' exists with 'boot/grub/grub.cfg'." 
+}
+
+# Ensure Output Directory exists
+$outDir = Split-Path $resolvedOutputIso
+if (-not (Test-Path $outDir)) {
+    New-Item -ItemType Directory -Path $outDir -Force | Out-Null
+}
+
+# Copy Kernel to Staging
+if ($resolvedKernelSource -and (Test-Path $resolvedKernelSource)) {
+    Write-Host "[iso ] Copying kernel: $resolvedKernelSource -> $kernelTarget" -ForegroundColor Gray
     Copy-Item -Path $resolvedKernelSource -Destination $kernelTarget -Force
 } elseif (-not (Test-Path $kernelTarget)) {
     throw "Kernel payload missing at $kernelTarget. Provide -KernelSource to copy it in."
 }
 
+# WSL Dependency Check
 if (-not (Get-Command wsl -ErrorAction SilentlyContinue)) {
-    throw "WSL is required for grub-mkrescue/xorriso on Windows."
+    throw "WSL is required for grub-mkrescue/xorriso on Windows. Please install WSL and a Linux distro (Ubuntu recommended)."
 }
 
-$wslRepoRoot = Convert-ToWslPath $repoRoot
-$wslOutPath = Convert-ToWslPath (Split-Path $resolvedOutputIso)
+$wslRepoRoot = Convert-ToWslPath $RepoRoot
 $wslIsoOut = Convert-ToWslPath $resolvedOutputIso
 $wslIsoDir = Convert-ToWslPath $isoDir
 
-# Ensure output directory exists inside WSL
-Invoke-WslCommand "mkdir -p $wslOutPath"
-
-# Check deps; if missing, instruct user to install
-$depCheck = @(
-    "command -v grub-mkrescue >/dev/null",
-    "command -v xorriso >/dev/null",
-    "command -v mformat >/dev/null"
-) -join " && "
-
-
-# Always use Ubuntu as default distro for dependency check
-$distro = $WslDistro
-if (-not $distro) { $distro = "Ubuntu" }
-$depArgs = @("-d", $distro, "--", "bash", "-c", $depCheck)
+# Check deps inside WSL
+$depCheck = "command -v grub-mkrescue >/dev/null && command -v xorriso >/dev/null && command -v mformat >/dev/null"
+$depArgs = @("-d", $WslDistro, "--", "bash", "-c", $depCheck)
 wsl @depArgs 2>$null
 if ($LASTEXITCODE -ne 0) {
-    throw "Missing deps in WSL. Run: sudo apt update && sudo apt install -y grub-pc-bin xorriso mtools"
+    throw "Missing deps in WSL ($WslDistro). Run: sudo apt update && sudo apt install -y grub-pc-bin xorriso mtools"
 }
 
-# Build ISO using existing GRUB tree under iso/
+# Execute ISO creation
+Write-Host "[iso ] Building ISO via WSL ($WslDistro): $OutputIso" -ForegroundColor Cyan
 Invoke-WslCommand "cd $wslRepoRoot && grub-mkrescue -o $wslIsoOut $wslIsoDir"
 
-Write-Host "ISO created at $resolvedOutputIso"
+Write-Host "[done] ISO created at $resolvedOutputIso" -ForegroundColor Green

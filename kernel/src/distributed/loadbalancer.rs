@@ -76,11 +76,31 @@ impl LoadBalancer {
         self.enabled && self.local_metrics.load_score() > 80
     }
 
-    /// Select target device for migration (stub - needs PeerTable integration)
-    pub fn select_target_device(&self) -> Option<u32> {
-        // TODO: Query PeerTable for least-loaded peer
-        // For now, return None (no migration)
-        None
+    /// Select target device for migration (Least Loaded Algorithm)
+    pub fn select_target_device(&self, peer_table: &crate::net::discovery::PeerTable) -> Option<u32> {
+        if !self.enabled {
+            return None;
+        }
+
+        // Phase 3.6: Least Loaded Peer Selection
+        // Iterating through all known peers to find the most available compute node.
+        let mut best_peer = None;
+        let mut min_load = 101u8; // Max load is 100
+
+        for peer in peer_table.get_peers() {
+            if peer.alive && peer.beacon.load < min_load {
+                min_load = peer.beacon.load;
+                // Use the last 4 bytes of device_id as a temporary numeric index
+                best_peer = Some(u32::from_le_bytes([
+                    peer.beacon.device_id[12],
+                    peer.beacon.device_id[13],
+                    peer.beacon.device_id[14],
+                    peer.beacon.device_id[15],
+                ]));
+            }
+        }
+
+        best_peer
     }
 
     /// Get current metrics

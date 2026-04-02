@@ -150,8 +150,8 @@ gdt64:
     .quad 0 /* zero entry */
     .quad (1<<43) | (1<<44) | (1<<47) | (1<<53) /* code segment */
 gdt64_pointer:
-    .word gdt64_pointer - gdt64 - 1
-    .long gdt64
+    .word . - gdt64 - 1
+    .quad gdt64
 "#);
 
 

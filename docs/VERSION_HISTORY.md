@@ -1,6 +1,6 @@
 # AetherOS Version History
 
-Riwayat lengkap evolusi AetherOS dari v1.0 hingga v10.0 "The Fabric".
+Riwayat lengkap evolusi AetherOS dari v1.0 hingga v10.2 "Supreme Grade".
 
 ---
 

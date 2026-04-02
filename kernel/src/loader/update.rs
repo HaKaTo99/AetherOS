@@ -54,7 +54,8 @@ impl UpdateManager {
     /// 3. Mark target partition as "Active" (Atomic Switch)
     pub fn commit_update(&mut self, image_hash: &[u8], signature: &[u8], public_key: &[u8]) -> Result<(), &'static str> {
         // 1. Verify Signature
-        if !AetherQuantumProvider::verify(image_hash, signature, public_key, SecurityLevel::Advance) {
+        let crypto = crate::security::crypto::CRYPTO_ENGINE.lock();
+        if !crypto.verify(image_hash, signature, public_key, SecurityLevel::Advance) {
              self.update_in_progress = false;
              return Err("Signature Verification Failed! Update Aborted.");
         }

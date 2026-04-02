@@ -3,7 +3,6 @@
 //! Kernel AetherOS yang 'sadar' akan tujuan pengguna melalui analisis pola syscall.
 //! Mentransformasi kernel dari reaktif menjadi proaktif.
 
-use crate::enterprise::audit;
 use spin::Mutex;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -85,11 +84,7 @@ impl IntentParser {
         self.current_intent = model.predict(dev_score, sec_score, media_score);
 
         if old_intent != self.current_intent {
-            audit::log_security(
-                audit::AuditSeverity::Info,
-                "CognitiveHub",
-                &alloc::format!("Universal Intent Shift: {:?} -> {:?}", old_intent, self.current_intent)
-            );
+            crate::println!("[AI-Intent] Universal Intent Shift detected.");
             self.apply_orchestration();
         }
     }

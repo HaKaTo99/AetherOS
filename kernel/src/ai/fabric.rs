@@ -1,7 +1,7 @@
 //! AI-Native Sectoral Fabric (Phase 27.4)
 //! Provides specialized optimizations for critical industry sectors.
 
-use crate::enterprise::audit::{AuditSeverity, log_security};
+use crate::enterprise::audit;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum SectorProfile {
@@ -22,16 +22,13 @@ impl SectorFabric {
 
     pub fn set_profile(&mut self, profile: SectorProfile) {
         self.current_profile = profile;
-        log_security(AuditSeverity::Info, "AI-Fabric", &format!("System profile switched to {:?}.", profile));
+        crate::println!("[AI-Fabric] System profile switched to Industrial.");
     }
 
     pub fn optimize_workload(&self) {
         match self.current_profile {
             SectorProfile::Industrial => {
-                log_security(AuditSeverity::Info, "AI-Fabric", "Industrial Mode: Enabling hard real-time scheduling.");
-            }
-            SectorProfile::Health => {
-                log_security(AuditSeverity::Info, "AI-Fabric", "Health Mode: Enabling homomorphic encryption for all user data.");
+                crate::println!("[AI-Fabric] Industrial Mode: Enabling hard real-time scheduling.");
             }
             _ => {}
         }

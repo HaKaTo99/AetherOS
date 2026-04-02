@@ -14,9 +14,10 @@ pub trait Platform: Sync {
     fn init(&self);
     fn shutdown(&self);
     
-    // Timer support
+    // Timer & Entropy support
     fn get_ticks(&self) -> u64;
     fn sleep_ms(&self, ms: u64);
+    fn get_entropy(&self) -> u64;
     
     // Serial/Keyboard support
     fn put_char(&self, c: u8);

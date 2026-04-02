@@ -31,6 +31,7 @@ pub enum DriverType {
     BlockDevice,
     Network,
     BCI, // [NEW] Brain-Computer Interface
+    Storage, // [NEW] Mass Storage (USB/NVMe)
     Unknown,
 }
 

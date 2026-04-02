@@ -17,7 +17,7 @@ impl AbilityMarket {
     /// Submit a bid for available local resources (AI/GPU/Compute).
     pub fn advertise_ability(_resource_type: u32, _price: u64) {
         let platform = hal::get_platform();
-        platform.puts("[ v7.0 ] MARKET: Advertising local compute ability...\n");
+        platform.puts("[ v10.2 ] MARKET: Advertising local compute ability...\n");
         // Broadcast ability beacon via Quantum Bus (Phase 5.2 QB integration)
     }
 

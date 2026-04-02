@@ -48,7 +48,8 @@ impl AttestationEngine {
         let measurement = Self::measure();
         
         // Sign the measurement
-        let signature = AetherQuantumProvider::sign(&measurement, private_identity_key, SecurityLevel::Advance);
+        let crypto = crate::security::crypto::CRYPTO_ENGINE.lock();
+        let signature = crypto.sign(&measurement, private_identity_key, SecurityLevel::Advance);
 
         KernelIntegrityProof {
             text_segment_hash: measurement,
@@ -66,6 +67,7 @@ impl AttestationEngine {
         }
 
         // 2. Verify signature
-        AetherQuantumProvider::verify(&proof.text_segment_hash, &proof.signature, peer_public_key, SecurityLevel::Advance)
+        let crypto = crate::security::crypto::CRYPTO_ENGINE.lock();
+        crypto.verify(&proof.text_segment_hash, &proof.signature, peer_public_key, SecurityLevel::Advance)
     }
 }

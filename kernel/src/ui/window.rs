@@ -1,5 +1,6 @@
-//! Window Manager (Phase 13.1)
+//! Window Manager (v10.2 SUPREME)
 //! Compositor for safe multi-window rendering
+//! Baseline for Tahap III (Desktop Expansion)
 
 use crate::ui::Rect;
 use alloc::vec::Vec;

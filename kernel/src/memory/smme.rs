@@ -168,17 +168,27 @@ impl MemoryPool {
         while !current_ptr.is_null() {
             let current = unsafe { &mut *current_ptr };
             
+            // GPF Guard: Skip blocks with corrupted/poisoned size
+            // Poison pattern 0xDEDEDEDE... would produce unreasonably large sizes
+            if current.size == 0 || current.size > self.size {
+                // Corrupted block — unlink and skip
+                if prev_ptr.is_null() {
+                    self.free_list_head.store(0, Ordering::Release);
+                } else {
+                    unsafe { (*prev_ptr).next = ptr::null_mut(); }
+                }
+                break;
+            }
+            
             if current.size >= size {
                 // Found a suitable block
-                // Supreme Stability: Zero-Leak split boundary. Split harus presisi ke 16-byte (batas struktur FreeBlock).
-                if current.size >= size + 16 {
-                    // Split the block if it's large enough
+                if current.size >= size + 32 {
+                    // Split the block only if remainder is large enough for header + useful data
                     let new_block_addr = (current_ptr as usize) + size;
                     let new_block = unsafe { &mut *(new_block_addr as *mut FreeBlock) };
                     new_block.size = current.size - size;
                     new_block.next = current.next;
                     
-                    // Update previous pointer
                     if prev_ptr.is_null() {
                         self.free_list_head.store(new_block_addr, Ordering::Release);
                     } else {
@@ -222,19 +232,13 @@ impl MemoryPool {
         Ok(())
     }
 
-    /// Deallocate memory - add to free list with coalescing
-    pub fn deallocate(&self, data_addr: usize, size: usize) -> Result<(), AllocationError> {
-        let addr = data_addr - 8; // Adjust to actual block start (head canary)
-        if addr < self.base || addr >= self.base + self.size {
-            return Err(AllocationError::InvalidAddress);
-        }
-        
-        // Military Grade: Canary Validation
+    /// Military Grade: Check canaries for a given data address
+    pub fn check_canaries(&self, data_addr: usize, size: usize) -> Result<(), AllocationError> {
+        let addr = data_addr - 8;
         unsafe {
             let head = ptr::read(addr as *const u64);
             let tail = ptr::read((addr + 8 + size) as *const u64);
-            // Head canary encodes pool identity in lower 32 bits:
-            // 0xDEAD0000_00000000 | (pool_base & 0xFFFF_FFFF)
+            
             let expected_head_prefix = 0xDEAD0000_00000000u64;
             let expected_head_low = (self.base as u64) & 0xFFFF_FFFF;
             let valid_head = (head & 0xFFFF0000_00000000u64) == expected_head_prefix
@@ -243,22 +247,55 @@ impl MemoryPool {
             if !valid_head || tail != 0xFEED_C0DE_BEEF_DEAD {
                 crate::enterprise::audit::log_security(
                     crate::enterprise::audit::AuditSeverity::Critical,
-                    "SMME", "Memory Corruption Detected (Canary Breach)!"
+                    "SMME", 
+                    &crate::alloc::format!("CANARY BREACH at 0x{:X}! Head: 0x{:X}, Tail: 0x{:X}", data_addr, head, tail)
                 );
                 return Err(AllocationError::InvalidRequest);
             }
         }
+        Ok(())
+    }
+
+    /// Deallocate memory - add to free list with coalescing
+    pub fn deallocate(&self, data_addr: usize, size: usize) -> Result<(), AllocationError> {
+        let addr = data_addr - 8; // Adjust to actual block start (head canary)
+        if addr < self.base || addr >= self.base + self.size {
+            return Err(AllocationError::InvalidAddress);
+        }
+        
+        // Military Grade: Mandatory Canary Validation before freeing
+        self.check_canaries(data_addr, size)?;
 
         let guarded_size = size + 16;
         let aligned_size = (guarded_size + 15) & !15;
         
         self.lock();
         
-        // Create new free block header
+        // CRITICAL FIX: Write FreeBlock header FIRST, THEN poison only the
+        // data area AFTER the header. Previous code poisoned the entire block
+        // with 0xDE before writing the header, but if a concurrent reader or
+        // a subsequent find_free_block() ran before the header was fully
+        // written, it would dereference poisoned bytes as a pointer,
+        // producing GPF at addresses like 0xDEDEDEDE_DEDEDEDE.
+
+        // Step 1: Create the free block header at the start of the block
         let new_block = unsafe { &mut *(addr as *mut FreeBlock) };
         new_block.size = aligned_size;
+        new_block.next = ptr::null_mut(); // Safe initial value
         
-        // Insert into sorted free list and coalesce
+        // Step 2: Poison ONLY the data area AFTER the FreeBlock header (16 bytes)
+        // This prevents use-after-free while keeping the header intact.
+        // Use 0xCC (INT3 instruction) to trigger a breakpoint if dereferenced as code.
+        let header_size = core::mem::size_of::<FreeBlock>();
+        let poison_start = addr + header_size;
+        let poison_len = aligned_size.saturating_sub(header_size);
+        if poison_len > 0 && poison_start + poison_len <= self.base + self.size {
+            unsafe {
+                ptr::write_bytes(poison_start as *mut u8, 0xCC, poison_len);
+            }
+        }
+        
+        // Step 3: Insert into sorted free list and coalesce
         let head = self.free_list_head.load(Ordering::Acquire) as *mut FreeBlock;
         
         if head.is_null() || addr < head as usize {
@@ -268,9 +305,14 @@ impl MemoryPool {
             
             // Try to coalesce with next
             if !head.is_null() && addr + aligned_size == head as usize {
-                new_block.size += unsafe { (*head).size };
-                new_block.next = unsafe { (*head).next };
-                self.coalesce_count.fetch_add(1, Ordering::Relaxed);
+                let head_size = unsafe { (*head).size };
+                let head_next = unsafe { (*head).next };
+                // Validate before coalescing
+                if head_size > 0 && head_size <= self.size {
+                    new_block.size += head_size;
+                    new_block.next = head_next;
+                    self.coalesce_count.fetch_add(1, Ordering::Relaxed);
+                }
             }
         } else {
             // Find insertion point
@@ -288,16 +330,19 @@ impl MemoryPool {
             new_block.next = current_ptr;
             prev.next = new_block as *mut FreeBlock;
             
-            // Try to coalesce with next
+            // Try to coalesce with next (with validation)
             if !current_ptr.is_null() && addr + aligned_size == current_ptr as usize {
-                let next = unsafe { &*current_ptr };
-                new_block.size += next.size;
-                new_block.next = next.next;
-                self.coalesce_count.fetch_add(1, Ordering::Relaxed);
+                let next_size = unsafe { (*current_ptr).size };
+                let next_next = unsafe { (*current_ptr).next };
+                if next_size > 0 && next_size <= self.size {
+                    new_block.size += next_size;
+                    new_block.next = next_next;
+                    self.coalesce_count.fetch_add(1, Ordering::Relaxed);
+                }
             }
             
-            // Try to coalesce with prev
-            if (prev_ptr as usize) + prev.size == addr {
+            // Try to coalesce with prev (with validation)
+            if (prev_ptr as usize) + prev.size == addr && prev.size <= self.size {
                 prev.size += new_block.size;
                 prev.next = new_block.next;
                 self.coalesce_count.fetch_add(1, Ordering::Relaxed);
@@ -305,15 +350,6 @@ impl MemoryPool {
         }
         
         self.free_count.fetch_add(1, Ordering::Relaxed);
-        
-        // Military Grade: Memory Poisoning (0xDEADBEEF) - v10.2 SUPREME
-        // Scrub the memory after the header to catch use-after-free
-        let start_pos = addr + core::mem::size_of::<FreeBlock>();
-        let scrub_size = aligned_size.saturating_sub(core::mem::size_of::<FreeBlock>());
-        unsafe {
-            ptr::write_bytes(start_pos as *mut u8, 0xDE, scrub_size);
-        }
-        
         self.unlock();
         Ok(())
     }

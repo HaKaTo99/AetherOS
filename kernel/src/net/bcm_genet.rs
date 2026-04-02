@@ -17,7 +17,7 @@ const UMAC_MAC1: usize = 0x810;
 
 /// BCM GENET Ethernet Driver
 pub struct BcmGenet {
-    base_addr: usize,
+    _base_addr: usize,
     mac: [u8; 6],
     rx_queue: VecDeque<Vec<u8>>,
     tx_queue: VecDeque<Vec<u8>>,
@@ -28,7 +28,7 @@ pub struct BcmGenet {
 impl BcmGenet {
     pub const fn new() -> Self {
         Self {
-            base_addr: GENET_BASE,
+            _base_addr: GENET_BASE,
             mac: [0xDC, 0xA6, 0x32, 0x00, 0x00, 0x01], // RPi default prefix
             rx_queue: VecDeque::new(),
             tx_queue: VecDeque::new(),

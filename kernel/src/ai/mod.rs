@@ -8,9 +8,8 @@ pub mod fabric; // [NEW] Phase 27.4 AI-Native Industrial Fabric
 
 /// Initialize Universal Intelligence Layer components (Phase 27.x)
 pub fn init_intelligence() {
-    use crate::enterprise::audit::{AuditSeverity, log_security};
-    
-    log_security(AuditSeverity::Info, "AI", "Initializing Universal Intelligence Layer v9.0...");
+    // log_security diganti dengan println! selama boot kritis untuk menghindari deadlock spinlock audit.
+    crate::println!("[AI] Initializing Universal Intelligence Layer v10.2 SUPREME...");
     
     // 1. Initialize Sectoral Fabric
     {
@@ -20,11 +19,15 @@ pub fn init_intelligence() {
         fabric.optimize_workload();
     }
 
-    // 2. Initialize Hardware NPU Driver
+    // 2. Initialize Hardware NPU Driver (PCIe)
     {
         use crate::ai::npu::NpuDriver;
         let mut npu_device = npu::GLOBAL_NPU.lock();
-        let _ = npu_device.init();
+        crate::println!("[AI] Memindai PCIe untuk Hardware Akselerator...");
+        match npu_device.init() {
+            Ok(_) => crate::println!("[AI] Hardware NPU Aktif."),
+            Err(_) => crate::println!("[AI] Hardware NPU tidak ditemukan (Simulation Fallback Aktif)."),
+        }
     }
 
     // 3. Initialize Intent Parser (Phase 27.5)
@@ -33,6 +36,6 @@ pub fn init_intelligence() {
         crate::println!("[Intent] Cognitive Listener Active.");
     }
 
-    log_security(AuditSeverity::Info, "AI", "Cognitive Sync-Align-Harmony: [ ACTIVE ]");
+    crate::println!("[AI] Cognitive Sync-Align-Harmony: [ ACTIVE ]");
 }
  

@@ -38,6 +38,7 @@ pub mod toolkit; // [NEW] App UI Toolkit (Phase 14.2)
 pub mod file_manager; // [NEW] Secure FileManager (Phase 20.2)
 pub mod organic_ui; // [NEW] Organic UI Drivers (Phase 25.4)
 pub mod dashboard; // [NEW] Fleet Monitor Dashboard (Phase 26.3)
+pub mod desktop; // [NEW] AetherDesktop Seed (Tahap III)
 
 pub use display::*;
 pub use layout::*;
