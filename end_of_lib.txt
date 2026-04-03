@@ -1,0 +1,10 @@
+﻿        __stack_chk_guard = 0xDEAD_BEEF_CAFE_BABE; 
+    }
+}
+
+
+
+
+
+
+

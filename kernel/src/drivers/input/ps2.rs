@@ -60,7 +60,7 @@ impl Ps2Keyboard {
             config &= !(1 << 1); // Disable IRQ2
             config &= !(1 << 4); // [SUPREME POWER] Enable Port 1 Clock
             config &= !(1 << 5); // [SUPREME POWER] Enable Port 2 Clock
-            config |= (1 << 6);  // Enable Translation (Set 2 to 1)
+            config |= 1 << 6;    // Enable Translation (Set 2 to 1)
             
             while inb(STATUS_PORT) & 0x02 != 0 { io_wait(); }
             outb(STATUS_PORT, 0x60); io_wait();
@@ -137,11 +137,6 @@ impl Ps2Keyboard {
             // Fallback: [Set 2 Standards]
             0x5A => KeyCode::Enter, // Set 2 Enter
             0x66 => KeyCode::Backspace, // Set 2 Backspace
-            0x16 => KeyCode::Num1, // Set 2 Num1 (conflicts with Set 1 'U' if translation fails)
-            0x1E => KeyCode::Num2,
-            0x26 => KeyCode::Num3,
-            0x25 => KeyCode::Num4,
-            0x2E => KeyCode::Num5,
             0x36 => KeyCode::Num6,
             0x3D => KeyCode::Num7,
             0x3E => KeyCode::Num8,

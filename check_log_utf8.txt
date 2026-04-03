@@ -1,0 +1,356 @@
+﻿cargo : warning: profiles for the non root package will be 
+ignored, specify profiles at the workspace root:
+At line:1 char:1
++ cargo check --manifest-path kernel/Cargo.toml > 
+check_log.txt 2>&1
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~
+    + CategoryInfo          : NotSpecified: (warning: profil. 
+   ..workspace root::String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+package:   D:\GitHub\AetherOS\kernel\Cargo.toml
+workspace: D:\GitHub\AetherOS\Cargo.toml
+    Checking aetheros-kernel v10.2.0 
+(D:\GitHub\AetherOS\kernel)
+error[E0432]: unresolved import 
+`crate::security::capabilities::Capability`
+ --> kernel\src\ui\file_manager.rs:6:54
+  |
+6 | use crate::security::capabilities::{SecurityContext, 
+Capability};
+  |                                                      
+^^^^^^^^^^ no `Capability` in `security::capabilities`
+
+error[E0432]: unresolved import `display::UIUpdate`
+  --> kernel\src\ui\mod.rs:48:43
+   |
+48 | pub use display::{DistributedFramebuffer, UIUpdate, 
+PixelFormat, VectorRenderer};
+   |                                           ^^^^^^^^ no 
+`UIUpdate` in `ui::display`
+
+error[E0432]: unresolved import 
+`crate::bus::quantum_bus::QuantumBus`
+  --> kernel\src\runtime\apm.rs:10:31
+   |
+10 | use crate::bus::quantum_bus::{QuantumBus, Device};
+   |                               ^^^^^^^^^^ no `QuantumBus` 
+in `bus::quantum_bus`
+   |
+   = help: consider importing this struct through its public 
+re-export instead:
+           crate::ipc::QuantumBus
+
+warning: unused import: `spin::Mutex`
+ --> kernel\src\ui\display.rs:6:5
+  |
+6 | use spin::Mutex;
+  |     ^^^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` (part of 
+`#[warn(unused)]`) on by default
+
+warning: unused imports: `AtomicUsize` and `Ordering`
+ --> kernel\src\ui\window.rs:7:26
+  |
+7 | use core::sync::atomic::{AtomicUsize, Ordering};
+  |                          ^^^^^^^^^^^  ^^^^^^^^
+
+warning: unnecessary parentheses around assigned value
+  --> kernel\src\drivers\input\ps2.rs:63:23
+   |
+63 |             config |= (1 << 6);  // Enable Translation 
+(Set 2 to 1)
+   |                       ^      ^
+   |
+   = note: `#[warn(unused_parens)]` (part of 
+`#[warn(unused)]`) on by default
+help: remove these parentheses
+   |
+63 -             config |= (1 << 6);  // Enable Translation 
+(Set 2 to 1)
+63 +             config |= 1 << 6;  // Enable Translation 
+(Set 2 to 1)
+   |
+
+warning: unused imports: `PACKAGE_MANAGER`, 
+`PackageManifest`, and `Package`
+ --> kernel\src\ecosystem\store.rs:7:27
+  |
+7 | use crate::runtime::apm::{PACKAGE_MANAGER, Package, 
+PackageManifest};
+  |                           ^^^^^^^^^^^^^^^  ^^^^^^^  
+^^^^^^^^^^^^^^^
+
+warning: unused import: `alloc::collections::BTreeMap`
+ --> kernel\src\ecosystem\store.rs:8:5
+  |
+8 | use alloc::collections::BTreeMap;
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `Device`
+  --> kernel\src\runtime\apm.rs:10:43
+   |
+10 | use crate::bus::quantum_bus::{QuantumBus, Device};
+   |                                           ^^^^^^
+
+warning: unused import: `QuantumSecurity`
+ --> kernel\src\runtime\browser.rs:6:31
+  |
+6 | use crate::security::crypto::{QuantumSecurity, 
+SecurityLevel};
+  |                               ^^^^^^^^^^^^^^^
+
+error[E0107]: struct takes 0 lifetime arguments but 1 
+lifetime argument was supplied
+   --> kernel\src\net\mod.rs:49:30
+    |
+ 49 |     VirtIO(self::virtio_net::VirtIONetTxToken<'a>),
+    |                              ^^^^^^^^^^^^^^^^---- help: 
+remove the unnecessary generics
+    |                              |
+    |                              expected 0 lifetime 
+arguments
+    |
+note: struct defined here, with 0 lifetime parameters
+   --> kernel\src\net\virtio_net.rs:137:12
+    |
+137 | pub struct VirtIONetTxToken {
+    |            ^^^^^^^^^^^^^^^^
+
+error[E0599]: no method named `has_capability` found for 
+struct `SecurityContext` in the current scope
+  --> kernel\src\ui\file_manager.rs:35:26
+   |
+35 |         if 
+!self.context.has_capability(Capability::ReadFs) {
+   |                          ^^^^^^^^^^^^^^ method not found 
+in `SecurityContext`
+   |
+  ::: kernel\src\security\capabilities.rs:49:1
+   |
+49 | pub struct SecurityContext {
+   | -------------------------- method `has_capability` not 
+found for this struct
+
+error[E0599]: no method named `has_capability` found for 
+struct `SecurityContext` in the current scope
+  --> kernel\src\ui\file_manager.rs:55:30
+   |
+55 |             if 
+!self.context.has_capability(Capability::WriteFs) {
+   |                              ^^^^^^^^^^^^^^ method not 
+found in `SecurityContext`
+   |
+  ::: kernel\src\security\capabilities.rs:49:1
+   |
+49 | pub struct SecurityContext {
+   | -------------------------- method `has_capability` not 
+found for this struct
+
+error[E0599]: no method named `has_capability` found for 
+struct `SecurityContext` in the current scope
+  --> kernel\src\ui\file_manager.rs:71:26
+   |
+71 |         if 
+!self.context.has_capability(Capability::WriteFs) {
+   |                          ^^^^^^^^^^^^^^ method not found 
+in `SecurityContext`
+   |
+  ::: kernel\src\security\capabilities.rs:49:1
+   |
+49 | pub struct SecurityContext {
+   | -------------------------- method `has_capability` not 
+found for this struct
+
+error[E0599]: no method named `inject` found for reference 
+`&VirtIONet` in the current scope
+  --> kernel\src\net\mod.rs:37:39
+   |
+37 |             AnyDevice::VirtIO(d) => d.inject(packet),
+   |                                       ^^^^^^
+   |
+help: there is a method `init` with a similar name, but with 
+different arguments
+  --> kernel\src\net\driver.rs:20:5
+   |
+20 |     fn init(&mut self) -> NetResult<()>;
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+error[E0560]: struct `PackageManifest` has no field named 
+`binaries`
+  --> kernel\src\ecosystem\store.rs:57:13
+   |
+57 |             binaries: vec![String::from("main.omni")],
+   |             ^^^^^^^^ `PackageManifest` does not have 
+this field
+   |
+   = note: available fields are: `merkle_root`
+
+error[E0308]: mismatched types
+  --> kernel\src\ecosystem\store.rs:67:9
+   |
+43 |     pub fn install_app(app_name: &str) -> Result<String, 
+&'static str> {
+   |                                           
+---------------------------- expected `Result<String, 
+&'static str>` because of return type
+...
+67 |         apm.install(pkg)
+   |         ^^^^^^^^^^^^^^^^ expected `Result<String, 
+&str>`, found `Result<(), &str>`
+   |
+   = note: expected enum `Result<String, _>`
+              found enum `Result<(), _>`
+
+error[E0599]: no method named `verify` found for struct 
+`spin::MutexGuard<'_, AetherQuantumProvider>` in the current 
+scope
+  --> kernel\src\runtime\apm.rs:71:16
+   |
+71 |         crypto.verify(
+   |         -------^^^^^^ method not found in 
+`spin::MutexGuard<'_, AetherQuantumProvider>`
+   |
+   = help: items from traits can only be used if the trait is 
+in scope
+help: trait `QuantumSecurity` which provides `verify` is 
+implemented but not in scope; perhaps you want to import it
+   |
+ 4 + use crate::security::crypto::QuantumSecurity;
+   |
+
+error[E0599]: no method named `verify_trust_anchor` found for 
+struct `spin::MutexGuard<'_, AetherQuantumProvider>` in the 
+current scope
+  --> kernel\src\runtime\browser.rs:33:19
+   |
+33 |         if 
+crypto.verify_trust_anchor(SecurityLevel::Advance) {
+   |                   ^^^^^^^^^^^^^^^^^^^ method not found 
+in `spin::MutexGuard<'_, AetherQuantumProvider>`
+
+error[E0599]: no method named `list` found for struct 
+`spin::MutexGuard<'_, PackageManager>` in the current scope
+   --> kernel\src\enterprise\shell.rs:418:37
+    |
+418 |                 let installed = apm.list();
+    |                                     ^^^^
+    |
+help: there is a method `fmt_list` with a similar name
+    |
+418 |                 let installed = apm.fmt_list();
+    |                                     ++++
+
+error[E0599]: no method named `as_str` found for unit type 
+`()` in the current scope
+   --> kernel\src\lib.rs:723:43
+    |
+723 |                         platform.puts(msg.as_str());
+    |                                           ^^^^^^ method 
+not found in `()`
+
+error[E0560]: struct `PackageManifest` has no field named 
+`binaries`
+   --> kernel\src\lib.rs:837:29
+    |
+837 | ...                   binaries: 
+vec![String::from("stk")],
+    |                       ^^^^^^^^ `PackageManifest` does 
+not have this field
+    |
+    = note: available fields are: `merkle_root`
+
+error[E0599]: no method named `as_str` found for unit type 
+`()` in the current scope
+   --> kernel\src\lib.rs:844:43
+    |
+844 |                         platform.puts(msg.as_str());
+    |                                           ^^^^^^ method 
+not found in `()`
+
+warning: unreachable pattern
+   --> kernel\src\drivers\input\ps2.rs:140:13
+    |
+129 |             0x16 => KeyCode::U, 0x2F => KeyCode::V, 
+0x11 => KeyCode::W, 0x2D => KeyCode::X,
+    |             ---- matches all the relevant values
+...
+140 |             0x16 => KeyCode::Num1, // Set 2 Num1 
+(conflicts with Set 1 'U' if translation fails)
+    |             ^^^^ no value can reach this
+    |
+    = note: `#[warn(unreachable_patterns)]` (part of 
+`#[warn(unused)]`) on by default
+
+warning: unreachable pattern
+   --> kernel\src\drivers\input\ps2.rs:141:13
+    |
+124 |             0x1E => KeyCode::A, 0x30 => KeyCode::B, 
+0x2E => KeyCode::C, 0x20 => KeyCode::D,
+    |             ---- matches all the relevant values
+...
+141 |             0x1E => KeyCode::Num2,
+    |             ^^^^ no value can reach this
+
+warning: unreachable pattern
+   --> kernel\src\drivers\input\ps2.rs:142:13
+    |
+126 |             0x17 => KeyCode::I, 0x24 => KeyCode::J, 
+0x25 => KeyCode::K, 0x26 => KeyCode::L,
+    |                                                         
+                ---- matches all the relevant values
+...
+142 |             0x26 => KeyCode::Num3,
+    |             ^^^^ no value can reach this
+
+warning: unreachable pattern
+   --> kernel\src\drivers\input\ps2.rs:143:13
+    |
+126 |             0x17 => KeyCode::I, 0x24 => KeyCode::J, 
+0x25 => KeyCode::K, 0x26 => KeyCode::L,
+    |                                                     
+---- matches all the relevant values
+...
+143 |             0x25 => KeyCode::Num4,
+    |             ^^^^ no value can reach this
+
+warning: unreachable pattern
+   --> kernel\src\drivers\input\ps2.rs:144:13
+    |
+124 |             0x1E => KeyCode::A, 0x30 => KeyCode::B, 
+0x2E => KeyCode::C, 0x20 => KeyCode::D,
+    |                                                     
+---- matches all the relevant values
+...
+144 |             0x2E => KeyCode::Num5,
+    |             ^^^^ no value can reach this
+
+warning: unused variable: `packet`
+   --> kernel\src\net\virtio_net.rs:119:28
+    |
+119 |     fn transmit(&mut self, packet: &[u8]) -> 
+NetResult<()> {
+    |                            ^^^^^^ help: if this is 
+intentional, prefix it with an underscore: `_packet`
+    |
+    = note: `#[warn(unused_variables)]` (part of 
+`#[warn(unused)]`) on by default
+
+warning: unused variable: `expected_root`
+  --> kernel\src\runtime\apm.rs:63:45
+   |
+63 |     fn verify_integrity(&self, data: &[u8], 
+expected_root: [u8; 32]) -> bool {
+   |                                             
+^^^^^^^^^^^^^ help: if this is intentional, prefix it with an 
+underscore: `_expected_root`
+
+Some errors have detailed explanations: E0107, E0308, E0432, 
+E0560, E0599.
+For more information about an error, try `rustc --explain 
+E0107`.
+warning: `aetheros-kernel` (lib) generated 14 warnings
+error: could not compile `aetheros-kernel` (lib) due to 16 
+previous errors; 14 warnings emitted

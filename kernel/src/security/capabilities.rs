@@ -46,22 +46,41 @@ pub enum ClearanceLevel {
     Fortress = 4, // Sovereign Kernel Space
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Capability {
+    ReadFs,
+    WriteFs,
+    Execute,
+    Network,
+    Admin,
+}
+
 pub struct SecurityContext {
-    pub attributes: ClearanceLevel, // [NEW] Mandatory Access Control Level
-    pub capabilities: [CapabilityToken; 16], // Fixed size for v1
+    pub attributes: ClearanceLevel, 
+    pub capabilities: [CapabilityToken; 16],
     pub cap_count: usize,
 }
 
 impl SecurityContext {
     pub const fn new() -> Self {
         Self {
-            attributes: ClearanceLevel::Ring3Untrusted, // Default to lowest trust (MAC Sandbox)
+            attributes: ClearanceLevel::Ring3Untrusted,
             capabilities: [CapabilityToken { object_id: 0, permissions: Permissions::empty() }; 16],
             cap_count: 0,
         }
     }
     
-    /// Evluasi MAC (Mandatory Access Control) terpisah dari DAC/RBAC
+    /// Professional Capability Check for Jalur B Components (Military Grade)
+    pub fn has_capability(&self, cap: Capability) -> bool {
+        match cap {
+            Capability::ReadFs => self.has_permission(0x100, Permissions::READ),
+            Capability::WriteFs => self.has_permission(0x100, Permissions::WRITE),
+            Capability::Execute => self.has_permission(0x100, Permissions::EXECUTE),
+            Capability::Network => self.has_permission(0x200, Permissions::all().bits),
+            Capability::Admin => self.attributes == ClearanceLevel::Fortress,
+        }
+    }
+    
     pub fn enforce_mac(&self, required_clearance: ClearanceLevel) -> Result<(), &'static str> {
         if self.attributes >= required_clearance {
             Ok(())

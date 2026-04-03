@@ -1,0 +1,129 @@
+﻿cargo : warning: profiles for the non root package will be 
+ignored, specify profiles at the workspace root:
+At line:1 char:1
++ cargo check --manifest-path kernel/Cargo.toml > 
+last_ever_log.txt 2>& ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (warning: profil. 
+   ..workspace root::String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+package:   D:\GitHub\AetherOS\kernel\Cargo.toml
+workspace: D:\GitHub\AetherOS\Cargo.toml
+    Checking aetheros-kernel v10.2.0 
+(D:\GitHub\AetherOS\kernel)
+warning: unused import: `spin::Mutex`
+ --> kernel\src\ui\display.rs:6:5
+  |
+6 | use spin::Mutex;
+  |     ^^^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` (part of 
+`#[warn(unused)]`) on by default
+
+warning: unused imports: `AtomicUsize` and `Ordering`
+ --> kernel\src\ui\window.rs:7:26
+  |
+7 | use core::sync::atomic::{AtomicUsize, Ordering};
+  |                          ^^^^^^^^^^^  ^^^^^^^^
+
+warning: unused imports: `PACKAGE_MANAGER`, 
+`PackageManifest`, and `Package`
+ --> kernel\src\ecosystem\store.rs:7:27
+  |
+7 | use crate::runtime::apm::{PACKAGE_MANAGER, Package, 
+PackageManifest};
+  |                           ^^^^^^^^^^^^^^^  ^^^^^^^  
+^^^^^^^^^^^^^^^
+
+warning: unused import: `alloc::collections::BTreeMap`
+ --> kernel\src\ecosystem\store.rs:8:5
+  |
+8 | use alloc::collections::BTreeMap;
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `crate::ipc::QuantumBus`
+  --> kernel\src\runtime\apm.rs:10:5
+   |
+10 | use crate::ipc::QuantumBus;
+   |     ^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `crate::bus::quantum_bus::Device`
+  --> kernel\src\runtime\apm.rs:11:5
+   |
+11 | use crate::bus::quantum_bus::Device;
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `CRYPTO_ENGINE`
+ --> kernel\src\runtime\browser.rs:6:31
+  |
+6 | use crate::security::crypto::{CRYPTO_ENGINE, 
+SecurityLevel, QuantumSecurity};
+  |                               ^^^^^^^^^^^^^
+
+warning: unused import: `Capability`
+ --> kernel\src\security\sandbox.rs:7:54
+  |
+7 | use crate::security::capabilities::{SecurityContext, 
+Capability, ClearanceLevel};
+  |                                                      
+^^^^^^^^^^
+
+error[E0308]: `match` arms have incompatible types
+  --> kernel\src\net\mod.rs:38:37
+   |
+36 | /         match self {
+37 | |             AnyDevice::Loopback(d) => d.inject(packet),
+   | |                                       ---------------- 
+this is found to be of type `()`
+38 | |             AnyDevice::VirtIO(_) => 
+Err(NetError::NotReady),
+   | |                                     
+^^^^^^^^^^^^^^^^^^^^^^^ expected `()`, found `Result<_, 
+NetError>`
+39 | |         }
+   | |_________- `match` arms have incompatible types
+   |
+   = note: expected unit type `()`
+                   found enum `Result<_, NetError>`
+
+warning: unused variable: `packet`
+   --> kernel\src\net\virtio_net.rs:119:28
+    |
+119 |     fn transmit(&mut self, packet: &[u8]) -> 
+NetResult<()> {
+    |                            ^^^^^^ help: if this is 
+intentional, prefix it with an underscore: `_packet`
+    |
+    = note: `#[warn(unused_variables)]` (part of 
+`#[warn(unused)]`) on by default
+
+warning: unused variable: `expected_root`
+  --> kernel\src\runtime\apm.rs:64:45
+   |
+64 |     fn verify_integrity(&self, data: &[u8], 
+expected_root: [u8; 32]) -> bool {
+   |                                             
+^^^^^^^^^^^^^ help: if this is intentional, prefix it with an 
+underscore: `_expected_root`
+
+warning: unnecessary `unsafe` block
+   --> kernel\src\lib.rs:362:52
+    |
+343 |     unsafe {
+    |     ------ because it's nested under this `unsafe` block
+...
+362 |             
+crate::drivers::video::register_driver(unsafe { &mut VGA });
+    |                                                    
+^^^^^^ unnecessary `unsafe` block
+    |
+    = note: `#[warn(unused_unsafe)]` (part of 
+`#[warn(unused)]`) on by default
+
+For more information about this error, try `rustc --explain 
+E0308`.
+warning: `aetheros-kernel` (lib) generated 11 warnings
+error: could not compile `aetheros-kernel` (lib) due to 1 
+previous error; 11 warnings emitted

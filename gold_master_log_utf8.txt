@@ -1,0 +1,181 @@
+﻿cargo : warning: profiles for the non root package will be 
+ignored, specify profiles at the workspace root:
+At line:1 char:1
++ cargo check --manifest-path kernel/Cargo.toml > 
+gold_master_log.txt 2 ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (warning: profil. 
+   ..workspace root::String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+package:   D:\GitHub\AetherOS\kernel\Cargo.toml
+workspace: D:\GitHub\AetherOS\Cargo.toml
+    Checking aetheros-kernel v10.2.0 
+(D:\GitHub\AetherOS\kernel)
+error[E0425]: cannot find type `GpuCommand` in this scope
+  --> kernel\src\ui\display.rs:16:30
+   |
+16 |     ring: [UnsafeCell<Option<GpuCommand>>; 256],
+   |                              ^^^^^^^^^^ not found in 
+this scope
+   |
+help: you might be missing a type parameter
+   |
+15 | pub struct GpuCommandQueue<GpuCommand> {
+   |                           ++++++++++++
+
+error[E0425]: cannot find type `GpuCommand` in this scope
+  --> kernel\src\ui\display.rs:24:45
+   |
+24 |         const EMPTY_CELL: UnsafeCell<Option<GpuCommand>> 
+= UnsafeCell::new(None);
+   |                                             ^^^^^^^^^^ 
+not found in this scope
+   |
+help: you might be missing a type parameter
+   |
+24 |         const EMPTY_CELL<GpuCommand>: 
+UnsafeCell<Option<GpuCommand>> = UnsafeCell::new(None);
+   |                         ++++++++++++
+
+error[E0425]: cannot find type `GpuCommand` in this scope
+  --> kernel\src\ui\display.rs:32:32
+   |
+32 |     pub fn enqueue(&self, cmd: GpuCommand) -> Result<(), 
+&'static str> {
+   |                                ^^^^^^^^^^ not found in 
+this scope
+
+error[E0425]: cannot find type `GpuCommand` in this scope
+  --> kernel\src\ui\display.rs:83:31
+   |
+83 |     pub fn submit(&self, cmd: GpuCommand) {
+   |                               ^^^^^^^^^^ not found in 
+this scope
+
+warning: unused import: `spin::Mutex`
+ --> kernel\src\ui\display.rs:6:5
+  |
+6 | use spin::Mutex;
+  |     ^^^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` (part of 
+`#[warn(unused)]`) on by default
+
+warning: unused imports: `AtomicUsize` and `Ordering`
+ --> kernel\src\ui\window.rs:7:26
+  |
+7 | use core::sync::atomic::{AtomicUsize, Ordering};
+  |                          ^^^^^^^^^^^  ^^^^^^^^
+
+warning: unused import: `crate::net::driver::NetError`
+  --> kernel\src\net\mod.rs:13:5
+   |
+13 | use crate::net::driver::NetError;
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused imports: `PACKAGE_MANAGER`, 
+`PackageManifest`, and `Package`
+ --> kernel\src\ecosystem\store.rs:7:27
+  |
+7 | use crate::runtime::apm::{PACKAGE_MANAGER, Package, 
+PackageManifest};
+  |                           ^^^^^^^^^^^^^^^  ^^^^^^^  
+^^^^^^^^^^^^^^^
+
+warning: unused import: `alloc::collections::BTreeMap`
+ --> kernel\src\ecosystem\store.rs:8:5
+  |
+8 | use alloc::collections::BTreeMap;
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `crate::ipc::QuantumBus`
+  --> kernel\src\runtime\apm.rs:10:5
+   |
+10 | use crate::ipc::QuantumBus;
+   |     ^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `crate::bus::quantum_bus::Device`
+  --> kernel\src\runtime\apm.rs:11:5
+   |
+11 | use crate::bus::quantum_bus::Device;
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `CRYPTO_ENGINE`
+ --> kernel\src\runtime\browser.rs:6:31
+  |
+6 | use crate::security::crypto::{CRYPTO_ENGINE, 
+SecurityLevel, QuantumSecurity};
+  |                               ^^^^^^^^^^^^^
+
+warning: unused import: `Capability`
+ --> kernel\src\security\sandbox.rs:7:54
+  |
+7 | use crate::security::capabilities::{SecurityContext, 
+Capability, ClearanceLevel};
+  |                                                      
+^^^^^^^^^^
+
+error[E0433]: cannot find type `GpuCommand` in this scope
+   --> kernel\src\ui\display.rs:143:27
+    |
+143 |         VIRTIO_GPU.submit(GpuCommand::Flush);
+    |                           ^^^^^^^^^^ use of undeclared 
+type `GpuCommand`
+
+warning: unused variable: `packet`
+   --> kernel\src\net\virtio_net.rs:119:28
+    |
+119 |     fn transmit(&mut self, packet: &[u8]) -> 
+NetResult<()> {
+    |                            ^^^^^^ help: if this is 
+intentional, prefix it with an underscore: `_packet`
+    |
+    = note: `#[warn(unused_variables)]` (part of 
+`#[warn(unused)]`) on by default
+
+warning: unused variable: `expected_root`
+  --> kernel\src\runtime\apm.rs:64:45
+   |
+64 |     fn verify_integrity(&self, data: &[u8], 
+expected_root: [u8; 32]) -> bool {
+   |                                             
+^^^^^^^^^^^^^ help: if this is intentional, prefix it with an 
+underscore: `_expected_root`
+
+warning: unnecessary `unsafe` block
+   --> kernel\src\lib.rs:362:52
+    |
+343 |     unsafe {
+    |     ------ because it's nested under this `unsafe` block
+...
+362 |             
+crate::drivers::video::register_driver(unsafe { &mut VGA });
+    |                                                    
+^^^^^^ unnecessary `unsafe` block
+    |
+    = note: `#[warn(unused_unsafe)]` (part of 
+`#[warn(unused)]`) on by default
+
+error[E0433]: cannot find type `GpuCommand` in this scope
+   --> kernel\src\ui\display.rs:129:27
+    |
+129 |         VIRTIO_GPU.submit(GpuCommand::Clear { color });
+    |                           ^^^^^^^^^^ use of undeclared 
+type `GpuCommand`
+
+error[E0433]: cannot find type `GpuCommand` in this scope
+   --> kernel\src\ui\display.rs:139:27
+    |
+139 |         VIRTIO_GPU.submit(GpuCommand::FillRect { x, y, 
+w, h, color });
+    |                           ^^^^^^^^^^ use of undeclared 
+type `GpuCommand`
+
+Some errors have detailed explanations: E0425, E0433.
+For more information about an error, try `rustc --explain 
+E0425`.
+warning: `aetheros-kernel` (lib) generated 12 warnings
+error: could not compile `aetheros-kernel` (lib) due to 7 
+previous errors; 12 warnings emitted

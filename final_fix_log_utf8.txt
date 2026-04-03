@@ -1,0 +1,31 @@
+﻿cargo : warning: profiles for the non root package will be 
+ignored, specify profiles at the workspace root:
+At line:1 char:1
++ cargo check --manifest-path kernel/Cargo.toml > 
+final_fix_log.txt 2>& ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (warning: profil. 
+   ..workspace root::String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+package:   D:\GitHub\AetherOS\kernel\Cargo.toml
+workspace: D:\GitHub\AetherOS\Cargo.toml
+    Checking aetheros-kernel v10.2.0 
+(D:\GitHub\AetherOS\kernel)
+error: unexpected closing delimiter: `}`
+    --> kernel\src\lib.rs:1018:5
+     |
+ 812 |                 {
+     |                 - this delimiter might not be properly 
+closed...
+...
+ 834 |     }
+     |     - ...as it matches this but it has different 
+indentation
+...
+1018 |     }
+     |     ^ unexpected closing delimiter
+
+error: could not compile `aetheros-kernel` (lib) due to 1 
+previous error

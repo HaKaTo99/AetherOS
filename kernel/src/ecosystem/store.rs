@@ -1,4 +1,4 @@
-//! Aether Store & Package Infrastructure - v7.0
+//! Aether Store & Package Infrastructure - v10.3 SUPREME
 //! 
 //! Decentralized portal for OmniLang apps, AI Agents, and System Tools.
 
@@ -44,8 +44,6 @@ impl AetherStore {
         use crate::runtime::apm::{PACKAGE_MANAGER, Package, PackageManifest};
         use alloc::collections::BTreeMap;
         
-        let mut apm = PACKAGE_MANAGER.lock();
-        
         // Mocking the creation of a signed .apkg for simulation
         let manifest = PackageManifest {
             name: String::from(app_name),
@@ -54,7 +52,7 @@ impl AetherStore {
             category: String::from("System"),
             developer_id: String::from("herman-krisnanto-01"),
             dependencies: BTreeMap::new(),
-            binaries: vec![String::from("main.omni")],
+            merkle_root: [0xA; 32],
         };
 
         let pkg = Package { 
@@ -64,6 +62,11 @@ impl AetherStore {
             public_key: vec![0xCA, 0xFE, 0xBA, 0xBE], // Mock Developer PK
         };
         
-        apm.install(pkg)
+        // [SOVEREIGN UPDATE] Verification through APM v2.0
+        let mut apm = PACKAGE_MANAGER.lock();
+        match apm.install(pkg) {
+            Ok(_) => Ok(String::from("Success: Deployed to Sovereign Hub")),
+            Err(e) => Err(e),
+        }
     }
 }

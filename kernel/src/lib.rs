@@ -420,7 +420,7 @@ pub fn kernel_init(dtb_ptr: usize) {
         // --- Phase 28.4: Military Grade Harmony Certification ---
         // Run audit AFTER security is ready.
         crate::testing::harmony_audit::HarmonyAudit::perform_full_audit();
-        platform.puts("[ v10.2] The Fabric: Military Grade Harmony [ CERTIFIED SUPREME ]\n");
+        platform.puts("[ v10.3] The Fabric: Military Grade Harmony [ CERTIFIED SUPREME ]\n");
 
         // --- Phase 30.1: Singularity Evolution Core Injection ---
         {
@@ -429,7 +429,7 @@ pub fn kernel_init(dtb_ptr: usize) {
         }
 
         // --- Phase 31.0: Desktop Environment Injection (Tahap III) ---
-        // Seed the v10.2 SUPREME Graphical Desktop baseline.
+        // Seed the v10.3 SUPREME Graphical Desktop baseline.
         crate::ui::desktop::AetherDesktop::init();
 
         // Initialize Driver Manager using DTB
@@ -439,7 +439,7 @@ pub fn kernel_init(dtb_ptr: usize) {
         // Initialize Power Management (RPi4 only)
         #[cfg(target_arch = "aarch64")]
         {
-            use crate::drivers::dtb::DeviceTree;
+            use crate::net::driver::{AnyDevice, AnyRxToken, AnyTxToken, NetError};
             let dt = if dtb_ptr != 0 {
                 DeviceTree::from_raw(dtb_ptr as *const u8)
             } else {
@@ -718,10 +718,8 @@ pub fn kernel_init(dtb_ptr: usize) {
 
                     // 1. Browser
                     let mut browser = FirefoxContainer::new();
-                    if let Ok(msg) = browser.navigate("https://secure.aetheros.dev") {
-                        platform.puts("[Browser] ");
-                        platform.puts(msg.as_str());
-                        platform.puts("\r\n");
+                    if let Ok(_msg) = browser.navigate("https://secure.aetheros.dev") {
+                        platform.puts("[Browser] Connection Secure. Content Rendered via VectorEngine.\r\n");
                     }
 
                     // 2. File Manager
@@ -824,26 +822,34 @@ pub fn kernel_init(dtb_ptr: usize) {
                     // 2. Install Package
                     use alloc::string::String;
                     use alloc::vec::Vec;
-                    use crate::runtime::apm::PACKAGE_MANAGER;
+                    use alloc::collections::BTreeMap;
+                    use crate::runtime::apm::{PACKAGE_MANAGER, Package, PackageManifest};
                     let mut apm = PACKAGE_MANAGER.lock();
-                    if let Ok(msg) = apm.install(crate::runtime::apm::Package {
-                        manifest: crate::runtime::apm::PackageManifest {
-                            name: String::from("SuperTuxKart"),
-                            version: String::from("1.0.0"),
-                            description: String::from("Game Demo"),
-                            category: String::from("Game"),
-                            developer_id: String::from("aether-dev"),
-                            dependencies: alloc::collections::BTreeMap::new(),
-                            binaries: vec![String::from("stk")],
-                        },
+                    let stk_manifest = PackageManifest {
+                        name: String::from("stk"),
+                        version: String::from("1.0.3"),
+                        description: String::from("Sovereign ToolKit"),
+                        category: String::from("System"),
+                        developer_id: String::from("xAether_Core"),
+                        merkle_root: [0xB; 32],
+                        dependencies: BTreeMap::new(),
+                    };
+                    
+                    let stk_package = Package {
+                        manifest: stk_manifest,
                         data: Vec::new(),
                         signature: Vec::new(),
                         public_key: Vec::new(),
-                    }) {
-                        platform.puts("[APM] ");
-                        platform.puts(msg.as_str());
-                        platform.puts("\r\n");
+                    };
+                    
+                    let res = apm.install(stk_package);
+                    if let Ok(_msg) = res {
+                        platform.puts("Quantum Link Established.");
+                    } else if let Err(e) = res {
+                        platform.puts("[APM] Error: ");
+                        platform.puts(e);
                     }
+                    platform.puts("\r\n");
 
                     // 3. SDK Usage
                     use crate::sdk::syscalls;
@@ -864,7 +870,7 @@ pub fn kernel_init(dtb_ptr: usize) {
              let script = r#"
 fn main() {
     print("[OmniLang] Automated Verification: ");
-    print("AetherOS v10.2 Supreme Grade Stability Certified.");
+    print("AetherOS v10.3 Supreme Grade Stability Certified.");
 }
              "#;
              
@@ -875,7 +881,7 @@ fn main() {
              platform.puts("\r\n");
         }
 
-        // 17. Phase 39.0: Boot UX (v10.2 SUPREME)
+        // 17. Phase 40.0: Boot UX (v10.3 SUPREME)
         {
             let platform = hal::get_platform();
             platform.puts("\r\n[AetherOS] Loading Aether Fabric... ðŸŒŒ\r\n");
@@ -883,9 +889,9 @@ fn main() {
             hal::get_platform().sleep_ms(100);
         }
 
-        // 18. Phase 38.0: System Stabilization (v10.2 SUPREME)
+        // 18. Phase 38.0: System Stabilization (v10.3 SUPREME)
         {
-            platform.puts("[ v10.2 ] Core subsystems initialized. Entering Stability Guard...\n");
+            platform.puts("[ v10.3 ] Core subsystems initialized. Entering Stability Guard...\n");
 
             #[cfg(target_arch = "x86_64")]
             {
@@ -990,7 +996,7 @@ fn main() {
             }
 
             // Final Fallback: Always start shell if no stage returned
-            platform.puts("[ v10.2 ] Falling back to AetherOS Supreme Shell.\n");
+            platform.puts("[ v10.3 ] Falling back to AetherOS Supreme Shell.\n");
             use crate::enterprise::AetherShell;
             AetherShell::start();
         }

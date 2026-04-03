@@ -1,0 +1,205 @@
+﻿cargo : warning: profiles for the non root package will be 
+ignored, specify profiles at the workspace root:
+At line:1 char:1
++ cargo check --manifest-path kernel/Cargo.toml > 
+final_check_log.txt 2 ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (warning: profil. 
+   ..workspace root::String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+package:   D:\GitHub\AetherOS\kernel\Cargo.toml
+workspace: D:\GitHub\AetherOS\Cargo.toml
+    Checking aetheros-kernel v10.2.0 
+(D:\GitHub\AetherOS\kernel)
+error[E0432]: unresolved import 
+`crate::security::capabilities::ClearanceLevel`
+ --> kernel\src\security\sandbox.rs:7:54
+  |
+7 | use crate::security::capabilities::{SecurityContext, 
+ClearanceLevel};
+  |                                                      
+^^^^^^^^^^^^^^ no `ClearanceLevel` in `security::capabilities`
+
+error[E0433]: cannot find type `NetError` in this scope
+  --> kernel\src\net\mod.rs:37:41
+   |
+37 |             AnyDevice::VirtIO(_) => 
+Err(NetError::NotReady),
+   |                                         ^^^^^^^^ use of 
+undeclared type `NetError`
+   |
+help: consider importing this enum
+   |
+ 9 + use crate::net::driver::NetError;
+   |
+
+error[E0425]: cannot find type `ClearanceLevel` in this scope
+  --> kernel\src\security\capabilities.rs:50:21
+   |
+50 |     pub attributes: ClearanceLevel, 
+   |                     ^^^^^^^^^^^^^^ not found in this 
+scope
+
+error[E0425]: cannot find type `ClearanceLevel` in this scope
+  --> kernel\src\security\capabilities.rs:76:51
+   |
+76 |     pub fn enforce_mac(&self, required_clearance: 
+ClearanceLevel) -> Result<(), &'static str> {
+   |                                                   
+^^^^^^^^^^^^^^ not found in this scope
+
+warning: unused import: `spin::Mutex`
+ --> kernel\src\ui\display.rs:6:5
+  |
+6 | use spin::Mutex;
+  |     ^^^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` (part of 
+`#[warn(unused)]`) on by default
+
+warning: unused imports: `AtomicUsize` and `Ordering`
+ --> kernel\src\ui\window.rs:7:26
+  |
+7 | use core::sync::atomic::{AtomicUsize, Ordering};
+  |                          ^^^^^^^^^^^  ^^^^^^^^
+
+warning: unused imports: `PACKAGE_MANAGER`, 
+`PackageManifest`, and `Package`
+ --> kernel\src\ecosystem\store.rs:7:27
+  |
+7 | use crate::runtime::apm::{PACKAGE_MANAGER, Package, 
+PackageManifest};
+  |                           ^^^^^^^^^^^^^^^  ^^^^^^^  
+^^^^^^^^^^^^^^^
+
+warning: unused import: `alloc::collections::BTreeMap`
+ --> kernel\src\ecosystem\store.rs:8:5
+  |
+8 | use alloc::collections::BTreeMap;
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `crate::ipc::QuantumBus`
+  --> kernel\src\runtime\apm.rs:10:5
+   |
+10 | use crate::ipc::QuantumBus;
+   |     ^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `crate::bus::quantum_bus::Device`
+  --> kernel\src\runtime\apm.rs:11:5
+   |
+11 | use crate::bus::quantum_bus::Device;
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused imports: `CRYPTO_ENGINE` and `QuantumSecurity`
+ --> kernel\src\runtime\browser.rs:6:31
+  |
+6 | use crate::security::crypto::{CRYPTO_ENGINE, 
+SecurityLevel, QuantumSecurity};
+  |                               ^^^^^^^^^^^^^               
+  ^^^^^^^^^^^^^^^
+
+error[E0308]: mismatched types
+  --> kernel\src\ecosystem\store.rs:69:9
+   |
+43 |     pub fn install_app(app_name: &str) -> Result<String, 
+&'static str> {
+   |                                           
+---------------------------- expected `Result<String, 
+&'static str>` because of return type
+...
+69 |         apm.install(pkg)
+   |         ^^^^^^^^^^^^^^^^ expected `Result<String, 
+&str>`, found `Result<(), &str>`
+   |
+   = note: expected enum `Result<String, _>`
+              found enum `Result<(), _>`
+
+error[E0599]: no method named `verify_trust_anchor` found for 
+struct `spin::MutexGuard<'_, AetherQuantumProvider>` in the 
+current scope
+  --> kernel\src\runtime\browser.rs:33:19
+   |
+33 |         if 
+crypto.verify_trust_anchor(SecurityLevel::Advance) {
+   |                   ^^^^^^^^^^^^^^^^^^^ method not found 
+in `spin::MutexGuard<'_, AetherQuantumProvider>`
+
+error[E0433]: cannot find type `ClearanceLevel` in this scope
+  --> kernel\src\security\capabilities.rs:58:25
+   |
+58 |             attributes: ClearanceLevel::Ring3Untrusted,
+   |                         ^^^^^^^^^^^^^^ use of undeclared 
+type `ClearanceLevel`
+
+error[E0308]: mismatched types
+   --> kernel\src\security\capabilities.rs:71:63
+    |
+ 71 |             Capability::Network => 
+self.has_permission(0x200, Permissions::all()),
+    |                                         --------------  
+      ^^^^^^^^^^^^^^^^^^ expected `u32`, found `Permissions`
+    |                                         |
+    |                                         arguments to 
+this method are incorrect
+    |
+note: method defined here
+   --> kernel\src\security\capabilities.rs:107:12
+    |
+107 |     pub fn has_permission(&self, object_id: u32, 
+required: u32) -> bool {
+    |            ^^^^^^^^^^^^^^                        
+-------------
+
+error[E0433]: cannot find type `ClearanceLevel` in this scope
+  --> kernel\src\security\capabilities.rs:72:53
+   |
+72 |             Capability::Admin => self.attributes == 
+ClearanceLevel::Fortress,
+   |                                                     
+^^^^^^^^^^^^^^ use of undeclared type `ClearanceLevel`
+
+error[E0433]: cannot find type `ClearanceLevel` in this scope
+  --> kernel\src\security\capabilities.rs:94:31
+   |
+94 |         if self.attributes == 
+ClearanceLevel::Ring3Untrusted {
+   |                               ^^^^^^^^^^^^^^ use of 
+undeclared type `ClearanceLevel`
+
+error[E0599]: no method named `as_str` found for unit type 
+`()` in the current scope
+   --> kernel\src\lib.rs:723:43
+    |
+723 |                         platform.puts(msg.as_str());
+    |                                           ^^^^^^ method 
+not found in `()`
+
+warning: unused variable: `packet`
+   --> kernel\src\net\virtio_net.rs:119:28
+    |
+119 |     fn transmit(&mut self, packet: &[u8]) -> 
+NetResult<()> {
+    |                            ^^^^^^ help: if this is 
+intentional, prefix it with an underscore: `_packet`
+    |
+    = note: `#[warn(unused_variables)]` (part of 
+`#[warn(unused)]`) on by default
+
+warning: unused variable: `expected_root`
+  --> kernel\src\runtime\apm.rs:64:45
+   |
+64 |     fn verify_integrity(&self, data: &[u8], 
+expected_root: [u8; 32]) -> bool {
+   |                                             
+^^^^^^^^^^^^^ help: if this is intentional, prefix it with an 
+underscore: `_expected_root`
+
+Some errors have detailed explanations: E0308, E0425, E0432, 
+E0433, E0599.
+For more information about an error, try `rustc --explain 
+E0308`.
+warning: `aetheros-kernel` (lib) generated 9 warnings
+error: could not compile `aetheros-kernel` (lib) due to 11 
+previous errors; 9 warnings emitted

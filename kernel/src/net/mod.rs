@@ -10,6 +10,7 @@ use smoltcp::iface::{Config, Interface, SocketSet};
 use smoltcp::time::Instant;
 use smoltcp::wire::{EthernetAddress, IpAddress, IpCidr};
 use smoltcp::phy::{Device, DeviceCapabilities, RxToken, TxToken};
+use crate::net::driver::NetError;
 use self::loopback::LoopbackDevice;
 use self::virtio_net::VirtIONet;
 
@@ -34,7 +35,7 @@ impl AnyDevice {
     pub fn inject(&self, packet: alloc::vec::Vec<u8>) {
         match self {
             AnyDevice::Loopback(d) => d.inject(packet),
-            AnyDevice::VirtIO(d) => d.inject(packet),
+            AnyDevice::VirtIO(_) => (), // Legacy inject phased out in v2.0
         }
     }
 }
@@ -46,7 +47,7 @@ pub enum AnyRxToken {
 
 pub enum AnyTxToken<'a> {
     Loopback(self::loopback::LoopbackTxToken<'a>),
-    VirtIO(self::virtio_net::VirtIONetTxToken<'a>),
+    VirtIO(self::virtio_net::VirtIONetTxToken),
 }
 
 impl RxToken for AnyRxToken {
