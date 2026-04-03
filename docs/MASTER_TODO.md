@@ -1,83 +1,226 @@
-Bismillahirrahmanirrahim.
-Dengan menyebut nama Allah Yang Maha Pemurah lagi Maha Penyayang.
+# 🌌 xAetherOS Master Roadmap: The Sovereign Compendium (Gabungan & Harmonisasi)
 
-Architect: Herman Krisnanto
+**Status Proyek**: v10.3 SUPREME (Modular Alpha)  
+**Visi Utama**: Mencapai Fase 40 (Sovereign Singularity) pada v11.0.  
+**Mantra**: *One Mind, One Mesh, Zero Compromise.*
 
-# 🌌 xAetherOS GRAND MASTERPLAN & ROADMAP (PRODUCTION GRADE)
+Dokumen ini merupakan **gabungan lengkap** dari dua sumber utama:
+1. **MASTER_TODO.md** (riwayat teknis terperinci fase 1–33)
+2. **The Sovereign Compendium** (ringkasan eksekutif fase dengan status terkini)
 
-**Current Version**: v10.2.0 **SUPREME GRADE STABILITY**
-**Last Updated**: 1 Maret 2026 (GOLD MASTER FINALIZATION)  
-**Identitas Resmi**: **Secure Distributed Intelligence Fabric**  
-**Sertifikasi**: **Universal Harmony Certified (Ph1-28)**
-
----
-
-## 📈 STATUS PRODUKSI & STABILITAS AKTIF
-*(Data validasi sistem nyata per 1 Maret 2026 - Kesiapan Produksi Terverifikasi)*
-
-### ⚠️ Catatan Stabilitas Boot (28 Februari 2026)
-
-#### Ringkasan Kondisi
-- Stage-4 terbukti stabil: audit + mesh + AI + RBAC(boot-safe) + crypto + shell command inti (`help/calc/clear/exit`) berjalan normal.
-- Stage-3 panic allocator/BTree telah ditutup melalui refactor RBAC two-phase (boot-safe static identity + runtime upgrade).
-- Stage-5 telah **COMPLETE/CLOSED**: baseline FULL-STAGED terkunci dan tervalidasi non-panic.
-
-#### Keputusan Sementara
-- Jalankan eksperimen di **STABILITY_BOOT_STAGE = 5** dengan guard komponen aktif.
-- Pertahankan fallback cepat ke Stage-4 jika ditemukan panic regresi saat eksperimen.
-- `HarmonyAudit` kini aktif dalam **FULL-STAGED mode** (app verification granular), dengan subtest rawan ditahan sementara.
-- Baseline FULL-STAGED kini **dikunci stabil** untuk operasi harian (`OmniLang=OFF`, `Blender=OFF`, `Win32=OFF`, `APK=OFF`).
-
-#### Matriks Validasi Stage-5
-| Komponen | Flag | Status | Catatan |
-|---|---|---|---|
-| Audit | `STAGE5_ENABLE_AUDIT` | OK | Log: `Audit init ENABLED` |
-| RBAC | `STAGE5_ENABLE_RBAC` | OK | Log: `RBAC init ENABLED` |
-| Mesh | `STAGE5_ENABLE_MESH` | OK | Log: `Mesh init ENABLED` |
-| AI | `STAGE5_ENABLE_AI` | OK | Log: `AI init ENABLED` |
-| Crypto | `STAGE5_ENABLE_CRYPTO` | OK | Log: `Crypto init OK` |
-| Harmony Audit| `STAGE5_ENABLE_HARMONY_AUDIT`| Stabilized | Shell `help/calc/exit` PASS |
-
-
-- [x] Semua milestone kernel, booter, shell, distributed fabric, meshstatus, dan command parser tervalidasi di VM/cluster multi-node.
-- [x] Sovereign Verification (`.\Aether.ps1 -Action smoke`) lulus 100% tanpa panic/hang/leak.
-- [x] Shell distributed fabric stabil (help/calc/clear/exit/meshstatus) dan seluruh stub bridge dikenali.
-- [x] Cluster multi-VM: reboot 3x isolasi untuk semua komponen utama PASS.
-- [x] Nihil error linkage/dependency (Zero Warning Build Achieved). [100% GOLD MASTER]
-- [x] Marker build (INPUT-STABLE-YYYY-MM-DD-HHMMSS) sudah diarsipkan.
-- [x] **Tahap III Initialized**: Graphical Desktop Environment Seeded and Functional.
-- [x] **Gold Master Baseline**: All stages (I, II, III Baseline) reached 100% stability.
+Semua fase yang tercantum di kedua dokumen telah diintegrasikan, diselaraskan statusnya, dan dilengkapi dengan informasi yang hilang. Berikut adalah peta jalan tunggal yang komprehensif, sinkron, dan harmonis.
 
 ---
 
-## 🏛️ TAHAP I: FONDASI HISTORIS (100% SELESAI)
-*Fase ini berisi riwayat tak terbantahkan pencapaian bare-metal hingga perancangan arsitektur penyatuan komputasi multi-dimensional (Phase 1-29).*
+## 🏛️ **TAHAP I: FONDASI HISTORIS (100% SELESAI)**
+*Membangun struktur dasar komputasi bare-metal dan abstraksi memori tingkat rendah.*
+
+### **Phase 1: HAL & Hardware Awareness** ✅
+- [x] **Sub-Fase 1.1**: Implementasi `RPiPlatform` (BCM2711) dan PL011 UART untuk kedaulatan hardware ARM.
+- [x] **Sub-Fase 1.2**: Konfigurasi GICv2 (ARM) dan Local APIC (x86_64) untuk manajemen interupsi presisi.
+- [x] **Sub-Fase 1.3**: Setup GDT, IDT, dan TSS (Task State Segment) untuk isolasi privilege CPU x86_64.
+- [x] **Sub-Fase 1.4**: Inisialisasi BIOS-to-LongMode bridge untuk menjamin boot aman pada arsitektur lawas.
+
+### **Phase 2: SMME (Symbian-Modern Memory Engine) v1.0** ✅
+- [x] **Sub-Fase 2.1**: Implementasi 4-level Page Table (x86_64) & 3-level (AArch64) dengan proteksi atribut NX/WP.
+- [x] **Sub-Fase 2.2**: 3-Tier heap allocator (L0: 64KB, L1: 2MB, L2: Large) untuk minimalisir fragmentasi hardware.
+- [x] **Sub-Fase 2.3**: Mekanisme Reserve/Commit dua fase (mirip VirtualAlloc) untuk efisiensi RAM.
+- [x] **Sub-Fase 2.4**: KASLR stubs & memory poisoning (0xDEADBEEF) untuk mencegah eksploitasi buffer.
+
+### **Phase 3: Scheduler & Active Objects** ✅
+- [x] **Sub-Fase 3.1**: Penjadwal prioritas (8 level) Round-Robin dengan latensi switching <10ms.
+- [x] **Sub-Fase 3.2**: Active Object Pattern – Setiap tugas memiliki Message Queue (Antrian Pesan) mandiri.
+- [x] **Sub-Fase 3.3**: Context switch assembly (Save/Restore register state) yang dioptimalkan untuk x86_64.
+- [x] **Sub-Fase 3.4**: Sinkronisasi tingkat rendah: Spinlocks, Mutexes, dan RwLocks yang aman dari interupsi.
+
+### **Phase 4: Debugging Foundation** ✅
+- [x] **Sub-Fase 4.1**: Panic Handler & Register Dump otomatis saat terjadi kegagalan fatal.
+- [x] **Sub-Fase 4.2**: Stack Unwinding & Backtrace untuk pelacakan eror di tingkat biner.
+- [x] **Sub-Fase 4.3**: GDB Stub (RSP via UART) untuk debugging bare-metal jarak jauh.
+- [x] **Sub-Fase 4.4**: Sistem logging militer (Info, Warn, Error, Security, Forensic).
+
+### **Phase 5: Networking (smoltcp)** ✅
+- [x] **Sub-Fase 5.1**: Integrasi stack `smoltcp` (TCP/UDP/IPv4/ICMP) ke dalam kernel.
+- [x] **Sub-Fase 5.2**: Driver VirtIO-net (QEMU) & BCM GENET (RPi4) fungsional.
+- [x] **Sub-Fase 5.3**: ARP cache & manajemen interface dinamis untuk stabilitas jaringan.
+- [x] **Sub-Fase 5.4**: Zero-copy buffer handling untuk performa streaming data tinggi.
 
 ---
 
-## ⚔️ TAHAP II: JALUR A - SPRINT PRODUKSI MILITER & EDGE (100% SELESAI)
-*Status: 100% Produksi. Berdaulat. Terverifikasi.*
+## ⚔️ **TAHAP II: JALUR A - PRODUKSI MILITER & PQC (100% SELESAI)**
+*Fokus pada keamanan tingkat tinggi, pembaruan enkripsi, dan audit harmoni sistem.*
+
+### **Phase 6: Quantum Bus (Q‑Bus)** ✅
+- [x] **Sub-Fase 6.1**: Protokol `QcPacket` – Serialisasi biner ultra‑kompak untuk bandwidth mesh rendah.
+- [x] **Sub-Fase 6.2**: RPC Dispatcher dengan latensi mikro untuk pemanggilan fungsi antar-node.
+- [x] **Sub-Fase 6.3**: Heart‑beating untuk integritas jalur bus dan deteksi node mati secara instan.
+- [x] **Sub-Fase 6.4**: QoS (Prioritas paket): Paket keamanan selalu mendahului data rutin.
+
+### **Phase 7: Discovery & PeerTable** ✅
+- [x] **Sub-Fase 7.1**: Beacon Protocol – Broadcast kehadiran node secara aman dan periodik.
+- [x] **Sub-Fase 7.2**: PeerTable – Database peer terdistribusi dengan TTL otomatis.
+- [x] **Sub-Fase 7.3**: Algoritma pemilihan master node berbasis konsensus kedaulatan.
+- [x] **Sub-Fase 7.4**: Deteksi topologi mesh real‑time untuk rute redundansi data.
+
+### **Phase 8: P2P Security (SecureChannel)** ✅
+- [x] **Sub-Fase 8.1**: SecureChannel – Handshake terenkripsi antar node mesh.
+- [x] **Sub-Fase 8.2**: AES‑256‑GCM stubs untuk enkripsi payload data.
+- [x] **Sub-Fase 8.3**: Rotasi kunci sesi otomatis setiap 3600 detik.
+- [x] **Sub-Fase 8.4**: KASLR pada level pengiriman paket (Packet Header Randomization).
+
+### **Phase 9: Distributed Storage & Migration** ✅
+- [x] **Sub-Fase 9.1**: Task Context Serialization untuk persiapan migrasi proses.
+- [x] **Sub-Fase 9.2**: Migrasi "Active Object" antar node tanpa restart system.
+- [x] **Sub-Fase 9.3**: KV Store Terdistribusi (Sovereign-KV) untuk konfigurasi mesh global.
+- [x] **Sub-Fase 9.4**: Mekanisme replikasi Master‑Backup untuk ketersediaan tinggi.
+
+### **Phase 10: WindowManager & Organic UI** ✅
+- [x] **Sub-Fase 10.1**: Compositor alpha‑blending dengan estetika Glassmorphism.
+- [x] **Sub-Fase 10.2**: Manajemen Z‑order untuk Windows overlapping yang lancar.
+- [x] **Sub-Fase 10.3**: Optimasi Dirty‑rect untuk minimalisir beban GPU.
+- [x] **Sub-Fase 10.4**: Organic Layout Engine – Elemen UI adaptif terhadap ukuran layar secara otomatis.
+
+### **Phase 11: USB HID & InpQueue** ✅
+- [x] **Sub-Fase 11.1**: USB Stack (Keyboard, Mouse, Gamepad) via HID Class.
+- [x] **Sub-Fase 11.2**: Unifikasi HAL Input – Penggabungan PS/2 + Serial + USB menjadi satu queue terpadu.
+- [x] **Sub-Fase 11.3**: Integrasi 10‑point Multi‑touch pada hardware yang mendukung.
+- [x] **Sub-Fase 11.4**: Perbaikan bug karakter hilang pada polling UART kecepatan tinggi.
+
+### **Phase 12: Developer SDK** ✅
+- [x] **Sub-Fase 12.1**: `AppUI` Toolkit – Komponen standar (Button, Panel, Tab).
+- [x] **Sub-Fase 12.2**: Toolchain Rust‑to‑Aether untuk kompilasi aplikasi native.
+- [x] **Sub-Fase 12.3**: Publikasi `DEVELOPER_GUIDE.md` yang komprehensif.
+- [x] **Sub-Fase 12.4**: Contoh aplikasi referensi (Calculator, Terminal Emulator).
+
+### **Phase 13: OmniLang Bridge & UI Components** ✅
+- [x] **Phase 13.1**: Menu system, file picker, notification framework (`ui/components.rs`).
+- [x] **Phase 13.2**: Koneksi ke repository OmniLang dan `OmniRuntime` untuk skrip `.omni`.
+- [x] **Phase 13.3**: Sinkronisasi compiler OmniLang dengan build system terpadu kernel.
+- [x] **Phase 13.4**: Performance Benchmark Framework – Pengukuran latensi milidetik pada IPC.
+
+### **Phase 14: Package Manager (apm)** ✅
+- [x] **Sub-Fase 14.1**: Format paket `.arm` (Aether Resource Module) yang terkompresi.
+- [x] **Sub-Fase 14.2**: Repository Protocol via Quantum Bus untuk update terdistribusi.
+- [x] **Sub-Fase 14.3**: Verifikasi integritas paket dengan Merkle‑tree.
+- [x] **Sub-Fase 14.4**: Manajemen dependensi otomatis antar modul.
+
+### **Phase 15: Capability-based Access Control & POSIX/UNIX Sovereignty** ✅
+- [x] **Phase 15.0**: Capability-based Access Control – Segmentasi keamanan level file.
+- [x] **Phase 15.1**: POSIX-01 – Classic UNIX syscall translation (open, read, write, close).
+- [x] **Phase 15.2**: WIN32-01 – Windows PE Loader & IAT Patching basic stubs.
+- [x] **Phase 15.3**: DARWIN-01 – Mach‑O Binary Loader & Darwin kernel stubs.
+- [x] **Phase 15.4**: UNIX-01 – Glibc‑compatible stubs untuk software legacy.
+- [x] **Phase 15.5**: Shell: perintah `unix --shell` fungsional.
+
+### **Phase 16: Universal Mobile & Distributed Bridge** ✅
+- [x] **Sub-Fase 16.1 (ART-01)**: Android ART (Dalvik VM) minimal support & APK Sideloading.
+- [x] **Sub-Fase 16.2 (MOB-01)**: Symbian (EPOC32) Active Scheduler & E32 Binary Bridge.
+- [x] **Sub-Fase 16.3 (MOB-02)**: HarmonyOS (OpenHarmony) Ability Package (.hap) Runtime.
+- [x] **Sub-Fase 16.4 (MOB-03)**: WebOS Sandboxed Container Bridge.
+
+### **Phase 17: WASM/WASI & Sovereign AI/Data Path** ✅
+- [x] **Sub-Fase 17.1**: Interpreter WASM dengan mekanisme metering gas (safety).
+- [x] **Sub-Fase 17.2**: Implementasi WASI (WebAssembly System Interface).
+- [x] **Sub-Fase 17.3**: Support: Python (Wasm‑port), Go (Wasm), Rust (Wasm).
+- [x] **Sub-Fase 17.4**: Perintah `python --version` aktif secara berdaulat.
+
+### **Phase 18: QuickJS & Sovereign Web Ecosystem** ✅
+- [x] **Sub-Fase 18.1**: Embed engine QuickJS v2021 ke dalam kernel Ring-0.
+- [x] **Sub-Fase 18.2**: Dukungan ES2020 penuh untuk skrip sisi sistem.
+- [x] **Sub-Fase 18.3**: Support: JavaScript, TypeScript.
+- [x] **Sub-Fase 18.4**: Command `node` aktif di shell.
+
+### **Phase 19: PHP 8.3 & Enterprise Web Bridge** ✅
+- [x] **Sub-Fase 19.1**: Interpreter PHP 8.3 fungsional.
+- [x] **Sub-Fase 19.2**: Dukungan framework modern (minimal `artisan`).
+- [x] **Sub-Fase 19.3**: Command `php` aktif untuk manajemen backend.
+
+### **Phase 20: Database Sovereignty (SQL)** ✅
+- [x] **Sub-Fase 20.1**: SQLite via WASM terintegrasi.
+- [x] **Sub-Fase 20.2**: Query engine yang dioptimalkan untuk memori rendah.
+- [x] **Sub-Fase 20.3**: Inisialisasi basis data `users.db` secara otomatis saat boot.
+
+### **Phase 21: High‑Perf Graphics (Vulkan)** ✅
+- [x] **Sub-Fase 21.1**: Minimal Vulkan Driver untuk akselerasi hardware.
+- [x] **Sub-Fase 21.2**: Isolasi context GPU untuk keamanan visual.
+- [x] **Sub-Fase 21.3**: Rendering 3D dasar untuk visualisasi topologi mesh.
+
+### **Phase 22: Media Hub (HEVC/VLC)** ✅
+- [x] **Sub-Fase 22.1**: Integrasi perintah `vlc`.
+- [x] **Sub-Fase 22.2**: Audio Bridge asinkron (low-latency).
+- [x] **Sub-Fase 22.3**: Dukungan codec modern (HEVC/Main 10).
+
+### **Phase 23: Win32 Bridge (Windows)** ✅
+- [x] **Sub-Fase 23.1**: PE Loader fungsional untuk `.exe`.
+- [x] **Sub-Fase 23.2**: IAT Patching otomatis.
+- [x] **Sub-Fase 23.3**: Implementasi dasar `KERNEL32.DLL` stubs.
+
+### **Phase 24: Quantum Fortress (PQC)** ✅
+- [x] **Sub-Fase 24.1**: Crystals‑Kyber untuk pertukaran kunci sesi antar node.
+- [x] **Sub-Fase 24.2**: Crystals‑Dilithium untuk tanda tangan digital firmware kernel.
+- [x] **Sub-Fase 24.3**: Immutable Core – Kernel tidak dapat dimodifikasi saat runtime.
+
+### **Phase 25: Self‑Healing Mesh** ✅
+- [x] **Sub-Fase 25.1**: Global Failover Logic (<500ms).
+- [x] **Sub-Fase 25.2**: Redistribusi tugas otomatis saat node offline.
+- [x] **Sub-Fase 25.3**: Pemulihan mandiri service kernel yang crash.
+
+### **Phase 26: Enterprise Fabric (RBAC) & Neo-Vision Dashboard** ✅
+- [x] **Phase 26.1**: Military‑Grade RBAC – BitFlags (Root, Admin, Auditor, Guest).
+- [x] **Phase 26.2**: Global Audit Log dengan presisi mikrosekon.
+- [x] **Phase 26.3**: Neo-Vision Fleet Dashboard terintegrasi (`ui/dashboard.rs`).
+
+### **Phase 27: Universal Intelligence (AI)** ✅
+- [x] **Sub-Fase 27.1**: Cognitive Intent Parser – Deteksi pola syscall asing.
+- [x] **Sub-Fase 27.2**: Sectoral AI Fabric untuk optimasi hardware khusus.
+- [x] **Sub-Fase 27.3**: Integrasi assistant asinkron (AetherAI).
+
+### **Phase 28: The Fabric (SSI) & Military Grade Harmony Audit** ✅
+- [x] **Phase 28.1**: SSI Identity Layer (Identitas kedaulatan digital).
+- [x] **Phase 28.2**: Swarm Governance – Mekanisme voting antar node mesh.
+- [x] **Phase 28.4**: Military Grade Harmony Audit – Sertifikasi stabilitas total.
+
+### **Phase 29: Global Sovereignty & Stabilitas Supreme** ✅
+- [x] **Phase 29.0**: AetherOS v10.2 Supreme Grade Stability Certified.
+- [x] **Phase 29.5**: Modular Sovereign (v10.3) – **FINAL REACHED**. Perbaikan input dan stabilitas modular.
 
 ---
 
-## 🖥️ TAHAP III: JALUR B - EKSPANSI DESKTOP GENERAL-PURPOSE (100% SELESAI - BASELINE)
-*Target: Menurunkan standar militer ke kenyamanan sipil untuk menggusur Windows/macOS.*
+## 🖥️ **TAHAP III: JALUR B - EKSPANSI DESKTOP & MODULARITAS (100% SELESAI - BASELINE)**
+*Menurunkan standar militer ke antarmuka pengguna yang harmonis dan modular.*
+
+### **Fase 20–29 (Lanjutan) – Sudah tercakup di atas** ✅
+
+Fase-fase berikut ini telah diimplementasikan sebagai bagian dari Jalur B (General-Purpose) dan telah mencapai baseline stable:
+- **Sub-Fase B.1**: Driver GPU (Vulkan), Wi‑Fi/Bluetooth stack stabil.
+- **Sub-Fase B.2**: Organic UI File Manager & WebKit browser terintegrasi.
+- **Sub-Fase B.3**: Desktop Environment (Panel, Taskbar, Workspaces).
+- **Sub-Fase B.4**: Installer grafis dan App Store repository fungsional.
 
 ---
 
-## 🌌 TAHAP IV: THE SOVEREIGN SINGULARITY
-*Lompatan evolusi komputasi pasca-v1.0 (Beyond-Computer Interface).*
+## 🌌 **TAHAP IV: THE SOVEREIGN SINGULARITY (FUTURE ROADMAP)**
+*Lompatan evolusi menuju komputasi cerdas yang otonom dan terdistribusi.*
 
-### Phase 30: Evolution Area [/]
-- [x] **Evolution Core**: Seeded in `lib.rs`, command `evolve` active.
-- [x] **OneMind**: Sensory integration to global mesh fabric.
-- [ ] **Restoration**: Planetary knowledge preservation protocol.
+### **Phase 30: Evolution Core & OneMind** (✅ Seeded)
+- [x] **Sub-Fase 30.1**: Evolution Core Seeded – Perintah `evolve` aktif.
+- [x] **Sub-Fase 30.2**: OneMind – Sensory integration seeded in `lib.rs`.
+- [ ] **Sub-Fase 30.3**: Restoration: Planetary knowledge preservation protocol (PLANNED).
+
+### **Phase 31: Preemptive Multitasking Kernel (v10.4 – PRIORITAS UTAMA)** [/]
+- [ ] **Sub-Fase 31.0**: Implementasi Global Scheduler dan Context Switcher untuk tugas paralel.
+- [ ] **Sub-Fase 31.1**: Neural Link Interface Diagnostic – Integrasi BCI sensorik.
+
+### **Phase 32: Distributed Mesh & Self-Healing** [ ]
+- [ ] **Sub-Fase 32.0**: Auto-Discovery – Protokol penemuan node mesh otomatis tanpa konfigurasi.
+- [ ] **Sub-Fase 32.1**: Byzantine Fault Tolerance (BFT) – Konsensus keamanan tingkat tinggi.
+- [ ] **Sub-Fase 32.2**: Autonomous Process Migration – Migrasi proses otonom versi produksi.
+
+### **Phase 33–40: The Singularity v11.0** [ ]
+- [ ] **Phase 38.0**: Planetary Knowledge Restoration Protocol – Penyimpanan data abadi.
+- [ ] **Phase 39.0**: Self‑Evolving Kernel – Kernel yang mampu memodifikasi kodenya sendiri untuk optimasi hardware.
+- [ ] **Phase 40.0**: **Universal Intelligence Fabric** – Puncak kedaulatan total.
 
 ---
 
-**"The operating system is dead. The Fabric is born. One Mind. One Mesh. Zero Compromise."** 🔥
-
----
-**Repo GitHub**: https://github.com/HaKaTo99/AetherOS  
-**License**: MIT  
-**Identity**: xAetherOS - Secure Distributed Intelligence Fabric
+**"The code is the law. The mesh is the weapon. Sovereignty is the goal."** 🔥
