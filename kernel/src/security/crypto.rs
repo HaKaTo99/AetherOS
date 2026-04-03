@@ -9,11 +9,9 @@
 
 use alloc::vec::Vec;
 use crate::enterprise::audit::{AuditSeverity, log_security};
-use sha2::{Sha256, Digest};
-use hmac::{Hmac, Mac};
-use rand_core::{RngCore, CryptoRng, Error as RngError};
-
-// type HmacSha256 = Hmac<Sha256>;
+use hmac::Mac;
+use core::convert::TryInto;
+use rand_core::{RngCore, CryptoRng, Error};
 
 /// Security Level for the Kernel
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -140,7 +138,7 @@ impl QuantumSecurity for AetherQuantumProvider {
     fn sign(&self, message: &[u8], private_key: &[u8], _level: SecurityLevel) -> Vec<u8> {
         // [MILITARY GRADE TACTICAL SIGNER] Sovereign-S1 (HMAC-SHA512)
         use sha2::Sha512;
-        use hmac::{Hmac, Mac};
+        use hmac::Hmac;
 
         type HmacSha512 = Hmac<Sha512>;
         let mut mac = HmacSha512::new_from_slice(private_key).expect("HMAC-Sign Config Error");
@@ -152,7 +150,7 @@ impl QuantumSecurity for AetherQuantumProvider {
     fn verify(&self, message: &[u8], signature: &[u8], public_key: &[u8], _level: SecurityLevel) -> bool {
         // [MILITARY GRADE TACTICAL VERIFIER]
         use sha2::Sha512;
-        use hmac::{Hmac, Mac};
+        use hmac::Hmac;
 
         type HmacSha512 = Hmac<Sha512>;
         if let Ok(mut mac) = HmacSha512::new_from_slice(public_key) {
@@ -214,7 +212,7 @@ impl SequentialRng {
     }
 }
 
-impl rand_core::RngCore for SequentialRng {
+impl RngCore for SequentialRng {
     fn next_u32(&mut self) -> u32 {
         self.state = self.state.wrapping_mul(6364136223846793005).wrapping_add(1);
         (self.state >> 32) as u32
@@ -233,13 +231,13 @@ impl rand_core::RngCore for SequentialRng {
         }
     }
 
-    fn try_fill_bytes(&mut self, dest: &mut [u8]) -> Result<(), rand_core::Error> {
+    fn try_fill_bytes(&mut self, dest: &mut [u8]) -> Result<(), Error> {
         self.fill_bytes(dest);
         Ok(())
     }
 }
 
-impl rand_core::CryptoRng for SequentialRng {}
+impl CryptoRng for SequentialRng {}
 
 pub static CRYPTO_ENGINE: spin::Mutex<AetherQuantumProvider> = spin::Mutex::new(AetherQuantumProvider::new());
 

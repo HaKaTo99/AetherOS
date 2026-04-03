@@ -4,7 +4,7 @@
 //! The OS never modifies the running partition. Updates are written to the inactive partition,
 //! verified with Dilithium signatures, and then activated by switching the boot flag.
 
-use crate::security::crypto::{AetherQuantumProvider, QuantumSecurity, SecurityLevel};
+use crate::security::crypto::{QuantumSecurity, SecurityLevel};
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Partition {

@@ -3,7 +3,7 @@
 //! Implements Zero-Trust logic where the kernel constantly monitors its own integrity
 //! and attaches a "Proof of Health" to outgoing messages.
 
-use crate::security::crypto::{AetherQuantumProvider, QuantumSecurity, SecurityLevel};
+use crate::security::crypto::{QuantumSecurity, SecurityLevel};
 use alloc::vec::Vec;
 
 pub struct KernelIntegrityProof {
@@ -20,15 +20,15 @@ impl AttestationEngine {
         // [REAL BARE-METAL ATTESTATION] Hash physical kernel sections
         use sha2::{Sha256, Digest};
         let mut hasher = Sha256::new();
-        unsafe {
-            // Target the mapped text section (In QEMU testing we hash a safe fixed slice 
-            // to avoid page faulting out of bounds, but logic is native SHA-256)
-            // let start = 0xFFFFFFFF80000000 as *const u8;
-            // let len = 0x200000;
-            // let slice = core::slice::from_raw_parts(start, len);
-            
-            hasher.update(b"DYNAMIC_AETHEROS_MEMORY_SWEEP_DATA");
-        }
+        let _anchor = 0xBEEF_CAFEu32;
+        
+        // Target the mapped text section (In QEMU testing we hash a safe fixed slice 
+        // to avoid page faulting out of bounds, but logic is native SHA-256)
+        // let start = 0xFFFFFFFF80000000 as *const u8;
+        // let len = 0x200000;
+        // let slice = core::slice::from_raw_parts(start, len);
+        
+        hasher.update(b"DYNAMIC_AETHEROS_MEMORY_SWEEP_DATA");
         hasher.finalize().into()
     }
 

@@ -7,7 +7,7 @@
 
 use alloc::string::String;
 use alloc::vec::Vec;
-use crate::security::crypto::{AetherQuantumProvider, QuantumSecurity, SecurityLevel};
+use crate::security::crypto::{QuantumSecurity, SecurityLevel};
 
 /// A secure browser instance
 pub struct FirefoxContainer {

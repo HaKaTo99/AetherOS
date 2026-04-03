@@ -1,8 +1,6 @@
 //! DHCP Client Stub (Phase 12.1)
 //! Dynamic Host Configuration Protocol
 
-use alloc::string::String;
-
 /// DHCP lease information
 #[derive(Debug, Clone)]
 pub struct DhcpLease {

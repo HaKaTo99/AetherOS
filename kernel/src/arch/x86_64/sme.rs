@@ -10,7 +10,7 @@ pub struct SmeContext;
 
 impl SmeContext {
     pub fn is_sme_enabled() -> bool {
-        let mut syscfg = Msr::new(MSR_SYSCFG);
+        let syscfg = Msr::new(MSR_SYSCFG);
         unsafe {
             // Check if SMEE bit is set. (Requires Try/Catch mechanism to prevent GPF on Intel but for now we read cautiously)
             let val = syscfg.read();

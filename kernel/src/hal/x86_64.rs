@@ -60,6 +60,18 @@ impl VgaWriter {
                 self.column_position += 1;
             }
         }
+        self.update_hardware_cursor();
+    }
+
+    fn update_hardware_cursor(&self) {
+        let row = VGA_HEIGHT - 1;
+        let pos = (row * VGA_WIDTH + self.column_position) as u16;
+        unsafe {
+            outb(0x3D4, 0x0F);
+            outb(0x3D5, (pos & 0xFF) as u8);
+            outb(0x3D4, 0x0E);
+            outb(0x3D5, ((pos >> 8) & 0xFF) as u8);
+        }
     }
 
     fn new_line(&mut self) {
@@ -92,6 +104,7 @@ impl VgaWriter {
             }
         }
         self.column_position = 0;
+        self.update_hardware_cursor();
     }
 }
 
@@ -202,36 +215,9 @@ impl X86Platform {
     }
 
     fn init_ps2_keyboard_minimal(&self) {
-        let _guard = InterruptGuard::new();
+        // [SUPREME COMPATIBILITY] Use the hardened driver init sequence
         unsafe {
-            // Flush output buffer first
-            for _ in 0..64 {
-                if (inb(0x64) & 0x01) == 0 {
-                    break;
-                }
-                let _ = inb(0x60);
-            }
-
-            let mut spins = 0usize;
-            while (inb(0x64) & 0x02) != 0 && spins < 100_000 {
-                core::hint::spin_loop();
-                spins += 1;
-            }
-            outb(0x64, 0xAE);
-
-            spins = 0;
-            while (inb(0x64) & 0x02) != 0 && spins < 100_000 {
-                core::hint::spin_loop();
-                spins += 1;
-            }
-            outb(0x60, 0xF4);
-
-            for _ in 0..8 {
-                if (inb(0x64) & 0x01) == 0 {
-                    break;
-                }
-                let _ = inb(0x60);
-            }
+            crate::drivers::input::ps2::KEYBOARD.init();
         }
     }
 
@@ -246,6 +232,10 @@ impl X86Platform {
                         if let Some(c) = self.map_keycode_to_ascii(key) {
                             self.process_input_byte(c);
                         }
+                        event_limit += 1;
+                    }
+                    Some(InputEvent::Raw(c)) => {
+                        self.process_input_byte(c);
                         event_limit += 1;
                     }
                     Some(_) => {

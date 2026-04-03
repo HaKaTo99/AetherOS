@@ -233,7 +233,7 @@ pub fn broadcast_beacon() -> Result<(), &'static str> {
     
     // Phase 1.2: REAL UDP BROADCAST (255.255.255.255:7878)
     // In Sovereign v1.0.0, we integrate with the global NetworkStack
-    if let Some(mut stack) = crate::net::get_network_stack() {
+    if let Some(stack) = crate::net::get_network_stack() {
          // Simulated broadcast: In a real NIC driver, this enters the Tx queue
          log::debug!("Discovery: Broadcasting beacon ({} bytes) via VirtIO-Net", beacon_bytes.len());
          let _ = stack.transmit_raw(&beacon_bytes); 

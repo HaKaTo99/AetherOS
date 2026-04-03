@@ -12,7 +12,9 @@ pub static VIRTIO_GPU: VirtIOGpuContext = VirtIOGpuContext::new();
 /// Basic stub for VirtIO-GPU Hardware Acceleration (Hardware Emulation Bridge)
 pub struct VirtIOGpuContext {
     enabled: AtomicU32,
+    #[allow(dead_code)]
     width: AtomicU32,
+    #[allow(dead_code)]
     height: AtomicU32,
     framebuffer_addr: AtomicU32, // Pointer phys-mem VRAM
 }

@@ -113,6 +113,15 @@ impl MemoryPool {
         let guarded_size = size + 16;
         let aligned_size = (guarded_size + 15) & !15;
         
+        // [SUPREME GUARD] Check for excessively large allocations (Military Grade)
+        if aligned_size > 512 * 1024 * 1024 {
+             crate::enterprise::audit::log_security(
+                 crate::enterprise::audit::AuditSeverity::Critical,
+                 "SMME", "EXTREME ALLOCATION SIZE REJECTED (DoS Guard)"
+             );
+             return Err(AllocationError::InvalidSize);
+        }
+
         // First, try to find a suitable block in free list
         let addr = if let Some(free_addr) = self.find_free_block(aligned_size) {
             self.alloc_count.fetch_add(1, Ordering::Relaxed);
@@ -122,6 +131,8 @@ impl MemoryPool {
             let old = self.reserved.fetch_add(aligned_size, Ordering::AcqRel);
             if old + aligned_size > self.size {
                 self.reserved.fetch_sub(aligned_size, Ordering::Release);
+                
+                // [SUPREME GUARD] OOM triggered
                 return Err(AllocationError::OutOfMemory);
             }
             self.alloc_count.fetch_add(1, Ordering::Relaxed);
@@ -667,6 +678,7 @@ pub enum AllocationError {
     OutOfMemory,
     InvalidAddress,
     InvalidRequest,
+    InvalidSize,
 }
 
 #[cfg(test)]

@@ -1,7 +1,7 @@
 //! AI-Native Sectoral Fabric (Phase 27.4)
 //! Provides specialized optimizations for critical industry sectors.
 
-use crate::enterprise::audit;
+// Removed unused import
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum SectorProfile {

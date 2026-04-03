@@ -64,6 +64,9 @@ pub trait Framebuffer: Send + Sync {
     /// Get screen height
     fn height(&self) -> usize;
     
+    /// Update hardware cursor position (if supported)
+    fn set_cursor_pos(&mut self, p: Point);
+
     /// Flush/Swap buffers (if double buffered)
     fn flush(&mut self) {}
     
@@ -99,20 +102,66 @@ pub trait Framebuffer: Send + Sync {
         }
     }
     
-    /// Draw a string
+    /// Draw a high-end gradient rectangle (Glassmorphism simulation)
+    /// Uses integer lerp for kernel stability (avoiding floats)
+    fn draw_gradient_rect(&mut self, p: Point, w: usize, h: usize, start: Color, end: Color) {
+        let max_w = self.width();
+        let max_h = self.height();
+        
+        for y in 0..h {
+            if p.y + y >= max_h { break; }
+            
+            // Integer LERP: start + (end - start) * y / h
+            let r = start.r as i32 + ((end.r as i32 - start.r as i32) * y as i32 / h.max(1) as i32);
+            let g = start.g as i32 + ((end.g as i32 - start.g as i32) * y as i32 / h.max(1) as i32);
+            let b = start.b as i32 + ((end.b as i32 - start.b as i32) * y as i32 / h.max(1) as i32);
+            let current_color = Color::new(r as u8, g as u8, b as u8);
+            
+            for x in 0..w {
+                if p.x + x >= max_w { break; }
+                self.draw_pixel(Point::new(p.x + x, p.y + y), current_color);
+            }
+        }
+    }
+
+    /// Draw a tactical progress ring (Procedural Circle)
+    fn draw_circle(&mut self, center: Point, radius: usize, color: Color, thickness: usize) {
+        let r = radius as i32;
+        let t = thickness as i32;
+        let r_inner = r - t;
+        
+        for y in -r..=r {
+            for x in -r..=r {
+                let dist_sq = x * x + y * y;
+                if dist_sq <= r * r && dist_sq >= r_inner * r_inner {
+                    let px = (center.x as i32 + x) as usize;
+                    let py = (center.y as i32 + y) as usize;
+                    if px < self.width() && py < self.height() {
+                        self.draw_pixel(Point::new(px, py), color);
+                    }
+                }
+            }
+        }
+    }
+
+    /// Draw a string using the embedded 8x8 font
     fn draw_string(&mut self, p: Point, s: &str, color: Color) {
         let mut x = p.x;
         let mut y = p.y;
+        let max_w = self.width();
+        let max_h = self.height();
         
         for c in s.chars() {
             if c == '\n' {
                 x = p.x;
-                y += 10; // Line height
+                y += if max_h <= 25 { 1 } else { 10 }; // Line height aware
                 continue;
             }
             
-            self.draw_char(Point::new(x, y), c, color);
-            x += 8; // Char width
+            if x < max_w && y < max_h {
+                self.draw_char(Point::new(x, y), c, color);
+            }
+            x += if max_w <= 80 { 1 } else { 8 }; // Char width aware
         }
     }
 }

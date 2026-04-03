@@ -38,13 +38,16 @@ impl VirtIONet {
         }
     }
 
-    fn read_reg(&self, _offset: usize) -> u32 {
-        // MMIO read - would use volatile_load in real impl
-        0
+    fn read_reg(&self, offset: usize) -> u32 {
+        unsafe {
+            core::ptr::read_volatile((self._base_addr + offset) as *const u32)
+        }
     }
 
-    fn write_reg(&self, _offset: usize, _value: u32) {
-        // MMIO write - would use volatile_store in real impl
+    fn write_reg(&self, offset: usize, value: u32) {
+        unsafe {
+            core::ptr::write_volatile((self._base_addr + offset) as *mut u32, value)
+        }
     }
 
     /// Inject a packet into the receive queue (for testing/simulation)

@@ -68,4 +68,8 @@ impl Framebuffer for SimpleFramebuffer {
     
     fn width(&self) -> usize { self.width }
     fn height(&self) -> usize { self.height }
+
+    fn set_cursor_pos(&mut self, _p: Point) {
+        // SimpleFB has no hardware cursor
+    }
 }

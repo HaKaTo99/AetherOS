@@ -6,9 +6,10 @@ use core::sync::atomic::{AtomicUsize, Ordering};
 const SOFT_CLEAR_LINES: usize = 24;
 const INPUT_MAX: usize = 64;
 const LETTERS_MAX: usize = 64;
-const ACTIVE_COMMANDS: [&str; 18] = [
+const ACTIVE_COMMANDS: [&str; 21] = [
     "help", "calc", "clear", "exit", "meshstatus", "omni", "ping", "captrade", "onemind",
-    "tactical", "bci", "intent", "identity", "evolve", "apk", "linux", "windows", "mac"
+    "tactical", "bci", "intent", "identity", "evolve", "apk", "linux", "windows", "mac",
+    "apm", "store", "dashboard"
 ];
 const SHELL_POLICY_STAGE_LABEL: &str = "Stage-8 lockdown";
 const BRIDGE_AUDIT_THROTTLE_TICKS: usize = 16;
@@ -49,6 +50,9 @@ const COMMAND_PREFIXES: &[(&[u8], &str)] = &[
     (b"evolve", "evolve"),
     (b"tactical", "tactical"),
     (b"bci", "bci"),
+    (b"apm", "apm"),
+    (b"store", "store"),
+    (b"dashboard", "dashboard"),
 ];
 
 pub struct AetherShell;
@@ -338,7 +342,7 @@ fn execute_command(platform: &dyn hal::Platform, cmd: &str) -> CommandExec {
                 CommandExec::Handled
             }
             "tactical" => {
-                let mut sov = crate::enterprise::sovereign::SOVEREIGN_MANAGER.lock();
+                let sov = crate::enterprise::sovereign::SOVEREIGN_MANAGER.lock();
                 platform.puts("\r\n[TACTICAL] System Status: ");
                 platform.puts(&sov.get_status());
                 platform.puts("\r\n[TACTICAL] Lockdown Status: ENFORCED\r\n");
@@ -403,6 +407,46 @@ fn execute_command(platform: &dyn hal::Platform, cmd: &str) -> CommandExec {
                 platform.puts(cmd);
                 platform.puts("\r\n[BRIDGE] Runtime state: HARDENED_SANDBOX (Stage-8 Enforced)\r\n");
                 platform.puts("[BRIDGE] Usage allowed only via PQC-signed intent packages.\r\n");
+                CommandExec::Handled
+            }
+            "apm" => {
+                platform.puts("\r\n[APM] Aether Package Manager v10.2 SUPREME\r\n");
+                platform.puts("Usage: apm [list|install <app>|verify <app>]\r\n");
+                
+                use crate::runtime::apm::PACKAGE_MANAGER;
+                let apm = PACKAGE_MANAGER.lock();
+                let installed = apm.list();
+                
+                platform.puts(&alloc::format!("[APM] Installed Packages ({}):\r\n", installed.len()));
+                for pkg in installed {
+                    platform.puts(&alloc::format!(" - {}\r\n", pkg));
+                }
+                CommandExec::Handled
+            }
+            "store" => {
+                platform.puts("\r\n[STORE] AetherStore: Decentralized Mesh Portal\r\n");
+                platform.puts("Usage: store [search <query>|install <app>]\r\n");
+                
+                use crate::ecosystem::store::AetherStore;
+                let results = AetherStore::search("mesh");
+                
+                platform.puts("[STORE] Discovery Results (Global Mesh):\r\n");
+                for res in results {
+                    platform.puts(&alloc::format!(" [+] {}\r\n", res));
+                }
+                platform.puts("[STORE] Try 'store install AppName' to deploy.\r\n");
+                CommandExec::Handled
+            }
+            "dashboard" => {
+                use crate::ui::dashboard::FLEET_DASHBOARD;
+                let mut dash = FLEET_DASHBOARD.lock();
+                dash.active = !dash.active;
+                if dash.active {
+                    platform.puts("\r\n[GUI] Fleet Dashboard ACTIVATED. Rendering HUD...\r\n");
+                    dash.render();
+                } else {
+                    platform.puts("\r\n[GUI] Fleet Dashboard DEACTIVATED. Returning to terminal.\r\n");
+                }
                 CommandExec::Handled
             }
             "exit" => CommandExec::Exit,

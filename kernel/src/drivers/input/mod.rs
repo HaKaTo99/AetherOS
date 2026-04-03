@@ -33,6 +33,7 @@ pub enum InputEvent {
     Keyboard { key: KeyCode, state: KeyState },
     Mouse { dx: i32, dy: i32, buttons: u8 },
     Touch { x: u32, y: u32, id: u8, pressed: bool },
+    Raw(u8), // [SUPREME DIAGNOSTIC] Raw scancode bypass
 }
 
 /// Trait for input drivers
