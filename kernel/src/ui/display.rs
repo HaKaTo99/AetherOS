@@ -3,7 +3,6 @@
 
 use core::sync::atomic::{AtomicU32, Ordering};
 use crate::bus::quantum_bus::Device;
-use spin::Mutex;
 
 use core::cell::UnsafeCell;
 

@@ -1,0 +1,136 @@
+cargo : warning: profiles for the non root package will be ignored, 
+specify profiles at the workspace root:
+At line:1 char:1
++ cargo check --release --package aetheros-kernel 2>&1 | Out-File 
+-File ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (warning: profil...works 
+   pace root::String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+package:   D:\GitHub\AetherOS\kernel\Cargo.toml
+workspace: D:\GitHub\AetherOS\Cargo.toml
+    Checking aetheros-kernel v10.3.0 (D:\GitHub\AetherOS\kernel)
+warning: unused import: `alloc::boxed::Box`
+ --> kernel\src\memory\x86_64_paging.rs:4:5
+  |
+4 | use alloc::boxed::Box;
+  |     ^^^^^^^^^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on 
+by default
+
+warning: unused import: `crate::net::driver::NetError`
+  --> kernel\src\net\mod.rs:13:5
+   |
+13 | use crate::net::driver::NetError;
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused imports: `PACKAGE_MANAGER`, `PackageManifest`, and 
+`Package`
+ --> kernel\src\ecosystem\store.rs:7:27
+  |
+7 | use crate::runtime::apm::{PACKAGE_MANAGER, Package, 
+PackageManifest};
+  |                           ^^^^^^^^^^^^^^^  ^^^^^^^  
+^^^^^^^^^^^^^^^
+
+warning: unused import: `alloc::collections::BTreeMap`
+ --> kernel\src\ecosystem\store.rs:8:5
+  |
+8 | use alloc::collections::BTreeMap;
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `crate::ipc::QuantumBus`
+  --> kernel\src\runtime\apm.rs:10:5
+   |
+10 | use crate::ipc::QuantumBus;
+   |     ^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `crate::bus::quantum_bus::Device`
+  --> kernel\src\runtime\apm.rs:11:5
+   |
+11 | use crate::bus::quantum_bus::Device;
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `CRYPTO_ENGINE`
+ --> kernel\src\runtime\browser.rs:6:31
+  |
+6 | use crate::security::crypto::{CRYPTO_ENGINE, SecurityLevel, 
+QuantumSecurity};
+  |                               ^^^^^^^^^^^^^
+
+warning: unused import: `Capability`
+ --> kernel\src\security\sandbox.rs:7:54
+  |
+7 | use crate::security::capabilities::{SecurityContext, Capability, 
+ClearanceLevel};
+  |                                                      ^^^^^^^^^^
+
+warning: unused variable: `n`
+   --> kernel\src\ui\input.rs:149:44
+    |
+149 |         self.desktop.notifications.retain(|n| {
+    |                                            ^ help: if this is 
+intentional, prefix it with an underscore: `_n`
+    |
+    = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) 
+on by default
+
+warning: unused variable: `packet`
+   --> kernel\src\net\virtio_net.rs:119:28
+    |
+119 |     fn transmit(&mut self, packet: &[u8]) -> NetResult<()> {
+    |                            ^^^^^^ help: if this is 
+intentional, prefix it with an underscore: `_packet`
+
+warning: unused variable: `expected_root`
+  --> kernel\src\runtime\apm.rs:64:45
+   |
+64 |     fn verify_integrity(&self, data: &[u8], expected_root: [u8; 
+32]) -> bool {
+   |                                             ^^^^^^^^^^^^^ help: 
+if this is intentional, prefix it with an underscore: 
+`_expected_root`
+
+warning: method `index_for` is never used
+  --> kernel\src\drivers\video\lfb.rs:30:8
+   |
+20 | impl LfbVideoDriver {
+   | ------------------- method in this implementation
+...
+30 |     fn index_for(&self, x: usize, y: usize) -> usize {
+   |        ^^^^^^^^^
+   |
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by 
+default
+
+warning: method `trigger_heartbeat` is never used
+   --> kernel\src\drivers\input\ps2.rs:167:15
+    |
+ 38 | impl Ps2Keyboard {
+    | ---------------- method in this implementation
+...
+167 |     unsafe fn trigger_heartbeat(&self) {
+    |               ^^^^^^^^^^^^^^^^^
+
+warning: field `tx_queue` is never read
+  --> kernel\src\net\virtio_net.rs:60:5
+   |
+55 | pub struct VirtIONet {
+   |            --------- field in this struct
+...
+60 |     tx_queue: Mutex<VirtQueue>,
+   |     ^^^^^^^^
+
+warning: comparison is useless due to type limits
+  --> kernel\src\runtime\apm.rs:67:9
+   |
+67 |         data.len() >= 0
+   |         ^^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(unused_comparisons)]` on by default
+
+warning: `aetheros-kernel` (lib) generated 15 warnings (run `cargo 
+fix --lib -p aetheros-kernel` to apply 11 suggestions)
+    Finished `release` profile [optimized] target(s) in 2.49s

@@ -1,10 +1,9 @@
 //! Window Manager - v2.0 "Organic" (v10.3 SUPREME)
 //! Advanced compositor with Focus Management and Event Routing.
 
-use crate::ui::Rect;
+use crate::ui::widget::Rect;
 use alloc::vec::Vec;
 use spin::Mutex;
-use core::sync::atomic::{AtomicUsize, Ordering};
 
 /// Window ID type
 pub type WindowId = usize;
@@ -103,6 +102,33 @@ impl WindowManager {
     }
 
     pub fn count(&self) -> usize { self.windows.len() }
+
+    /// [SOVEREIGN VISUAL UPGRADE] Draw all windows with Glassmorphism and Quantum Glow
+    pub fn draw_all_windows(&self) {
+        use crate::ui::organic_ui::{OrganicUIDriver, MAGENTA_GLOW, DEEP_SPACE};
+        
+        for w in self.visible_windows() {
+            // 1. Draw Glassmorphism Base (Translucent Deep Space)
+            OrganicUIDriver::draw_rect(
+                w.rect.x as u32, 
+                w.rect.y as u32, 
+                w.rect.width as u32, 
+                w.rect.height as u32, 
+                DEEP_SPACE
+            );
+            
+            // 2. Draw Quantum Glow Border (Neon Magenta for Windows)
+            OrganicUIDriver::draw_glow_border(
+                w.rect.x as u32, 
+                w.rect.y as u32, 
+                w.rect.width as u32, 
+                w.rect.height as u32, 
+                MAGENTA_GLOW
+            );
+            
+            crate::println!("[v10.3] Window: Rendered '{}' [ ID: {}, Z: {} ] w/ MAGENTA GLOW", w.title, w.id, w.z_order);
+        }
+    }
 }
 
 /// Global window manager

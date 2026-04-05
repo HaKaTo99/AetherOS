@@ -3,17 +3,15 @@
 
 use aetheros_kernel::{kernel_init, kernel_tick, BOOT_PARAMS};
 
-// entry_point!(kernel_main);
-
-// fn kernel_main(_boot_info: &'static mut BootInfo) -> ! {
-//     // Initialize kernel with no DTB pointer (legacy path)
-//     kernel_init(0);
-
-//     // Main kernel loop
-//     loop {
-//         kernel_tick();
-//     }
-// }
+// Multiboot2 header (manual)
+#[link_section = ".multiboot2_header"]
+#[used]
+static MULTIBOOT2_HEADER: [u8; 16] = [
+    0x02, 0x00, 0x00, 0x00,  // magic
+    0x00, 0x00, 0x00, 0x00,  // architecture (i386)
+    0x10, 0x00, 0x00, 0x00,  // header length
+    0x00, 0x00, 0x00, 0x00,  // checksum
+];
 
 #[no_mangle]
 pub extern "C" fn kernel_main_grub(magic: u32, info_ptr: usize) -> ! {
@@ -23,14 +21,19 @@ pub extern "C" fn kernel_main_grub(magic: u32, info_ptr: usize) -> ! {
 
     let cmdline = unsafe { aetheros_kernel::boot::cmdline::find_multiboot2_cmdline(info_ptr) }.unwrap_or("");
     let params = aetheros_kernel::boot::cmdline::parse_cmdline(cmdline);
+    
+    // Captured LFB Info for High-Res Graphics
+    let _fb_info = unsafe { aetheros_kernel::boot::cmdline::find_multiboot2_framebuffer(info_ptr) };
+
     {
         let mut lock = BOOT_PARAMS.lock();
         *lock = params;
     }
 
-    kernel_init(0);
+    // Pass the Multiboot2 Info Pointer for full tag discovery
+    kernel_init(info_ptr);
+    
     loop {
         kernel_tick();
     }
 }
-

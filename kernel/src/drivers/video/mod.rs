@@ -3,6 +3,8 @@
 
 pub mod vga;
 pub mod font; // [NEW] Embedded Font
+pub mod lfb; // [SOVEREIGN] Linear Framebuffer
+pub mod nebula; // [NEW] Sovereign Nebula Generator
 
 #[cfg(target_arch = "aarch64")]
 pub mod simplefb;
@@ -69,6 +71,12 @@ pub trait Framebuffer: Send + Sync {
 
     /// Flush/Swap buffers (if double buffered)
     fn flush(&mut self) {}
+
+    /// Write a character to the screen (handles cursor management in software)
+    fn write_char(&mut self, _c: char, _color: Color) {}
+
+    /// Trigger the full graphical dashboard frame (Neo-Vision)
+    fn draw_dashboard(&mut self) {}
     
     // --- High-level primitives (default implementations) ---
     
@@ -163,6 +171,27 @@ pub trait Framebuffer: Send + Sync {
             }
             x += if max_w <= 80 { 1 } else { 8 }; // Char width aware
         }
+    }
+
+    /// Draw a professional window (Standard OS Grade)
+    fn draw_window(&mut self, title: &str, x: usize, y: usize, w: usize, h: usize, border_color: Color) {
+        // [SOVEREIGN UI] 1. Semi-transparent-look Background
+        self.draw_rect(Point::new(x, y), w, h, Color::new(0, 10, 20));
+        
+        // 2. Window Body
+        self.draw_rect(Point::new(x + 2, y + 2), w - 4, h - 4, Color::new(0, 5, 10));
+        
+        // 3. Header Bar (using gradient if available, or simple rect)
+        self.draw_gradient_rect(Point::new(x + 2, y + 2), w - 4, 25, Color::new(0, 40, 60), Color::BLACK);
+        
+        // 4. Title Text
+        self.draw_string(Point::new(x + 10, y + 8), title, Color::WHITE);
+        
+        // 5. Border Glow
+        self.draw_rect(Point::new(x, y), w, 2, border_color); // Top
+        self.draw_rect(Point::new(x, y + h - 2), w, 2, border_color); // Bottom
+        self.draw_rect(Point::new(x, y), 2, h, border_color); // Left
+        self.draw_rect(Point::new(x + w - 2, y), 2, h, border_color); // Right
     }
 }
 

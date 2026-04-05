@@ -394,9 +394,11 @@ impl Drop for InterruptGuard {
 impl Platform for X86Platform {
     fn init(&self) {
         SERIAL.init();
+        // Very-early diagnostic banner to verify serial/VGA output
+        self.puts("[EARLY] HAL init: serial/VGA initialized\r\n");
         unsafe { crate::drivers::input::ps2::KEYBOARD.init(); }
         self.init_ps2_keyboard_minimal();
-        self.puts("X86_64 HAL Initialized (v10.2 Supreme Grade)\n");
+        self.puts("X86_64 HAL Initialized (v10.3 Supreme Grade)\n");
     }
 
     fn shutdown(&self) { unsafe { outb(0xf4, 0x00); } }

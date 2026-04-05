@@ -120,6 +120,15 @@ AetherOS v10.2 includes these stability mechanisms:
 - **SMME Memory**: Predictive cleanup with self-audit
 - **Priority Scheduler**: Deadlock prevention via priority inheritance
 
+## Production Readiness Checklist
+
+1. `cargo +nightly -Z bindeps build --release --manifest-path kernel/Cargo.toml` succeeds with zero errors.
+2. `powershell .\Aether.ps1 -Action smoke` completes with marker `AetherShell>` or successful output.
+3. `powershell .\Aether.ps1 -Action stress` passes with no panics (>5 min).
+4. `powershell .\Aether.ps1 -Action verifikasi` completes, log contains `CERTIFIED SUPREME`.
+5. AetherOS kernel subsystems in `kernel/src/ui` are included (display/dashboard/splash/file_manager/organic_ui).
+6. All critical warnings in stable release are audited & mitigated.
+
 ## Requirements
 
 - QEMU 7.0+

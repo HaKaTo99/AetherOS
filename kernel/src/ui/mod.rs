@@ -1,50 +1,22 @@
-//! User Interface Framework
-//!
-//! A lightweight UI framework for AetherOS featuring a widget system and flexible layout engine.
-//!
-//! # Components
-//!
-//! - **Display**: Framebuffer abstraction and distributed rendering
-//! - **Widget**: Core UI components (Label, Button, Panel, TextBox)
-//! - **Layout**: FlexBox-inspired layout engine for responsive UIs
-//!
-//! # Example
-//!
-//! ```no_run
-//! use aetheros_kernel::ui::{Label, Button, FlexLayout, Rect};
-//!
-//! // Create a simple UI scene
-//! let mut label = Label::new(Rect::new(10, 10, 200, 30), "Hello AetherOS");
-//! let mut button = Button::new(Rect::new(10, 50, 100, 30), "Click Me");
-//!
-//! // Use FlexLayout for responsive layout
-//! let layout = FlexLayout::new(Rect::new(0, 0, 640, 480));
-//! layout.row(); // Horizontal layout
-//! ```
-//!
-//! # Design Philosophy
-//!
-//! The UI framework is designed to be minimal yet functional, prioritizing:
-//! - **Simplicity**: Easy to understand widget system
-//! - **Flexibility**: Layout engine adapts to different screen sizes
-//! - **Performance**: Lightweight rendering suitable for embedded systems
+//! UI Subsystem - Sovereing Isolation Mode [SDE v2.0]
+//! Complete desktop environment like Ubuntu, Windows, and macOS
 
-pub mod display;
-pub mod widget; // [NEW] Widget system
-pub mod layout; // [NEW] Layout engine
-pub mod window; // [NEW] Window Manager (Phase 13.1)
-pub mod components; // [NEW] Menu, FilePicker, Notifications (Phase 13.1)
-pub mod toolkit; // [NEW] App UI Toolkit (Phase 14.2)
-pub mod file_manager; // [NEW] Secure FileManager (Phase 20.2)
-pub mod organic_ui; // [NEW] Organic UI Drivers (Phase 25.4)
-pub mod dashboard; // [NEW] Fleet Monitor Dashboard (Phase 26.3)
-pub mod desktop; // [NEW] AetherDesktop Seed (Tahap III)
-pub mod splash; // [NEW] Supreme Splash (v10.2)
+pub mod desktop;      // [SDE v2.0] Complete Desktop Manager
+pub mod window;       // Window management with z-ordering
+pub mod components;   // UI components (buttons, text fields, etc.)
+pub mod dashboard;    // System dashboard
+pub mod display;      // Vector rendering and GPU orchestration
+pub mod file_manager; // File browser integration
+pub mod layout;       // Layout managers
+pub mod organic_ui;   // Advanced visual effects
+pub mod splash;       // Splash screens
+pub mod store;        // Application store UI
+pub mod toolkit;      // UI toolkit utilities
+pub mod widget;       // Core widgets
+pub mod input;        // Input management for desktop
 
-pub use display::*;
-pub use layout::*;
-pub use window::{Window, WindowManager, WINDOW_MANAGER};
-
-pub use display::{DistributedFramebuffer, UIUpdate, PixelFormat, VectorRenderer};
-pub use widget::{Widget, Rect, Label, Button};
-pub use layout::FlexLayout;
+// Re-export core APIs for ergonomic access and compatibility
+pub use widget::Rect;
+pub use window::WINDOW_MANAGER;
+pub use desktop::DesktopManager;
+pub use input::{InputManager, init as init_input, get_manager as get_input_manager};

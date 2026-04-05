@@ -4,8 +4,8 @@
 use alloc::string::String;
 use alloc::vec::Vec;
 use crate::ui::window::{WINDOW_MANAGER, WindowId};
-use crate::ui::Rect;
-use crate::runtime::apm::{PACKAGE_MANAGER, Package};
+use crate::ui::widget::Rect;
+use crate::runtime::apm::PACKAGE_MANAGER;
 use crate::ui::display::VectorRenderer;
 
 pub struct StoreApp {

@@ -29,7 +29,8 @@ impl GlobalMeshController {
 
     pub fn init(&mut self) {
         let platform = hal::get_platform();
-        platform.puts("[ v10.2 ] Global Mesh: Cluster handshake initiated...\n");
+        platform.puts("[ v10.3 ] Global Mesh: Cluster handshake initiated...\n");
+        platform.puts("[ v10.3 ] Global Mesh: Harmony Baseline Stable.\n");
         
         // Phase 25.1: Initialize Heartbeat
         self_healing::SELF_HEALING.record_heartbeat(0);
@@ -40,7 +41,7 @@ impl GlobalMeshController {
         // Phase 28.1: Autonomous Swarm Governance
         swarm::SWARM_GOVERNANCE.lock().init();
         
-        platform.puts("[ v10.2 ] Global Mesh: Harmony Baseline Stable.\n");
+        crate::println!("[AI] Initializing Universal Intelligence Layer v10.3 SUPREME...");
     }
     
     /// Tambahkan peer baru dan log event discovery

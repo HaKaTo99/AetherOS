@@ -36,6 +36,15 @@ mb2_header_start:
     .long 12   /* size */
     .long _multiboot_entry
 
+    /* framebuffer request tag (Sovereign High-Res) */
+    .align 8
+    .word 5    /* type: framebuffer request */
+    .word 0    /* flags */
+    .long 20   /* size */
+    .long 1024 /* width */
+    .long 768  /* height */
+    .long 32   /* depth */
+
     /* end tag */
     .align 8
     .word 0

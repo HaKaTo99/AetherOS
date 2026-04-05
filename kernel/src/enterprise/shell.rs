@@ -128,7 +128,7 @@ impl AetherShell {
     pub fn start() {
         let platform = hal::get_platform();
 
-        platform.puts("--- AetherOS v10.2 SUPREME Sovereign Shell ---\r\n");
+        platform.puts("--- AetherOS v10.3 SUPREME Sovereign Shell ---\r\n");
         platform.puts("[BUILD] ");
         platform.puts(build_marker());
         platform.puts("\r\n");
@@ -358,7 +358,7 @@ fn execute_command(platform: &dyn hal::Platform, cmd: &str) -> CommandExec {
                 CommandExec::Handled
             }
             "intent" => {
-                platform.puts("\r\n[INTENT] Cognitive Prediction Engine (v10.2)\r\n");
+                platform.puts("\r\n[INTENT] Cognitive Prediction Engine (v10.3)\r\n");
                 platform.puts("[INTENT] Analyzing historical syscall patterns...\r\n");
                 platform.puts("[INTENT] Predicted Action: 'System Scale-Out' (94.2% Reliability)\r\n");
                 platform.puts("[INTENT] Adaptive Resource Map updated.\r\n");
@@ -410,7 +410,7 @@ fn execute_command(platform: &dyn hal::Platform, cmd: &str) -> CommandExec {
                 CommandExec::Handled
             }
             "apm" => {
-                platform.puts("\r\n[APM] Aether Package Manager v10.2 SUPREME\r\n");
+                platform.puts("\r\n[APM] Aether Package Manager v10.3 SUPREME\r\n");
                 platform.puts("Usage: apm [list|install <app>|verify <app>]\r\n");
                 
                 use crate::runtime::apm::PACKAGE_MANAGER;
@@ -848,7 +848,7 @@ mod shell_policy_tests {
 }
 
 fn print_help(platform: &dyn hal::Platform) {
-    platform.puts("\r\n--- AetherOS v10.2 SUPREME (Sovereign-PQC) ---\r\n");
+    platform.puts("\r\n--- AetherOS v10.3 SUPREME (Sovereign-PQC) ---\r\n");
     platform.puts("One Mind. One Mesh. Zero Compromise.\r\n\r\n");
     
     platform.puts("CORE SYSTEM:\r\n");
@@ -869,7 +869,7 @@ fn print_help(platform: &dyn hal::Platform) {
 }
 
 fn print_calc(platform: &dyn hal::Platform) {
-    platform.puts("\r\n[CALC] Aether Quantum Calculator v10.2\r\n");
+    platform.puts("\r\n[CALC] Aether Quantum Calculator v10.3\r\n");
     platform.puts("[CALC] Mode: High-Precision (64-bit Fixed Point)\r\n");
     platform.puts("[CALC] 1 + 1 = 2 (Verified via Mesh Consensus)\r\n");
     platform.puts("[CALC] 2 ^ 10 = 1024\r\n");

@@ -1,7 +1,8 @@
 pub mod smme;
-pub mod paging; // [NEW] Paging module
-pub mod mmu;    // [NEW] MMU setup
-pub mod predictive; // [NEW] Phase 27.6
+pub mod paging; // Paging module for AArch64
+pub mod x86_64_paging; // [NEW] Sovereign Paging for x86_64
+pub mod mmu;    // MMU setup
+pub mod predictive; // Phase 27.6
 
 #[derive(Debug, Clone, Copy)]
 pub struct MemoryUsage {
