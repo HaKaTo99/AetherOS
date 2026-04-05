@@ -7,9 +7,39 @@ use core::ptr::write_volatile;
 use alloc::vec::Vec;
 use alloc::boxed::Box;
 
+#[derive(Debug, Clone, Copy)]
+struct DirtyRegion {
+    min_x: usize,
+    min_y: usize,
+    max_x: usize,
+    max_y: usize,
+    active: bool,
+}
+
+impl DirtyRegion {
+    fn new() -> Self {
+        Self { min_x: 2000, min_y: 2000, max_x: 0, max_y: 0, active: false }
+    }
+
+    fn update(&mut self, x: usize, y: usize) {
+        if x < self.min_x { self.min_x = x; }
+        if y < self.min_y { self.min_y = y; }
+        if x > self.max_x { self.max_x = x; }
+        if y > self.max_y { self.max_y = y; }
+        self.active = true;
+    }
+
+    fn reset(&mut self) {
+        self.min_x = 2000; self.min_y = 2000;
+        self.max_x = 0; self.max_y = 0;
+        self.active = false;
+    }
+}
+
 pub struct LfbVideoDriver {
     info: FramebufferInfo,
     back_buffer: Option<Box<[u32]>>,
+    dirty: DirtyRegion,
 }
 
 // --- Software Cursor & UI State ---
@@ -19,7 +49,11 @@ static mut LFB_VIRTUAL_ADDR: usize = 0; // [NEW] Phase 41: Sovereign Virtual Poi
 
 impl LfbVideoDriver {
     pub fn new(info: FramebufferInfo) -> Self {
-        Self { info, back_buffer: None }
+        Self { 
+            info, 
+            back_buffer: None,
+            dirty: DirtyRegion::new(),
+        }
     }
 
     fn buffer_size(&self) -> usize {
@@ -120,15 +154,18 @@ impl Framebuffer for LfbVideoDriver {
     fn init(&mut self) {
         // [MILITARY GRADE] Sovereign Memory Mapping for x86_64 Visuals
         unsafe {
-            LFB_VIRTUAL_ADDR = self.info.address as usize; 
+            // [SOVEREIGN v10.4.4] Use SMME formal mapping interface
+            let smme = crate::SMME.lock();
+            let virtual_addr = smme.map_video_region(self.info.address as usize, 0x1000_0000);
+            LFB_VIRTUAL_ADDR = virtual_addr; 
             
             #[cfg(target_arch = "x86_64")]
-            crate::memory::x86_64_paging::map_lfb_identity(self.info.address, 0x1000_0000); // Map 256MB for 4K potential
+            crate::memory::x86_64_paging::map_lfb_identity(self.info.address, 0x1000_0000); // 256MB
         }
         
         crate::println!("[v10.3] LFB: Visual Sovereignty Active at 0x{:X} [ {}x{} ]", 
             self.info.address, self.info.width, self.info.height);
-        crate::println!("[MEMORY] LFB Mapping: Phase 0xFD Protected [SUCCESS]");
+        crate::println!("[MEMORY] LFB Mapping: SMME-REG-0xFD [SUCCESS]");
         
         // --- HIGH-SPEED BUFFER INITIALIZATION ---
         let size = self.buffer_size();
@@ -158,6 +195,7 @@ impl Framebuffer for LfbVideoDriver {
         if let Some(ref mut buf) = self.back_buffer {
             let idx = p.y * width + p.x;
             buf[idx] = color.to_u32();
+            self.dirty.update(p.x, p.y);
         } else {
             let offset = self.get_offset(p.x, p.y);
             unsafe {
@@ -199,26 +237,28 @@ impl Framebuffer for LfbVideoDriver {
     }
 
     fn flush(&mut self) {
+        if !self.dirty.active { return; }
+
         if let Some(ref buf) = self.back_buffer {
             unsafe {
                 if LFB_VIRTUAL_ADDR == 0 { return; }
                 let fb_base = LFB_VIRTUAL_ADDR as *mut u32;
                 let width = self.info.width as usize;
-                let height = self.info.height as usize;
                 let pitch_pixels = self.info.pitch as usize / 4;
 
-                if pitch_pixels == width {
-                    // ELITE MODE: Single block copy for maximum performance
-                    core::ptr::copy_nonoverlapping(buf.as_ptr(), fb_base, width * height);
-                } else {
-                    // COMPAT MODE: Row-by-row
-                    for y in 0..height {
-                        let dest_row = fb_base.add(y * pitch_pixels);
-                        let src_row = buf.as_ptr().add(y * width);
-                        core::ptr::copy_nonoverlapping(src_row, dest_row, width);
-                    }
+                // [v10.3 SUPREME] Optimized Partial Flush (Dirty-Rect)
+                let start_y = self.dirty.min_y;
+                let end_y = (self.dirty.max_y + 1).min(self.info.height as usize);
+                
+                for y in start_y..end_y {
+                    let dest_row = fb_base.add(y * pitch_pixels + self.dirty.min_x);
+                    let src_row = buf.as_ptr().add(y * width + self.dirty.min_x);
+                    let copy_width = (self.dirty.max_x - self.dirty.min_x + 1).min(width - self.dirty.min_x);
+                    
+                    core::ptr::copy_nonoverlapping(src_row, dest_row, copy_width);
                 }
             }
+            self.dirty.reset();
         }
     }
 

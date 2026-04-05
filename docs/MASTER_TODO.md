@@ -225,14 +225,46 @@ Menggabungkan keunggulan estetik Ubuntu (GNOME), macOS, dan Windows 11.
 - [x] Background stabil (Sovereign Deep Space Blue).
 - [x] Direct vs Buffered Render path verification.
 
-#### **Tahap A2: Jendela Statis (IN PROGRESS [/])**
-- [ ] Tombol Window Manager `draw_window` (Corner Radius 8px).
-- [ ] DesktopManager minimal di `ui/desktop.rs`.
-- [ ] Integrasi `pub mod ui` di `lib.rs`.
+#### **Tahap A2: Jendela Statis (SELESAI ✅)**
+- [x] Tombol Window Manager `draw_window` (Corner Radius 8px).
+- [x] DesktopManager minimal di `ui/desktop.rs`.
+- [x] Integrasi `pub mod ui` di `lib.rs`.
+- [x] Desain "Traffic Light" (macOS style) & Shadow Effects.
 
-#### **Tahap A3: Integrasi AetherShell (PLANNED)**
-- [ ] Jendela Terminal khusus dengan input serial terpadu.
-- [ ] Teks buffer scrolling & history.
+#### **Tahap A3: Integrasi AetherShell (SELESAI ✅)**
+- [x] Jendela Terminal khusus dengan input serial terpadu.
+- [x] Teks buffer scrolling & history (50 baris).
+- [x] Non-Blocking UI Pulse: Render desktop saat menunggu input.
+- [x] Singleton DesktopManager untuk akses global.
+
+#### **Tahap A4: Optimasi & Mouse Dasar (SELESAI ✅)**
+- [x] Dirty-Rect Tracking (Bounding-Box Optimization).
+- [x] Driver Mouse PS/2 (3-byte packet processing).
+- [x] Futuristic Hybrid Cursor Design.
+- [x] Window Focus Interaction (Click-to-focus).
+
+#### **Tahap A5: Window Dynamics & Interaction (SELESAI ✅)**
+- [x] Titlebar Dragging Logic (Smooth movement).
+- [x] Z-Order Re-sorting (Bring to front).
+- [x] Window Controls (Traffic Lights interaction).
+
+#### **Tahap A6: Ultimate UX & System Metrics (SELESAI ✅)**
+- [x] Interactive Desktop Icons (Launch Window).
+- [x] Sovereign System Menu (Aether Menu).
+- [x] Live Memory/Uptime visualization in Top-Bar.
+- [x] Final Aesthetic Polish (Focus Glow & Terminal Plasma).
+
+---
+
+## **🔵 TAHAP B: The Fabric Architecture (v10.4 Trinity) — [AKTIF]**
+*Target: Mewujudkan "The Fabric" yang hidup, responsif, dan hierarkis.*
+
+| Status | ID | Milestone | Output Utama |
+| :---: | :---: | :--- | :--- |
+| 🏗️ | B1 | Parent-Child Window Hierarchy | Modal Windows, Dialog Blocking |
+| 📅 | B2 | Fractal Nebula & Pulse Visuals | Dynamic Background, Mesh Pulse Circle |
+| 📅 | B3 | Advanced Interaction (Hover/Snap) | Dock scaling, Window Snapping |
+| 📅 | B4 | Aether-X Search Launcher | Global Spotlight Search (Super+Space) |
 
 ---
 

@@ -59,6 +59,7 @@ pub unsafe fn map_lfb_identity(phys_addr: u64, size_bytes: usize) {
 
         let pml4_entry = &mut (*pml4).entries[pml4_index];
         if !pml4_entry.is_present() {
+            // [SOVEREIGN RESTORATION] In Identity Mode (VA=PA), symbolic address is physical address
             let pdpt_phys = &LFB_PDPT as *const X86PageTable as u64;
             pml4_entry.0 = X86Entry::PRESENT | X86Entry::WRITABLE;
             pml4_entry.set_addr(pdpt_phys);
@@ -68,6 +69,7 @@ pub unsafe fn map_lfb_identity(phys_addr: u64, size_bytes: usize) {
         let pdpt_entry = &mut (*pdpt).entries[pdpt_index];
 
         if !pdpt_entry.is_present() {
+            // [SOVEREIGN RESTORATION] Mapping PDPT -> PD
             let pd_phys = &LFB_PD as *const X86PageTable as u64;
             pdpt_entry.0 = X86Entry::PRESENT | X86Entry::WRITABLE;
             pdpt_entry.set_addr(pd_phys);

@@ -57,9 +57,9 @@ impl Ps2Keyboard {
             let mut config = inb(DATA_PORT); io_wait();
             
             config &= !(1 << 0); // Disable IRQ1 (we poll)
-            config &= !(1 << 1); // Disable IRQ2
+            config &= !(1 << 1); // Disable IRQ2 (we poll mouse too)
             config &= !(1 << 4); // [SUPREME POWER] Enable Port 1 Clock
-            config &= !(1 << 5); // [SUPREME POWER] Enable Port 2 Clock
+            config &= !(1 << 5); // [SUPREME POWER] Enable Port 2 Clock (MOUSE)
             config |= 1 << 6;    // Enable Translation (Set 2 to 1)
             
             while inb(STATUS_PORT) & 0x02 != 0 { io_wait(); }
@@ -177,4 +177,73 @@ impl Ps2Keyboard {
     }
 }
 
+pub struct Ps2Mouse {
+    enabled: bool,
+    buffer: [u8; 3],
+    index: usize,
+}
+
+impl Ps2Mouse {
+    pub const fn new() -> Self {
+        #[allow(clippy::redundant_static_lifetimes)]
+        Self { enabled: false, buffer: [0; 3], index: 0 }
+    }
+
+    pub fn init(&mut self) {
+        unsafe {
+            // [SUPREME MOUSE INIT] Give Port 2 attention
+            while inb(STATUS_PORT) & 0x02 != 0 { io_wait(); }
+            outb(STATUS_PORT, 0xA8); io_wait(); // Enable Port 2 (Auxiliary Device)
+
+            // Enable Mouse Data Reporting
+            while inb(STATUS_PORT) & 0x02 != 0 { io_wait(); }
+            outb(STATUS_PORT, 0xD4); io_wait(); // Next byte goes to mouse
+            while inb(STATUS_PORT) & 0x02 != 0 { io_wait(); }
+            outb(DATA_PORT, 0xF4); io_wait();   // Enable Reporting
+
+            // Flush potential ACK (0xFA)
+            let mut timeout = 1000;
+            while inb(STATUS_PORT) & 0x01 != 0 && timeout > 0 {
+                let _ = inb(DATA_PORT);
+                io_wait();
+                timeout -= 1;
+            }
+        }
+        self.enabled = true;
+    }
+
+    pub fn poll(&mut self) -> Option<InputEvent> {
+        if !self.enabled { return None; }
+        unsafe {
+            let status = inb(STATUS_PORT);
+            // Mouse data has bit 5 set in status port (along with bit 0 for data ready)
+            if status & 0x01 != 0 && status & 0x20 != 0 {
+                let b = inb(DATA_PORT);
+                self.buffer[self.index] = b;
+                self.index += 1;
+
+                if self.index == 3 {
+                    self.index = 0;
+                    let flags = self.buffer[0];
+                    let mut dx = self.buffer[1] as i32;
+                    let mut dy = self.buffer[2] as i32;
+
+                    // Handle sign bits for relative movement
+                    if (flags & (1 << 4)) != 0 { dx |= !0xFF; }
+                    if (flags & (1 << 5)) != 0 { dy |= !0xFF; }
+
+                    // Button states from flags byte
+                    let left = (flags & 0x01) != 0;
+                    let right = (flags & 0x02) != 0;
+                    let middle = (flags & 0x04) != 0;
+
+                    return Some(InputEvent::Mouse { dx, dy, left, right, middle });
+                }
+            }
+            None
+        }
+    }
+}
+
 pub static mut KEYBOARD: Ps2Keyboard = Ps2Keyboard::new();
+pub static mut MOUSE: Ps2Mouse = Ps2Mouse::new();

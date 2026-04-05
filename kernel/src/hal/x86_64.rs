@@ -246,7 +246,19 @@ impl X86Platform {
             }
         }
 
-        // Path B: Serial COM1 (for QEMU stdio / terminal interaction)
+        // Path B: PS/2 Mouse (v10.3 Supreme Interactivity)
+        unsafe {
+            while let Some(event) = crate::drivers::input::ps2::MOUSE.poll() {
+                if let InputEvent::Mouse { dx, dy, left, .. } = event {
+                    // Dispatch to DesktopManager Singleton
+                    let desktop_lock = crate::ui::DesktopManager::get_instance();
+                    let mut desktop = desktop_lock.lock();
+                    desktop.update_mouse(dx, dy, left);
+                }
+            }
+        }
+
+        // Path C: Serial COM1 (for QEMU stdio / terminal interaction)
         while SERIAL.has_data() {
             let c = SERIAL.receive();
             self.process_input_byte(c);
@@ -396,7 +408,10 @@ impl Platform for X86Platform {
         SERIAL.init();
         // Very-early diagnostic banner to verify serial/VGA output
         self.puts("[EARLY] HAL init: serial/VGA initialized\r\n");
-        unsafe { crate::drivers::input::ps2::KEYBOARD.init(); }
+        unsafe { 
+            crate::drivers::input::ps2::KEYBOARD.init(); 
+            crate::drivers::input::ps2::MOUSE.init();
+        }
         self.init_ps2_keyboard_minimal();
         self.puts("X86_64 HAL Initialized (v10.3 Supreme Grade)\n");
     }

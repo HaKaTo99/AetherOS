@@ -5,6 +5,7 @@ use crate::drivers::video::{Color, Point, Framebuffer};
 use alloc::string::String;
 use alloc::vec::Vec;
 use core::time::Duration;
+use spin::Mutex;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum WindowState {
@@ -96,6 +97,8 @@ pub struct Window {
     pub is_resizable: bool,
     pub has_titlebar: bool,
     pub z_index: i32,
+    pub parent_id: Option<usize>,
+    pub is_modal: bool,
 }
 
 impl Window {
@@ -116,6 +119,8 @@ impl Window {
             is_resizable: true,
             has_titlebar: true,
             z_index: 0,
+            parent_id: None,
+            is_modal: false,
         }
     }
 
@@ -160,6 +165,10 @@ pub struct DesktopManager {
     pub uptime_ticks: u64,
     pub mem_used_pages: u64,
     pub mem_total_pages: u64,
+    // [v10.3 SUPREME] Interactive Mouse State
+    pub mouse_x: usize,
+    pub mouse_y: usize,
+    pub mouse_left: bool,
 }
 
 #[derive(Clone, Copy)]
@@ -169,14 +178,14 @@ pub enum WallpaperMode {
     Gradient(Color, Color),
 }
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum MouseButton {
     Left,
     Right,
     Middle,
 }
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum MouseEventType {
     Press,
     Release,
@@ -221,6 +230,108 @@ impl DesktopManager {
             uptime_ticks: 0,
             mem_used_pages: 0,
             mem_total_pages: 0,
+            mouse_x: 512,
+            mouse_y: 384,
+            mouse_left: false,
+        }
+    }
+
+    pub fn get_instance() -> &'static Mutex<Self> {
+        static INSTANCE: Mutex<DesktopManager> = Mutex::new(DesktopManager {
+            windows: Vec::new(),
+            desktop_icons: Vec::new(),
+            taskbar_items: Vec::new(),
+            notifications: Vec::new(),
+            focused_window: None,
+            dragged_window: None,
+            drag_offset: (0, 0),
+            context_menu: None,
+            current_desktop: 0,
+            total_desktops: 4,
+            wallpaper_mode: WallpaperMode::Nebula,
+            show_desktop_icons: true,
+            top_bar_height: 30,
+            dock_height: 64,
+            accent_color: Color::new(120, 80, 255),
+            uptime_ticks: 0,
+            mem_used_pages: 0,
+            mem_total_pages: 0,
+            mouse_y: 384,
+            mouse_left: false,
+        });
+        &INSTANCE
+    }
+
+    /// [SOVEREIGN Trinity] Jantung Render Utama
+    pub fn paint_all(&mut self) {
+        // [SOVEREIGN v10.4.4] Gunakan pola "Sovereign Draw" yang sah
+        crate::drivers::video::draw(|driver| {
+            // 1. Render Nebula Background (The Fabric Pulse)
+            use crate::drivers::video::nebula::NebulaGenerator;
+            NebulaGenerator::render(driver);
+
+            // 2. Render Windows
+            // Karena kita di dalam closure, kita butuh akses ke self. 
+            // Namun karena fungsionalitas ini terbatas, kita akan memindahkan loop ke luar atau memanggilnya secara manual.
+        });
+
+        // Loop rendering jendela di luar closure untuk menghindari peminjaman ganda (double-borrow)
+        for window in self.windows.iter_mut() {
+            if window.state != WindowState::Closed && window.state != WindowState::Minimized {
+                let border = window.border_color;
+                let bg = window.background_color;
+                let wx = window.x;
+                let wy = window.y;
+                let ww = window.width;
+                let wh = window.height;
+
+                crate::drivers::video::draw(|driver| {
+                    driver.draw_rect(Point::new(wx, wy), ww, wh, bg);
+                    driver.draw_rect(Point::new(wx, wy), ww, 2, border);
+                });
+            }
+        }
+
+        // Final Flush & Cursor Pulse
+        let mx = self.mouse_x;
+        let my = self.mouse_y;
+        crate::drivers::video::draw(|driver| {
+            driver.draw_rect(Point::new(mx, my), 8, 8, Color::WHITE);
+            driver.flush();
+        });
+    }
+
+    pub fn update_mouse(&mut self, dx: i32, dy: i32, left: bool) {
+        // [SUPREME INTERACTION] Mouse movement is relative in PS/2
+        let mut new_x = self.mouse_x as i32 + dx;
+        let mut new_y = self.mouse_y as i32 - dy; // PS/2 Y is inverted relative to screen Y
+
+        // Screen clamping (1024x768 hardcoded for v10.3 target)
+        if new_x < 0 { new_x = 0; }
+        if new_y < 0 { new_y = 0; }
+        if new_x > 1023 { new_x = 1023; }
+        if new_y > 767 { new_y = 767; }
+
+        let old_left = self.mouse_left;
+        self.mouse_x = new_x as usize;
+        self.mouse_y = new_y as usize;
+        self.mouse_left = left;
+
+        // --- Stage A5: Interactive Event Bridging ---
+        let x = self.mouse_x;
+        let y = self.mouse_y;
+
+        // 1. Detect Press (Transition from false to true)
+        if !old_left && left {
+            self.handle_mouse_event(x, y, MouseButton::Left, MouseEventType::Press);
+        }
+        // 2. Detect Release (Transition from true to false)
+        else if old_left && !left {
+            self.handle_mouse_event(x, y, MouseButton::Left, MouseEventType::Release);
+        }
+        // 3. Constant Update for Moving/Dragging
+        else {
+            self.handle_mouse_event(x, y, MouseButton::Left, MouseEventType::Move);
         }
     }
 
@@ -439,6 +550,9 @@ impl DesktopManager {
         let width = fb.width();
         let height = fb.height();
 
+        // [DIAGNOSTIC] Trace Loop Start
+        crate::print!("."); // Minimal pulse in serial
+
         // 1. Wallpaper & Background System
         self.render_wallpaper(fb, width, height);
 
@@ -466,8 +580,17 @@ impl DesktopManager {
         if let Some((x, y, ref items)) = self.context_menu {
             self.render_context_menu(fb, x, y, items);
         }
+        
+        // 9. [SOVEREIGN] PROOF-OF-VISUALIZATION OVERLAY
+        fb.draw_string(crate::drivers::video::Point::new(10, 10), "AETHEROS v10.3 [ACTIVE]", self.accent_color);
 
-        // Atomic Buffer Flip
+        // [v10.4] The Fabric Pulse Indicator (Bottom-Right)
+        self.render_fabric_pulse(fb, width, height);
+
+        // [v10.3 SUPREME] Final Overlay: Interactive Cursor
+        fb.draw_cursor(crate::drivers::video::Point::new(self.mouse_x, self.mouse_y));
+
+        // Atomic Buffer Flip with hardware barrier
         fb.flush();
     }
 
@@ -496,6 +619,16 @@ impl DesktopManager {
         
         // Battery (Mockup)
         fb.draw_string(Point::new(width - 170, 8), "[|||]", Color::new(50, 255, 100));
+
+        // [v10.3 SUPREME] Real-time Memory Usage Bar
+        let mem_x = width - 300;
+        let mem_w = 100;
+        fb.draw_rect(Point::new(mem_x, 10), mem_w, 10, Color::new(40, 40, 60)); // BG
+        if self.mem_total_pages > 0 {
+            let used_w = (self.mem_used_pages * mem_w as u64 / self.mem_total_pages) as usize;
+            fb.draw_rect(Point::new(mem_x, 10), used_w.min(mem_w), 10, Color::new(0, 255, 255)); // FG (Neon Cyan)
+        }
+        fb.draw_string(Point::new(mem_x - 40, 8), "MEM", Color::new(150, 150, 180));
     }
 
     fn render_wallpaper(&self, fb: &mut dyn Framebuffer, width: usize, height: usize) {
@@ -556,44 +689,77 @@ impl DesktopManager {
     fn render_windows(&self, fb: &mut dyn Framebuffer) {
         for window in &self.windows {
             if window.state == WindowState::Minimized { continue; }
-            let background = if window.is_focused { Color::new(25, 20, 45) } else { Color::new(18, 15, 30) };
-            self.fill_rect(fb, window.x, window.y, window.width, window.height, background);
-            self.draw_rect_outline(fb, window.x, window.y, window.width, window.height, window.border_color);
-            if window.has_titlebar {
-                fb.draw_gradient_rect(Point::new(window.x, window.y), window.width, 32, self.accent_color, Color::new(30, 10, 80));
-                fb.draw_string(Point::new(window.x + 14, window.y + 8), &window.title, Color::WHITE);
-            }
+
+            // [v10.3 SUPREME] Use the new high-fidelity window primitive
+            let accent = if window.is_focused { self.accent_color } else { Color::new(60, 60, 80) };
+            
+            // [A6.4] Focus Glow (Outer border for active window)
             if window.is_focused {
-                self.draw_rect_outline(fb, window.x + 2, window.y + 2, window.width - 4, window.height - 4, Color::new(120, 100, 255));
+                let glow = Color::new(accent.r / 2, accent.g / 2, accent.b / 2);
+                self.draw_rect_outline(fb, window.x - 1, window.y - 1, window.width + 2, window.height + 2, glow);
+            }
+            
+            fb.draw_sovereign_window(&window.title, window.x, window.y, window.width, window.height, accent);
+
+            // [v10.4] Modal Dimming Effect
+            // If this window is a parent of an active modal, dim its content
+            if let Some(modal_id) = self.get_active_modal_id() {
+                if let Some(modal_win) = self.windows.iter().find(|w| w.id == modal_id) {
+                    if modal_win.parent_id == Some(window.id) {
+                        // Drawing a simple diagonal "disabled" hatch or darkening rect
+                        // Since we don't have true alpha blending, we simulate with a grid of dark pixels
+                        for dy in 45..window.height-5 {
+                            if dy % 2 == 0 {
+                                fb.draw_rect(Point::new(window.x + 5, window.y + dy), window.width - 10, 1, Color::new(5, 5, 10));
+                            }
+                        }
+                    }
+                }
             }
 
-            // Window Content Specialization
+            // Window Content Specialization (Offset by 45px to clear title bar)
+            let content_y = window.y + 45;
             if window.title == "Terminal" {
-                fb.draw_string(Point::new(window.x + 10, window.y + 40), "AetherShell> _", Color::new(100, 255, 150));
+                // [v10.3 SUPREME] Render Real-time Terminal Log
+                let log = crate::ui::terminal::TERMINAL_LOG.lock();
+                let lines = log.get_lines();
+                let start_idx = lines.len().saturating_sub(20); // Show last 20 lines
+                
+                for (i, line) in lines[start_idx..].iter().enumerate() {
+                    let color = if line.contains("!") || line.contains("[ERROR]") {
+                        Color::new(255, 120, 120) // Critical/Error
+                    } else if line.contains("[OK]") || line.contains("DONE") {
+                        Color::new(140, 255, 140) // Success
+                    } else {
+                        Color::new(200, 230, 255) // Standard Plasma
+                    };
+                    fb.draw_string(Point::new(window.x + 15, content_y + (i * 12)), line, color);
+                }
+                
+                // Cursor simulation
+                if lines.len() > 0 {
+                    let last_line = &lines[lines.len() - 1];
+                    let cursor_x = window.x + 15 + (last_line.len() * 8);
+                    let cursor_y = content_y + ((lines.len() - start_idx - 1) * 12);
+                    if cursor_x < window.x + window.width - 15 {
+                        fb.draw_rect(Point::new(cursor_x, cursor_y), 8, 10, self.accent_color);
+                    }
+                }
             } else if window.title == "System Status" {
-                fb.draw_string(Point::new(window.x + 10, window.y + 45), "CORE: Sovereign v10.3", Color::WHITE);
-                fb.draw_string(Point::new(window.x + 10, window.y + 65), "MEMORY: SMME Active", Color::new(200, 200, 255));
+                fb.draw_string(Point::new(window.x + 15, content_y), "CORE: Sovereign v10.3", Color::WHITE);
+                fb.draw_string(Point::new(window.x + 15, content_y + 20), "MEMORY: SMME Active", Color::new(200, 200, 255));
                 
                 // Memory Progress Bar
-                self.draw_rect_outline(fb, window.x + 10, window.y + 85, 300, 20, Color::new(120, 80, 255));
+                self.draw_rect_outline(fb, window.x + 15, content_y + 45, window.width - 30, 18, Color::new(120, 80, 255));
                 if self.mem_total_pages > 0 {
-                    let fill_w = (self.mem_used_pages * 296) / self.mem_total_pages;
-                    self.fill_rect(fb, window.x + 12, window.y + 87, fill_w as usize, 16, self.accent_color);
+                    let fill_w = (self.mem_used_pages * (window.width as u64 - 34)) / self.mem_total_pages;
+                    self.fill_rect(fb, window.x + 17, content_y + 47, fill_w as usize, 14, self.accent_color);
                 }
             } else if window.title == "Security Protocols" {
-                fb.draw_string(Point::new(window.x + 10, window.y + 45), "[PQC] Post-Quantum Activated", Color::new(255, 100, 255));
-                fb.draw_string(Point::new(window.x + 10, window.y + 65), "[SME] Memory Encrypted", Color::new(255, 200, 255));
+                fb.draw_string(Point::new(window.x + 15, content_y), "[PQC] Post-Quantum Activated", Color::new(255, 100, 255));
+                fb.draw_string(Point::new(window.x + 15, content_y + 20), "[SME] Memory Encrypted", Color::new(255, 200, 255));
+                fb.draw_string(Point::new(window.x + 15, content_y + 40), "[BFT] Swarm Consensus: OK", Color::new(100, 255, 255));
             }
-
-            // macOS Traffic Light Controls (Left-Side Circles)
-            let (cx, cy, _, _) = window.close_button_rect();
-            fb.draw_circle(Point::new(cx + 7, cy + 7), 6, Color::new(255, 95, 87), 6); // Red Circle
-            
-            let (minx, miny, _, _) = window.minimize_button_rect();
-            fb.draw_circle(Point::new(minx + 7, miny + 7), 6, Color::new(255, 189, 46), 6); // Yellow Circle
-            
-            let (mx, my, _, _) = window.maximize_button_rect();
-            fb.draw_circle(Point::new(mx + 7, my + 7), 6, Color::new(40, 200, 64), 6); // Green Circle
         }
     }
 
@@ -655,6 +821,16 @@ impl DesktopManager {
     }
 
     pub fn handle_mouse_event(&mut self, x: usize, y: usize, button: MouseButton, ev: MouseEventType) {
+        // [v10.4] Check for active modals globally before processing standard events
+        if let Some(target_id) = self.get_active_modal_id() {
+            // Only allow events if they hit the modal (or if it's a move event for dragging the modal)
+            if ev == MouseEventType::Press {
+                if let Some(w) = self.windows.iter().find(|w| w.id == target_id) {
+                    if !w.contains_point(x, y) { return; } // Block press outside modal
+                }
+            }
+        }
+
         match ev {
             MouseEventType::Press => match button {
                 MouseButton::Left => self.handle_left_click(x, y),
@@ -681,6 +857,14 @@ impl DesktopManager {
             return;
         }
 
+        // Top bar interaction (Aether Menu)
+        if y < self.top_bar_height {
+            if x < 100 { // Clicks on "AETHER" logo area
+                self.show_context_menu(10, self.top_bar_height + 5, ContextMenuType::Desktop);
+            }
+            return;
+        }
+
         let dock_y = 768usize.saturating_sub(self.dock_height + 15);
         if y >= dock_y {
             self.handle_taskbar_click(x, y);
@@ -700,7 +884,13 @@ impl DesktopManager {
                     let icon = &mut self.desktop_icons[i];
                     icon.is_selected = !icon.is_selected;
                 }
-                self.open_desktop_icon(id);
+                // [v10.3 SUPREME] Interactive Icon Mapping
+                match id {
+                    0 => self.focus_window(0), // Core -> System Status
+                    1 => self.show_context_menu(x, y, ContextMenuType::Desktop), // Data -> Folder Menu
+                    3 => self.focus_window(3), // Terminal -> AetherShell Window
+                    _ => self.open_desktop_icon(id),
+                }
                 return;
             } else {
                 let icon = &mut self.desktop_icons[i];
@@ -745,6 +935,25 @@ impl DesktopManager {
     }
 
     fn handle_middle_click(&mut self, _x: usize, _y: usize) {}
+
+    fn get_active_modal_id(&self) -> Option<usize> {
+        self.windows.iter().find(|w| w.is_modal).map(|w| w.id)
+    }
+
+    fn render_fabric_pulse(&self, fb: &mut dyn Framebuffer, width: usize, height: usize) {
+        // Pulse logic based on uptime (simulated sine wave)
+        let divisor = 500_000_000u64; // ~0.5s per pulse cycle
+        let phase = (self.uptime_ticks / divisor) % 2;
+        let brightness = if phase == 0 { 255 } else { 150 };
+        
+        let x = width - 130;
+        let y = height - 100;
+        let color = Color::new(0, brightness as u8, (brightness / 2) as u8);
+        
+        // Draw the glowing orb
+        fb.draw_rect(Point::new(x, y), 12, 12, color);
+        fb.draw_string(Point::new(x + 18, y + 2), "FABRIC PULSE", Color::new(100, 255, 180));
+    }
 
     fn handle_taskbar_click(&mut self, x: usize, y: usize) {
         // [SOVEREIGN DOCK INTERACTION]

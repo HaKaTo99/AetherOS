@@ -60,6 +60,9 @@ pub trait Framebuffer: Send + Sync {
     /// Draw a single pixel
     fn draw_pixel(&mut self, p: Point, color: Color);
     
+    /// Mark a region as dirty (for optimized flushing)
+    fn mark_dirty(&mut self, _p: Point, _w: usize, _h: usize) {}
+    
     /// Get screen width
     fn width(&self) -> usize;
     
@@ -173,25 +176,98 @@ pub trait Framebuffer: Send + Sync {
         }
     }
 
-    /// Draw a professional window (Standard OS Grade)
-    fn draw_window(&mut self, title: &str, x: usize, y: usize, w: usize, h: usize, border_color: Color) {
-        // [SOVEREIGN UI] 1. Semi-transparent-look Background
-        self.draw_rect(Point::new(x, y), w, h, Color::new(0, 10, 20));
+    /// Draw a filled rectangle with rounded corners (8px default)
+    fn draw_rounded_rect(&mut self, p: Point, w: usize, h: usize, radius: usize, color: Color) {
+        let max_w = self.width();
+        let max_h = self.height();
+        let r = radius as i32;
+
+        for y in 0..h {
+            for x in 0..w {
+                let px = p.x + x;
+                let py = p.y + y;
+                if px >= max_w || py >= max_h { continue; }
+
+                let mut draw = true;
+                let dx = x as i32;
+                let dy = y as i32;
+                let fw = w as i32;
+                let fh = h as i32;
+
+                // Top-left corner
+                if dx < r && dy < r {
+                    if (dx - r) * (dx - r) + (dy - r) * (dy - r) > r * r { draw = false; }
+                }
+                // Top-right corner
+                else if dx >= fw - r && dy < r {
+                    if (dx - (fw - r)) * (dx - (fw - r)) + (dy - r) * (dy - r) > r * r { draw = false; }
+                }
+                // Bottom-left corner
+                else if dx < r && dy >= fh - r {
+                    if (dx - r) * (dx - r) + (dy - (fh - r)) * (dy - (fh - r)) > r * r { draw = false; }
+                }
+                // Bottom-right corner
+                else if dx >= fw - r && dy >= fh - r {
+                    if (dx - (fw - r)) * (dx - (fw - r)) + (dy - (fh - r)) * (dy - (fh - r)) > r * r { draw = false; }
+                }
+
+                if draw {
+                    self.draw_pixel(Point::new(px, py), color);
+                }
+            }
+        }
+    }
+
+    /// [v10.3 SUPREME] Draw a high-fidelity Sovereign Window with rounded corners and traffic lights
+    fn draw_sovereign_window(&mut self, title: &str, x: usize, y: usize, w: usize, h: usize, accent: Color) {
+        // 1. Shadow/Outer Glow (Simulated with a slightly larger rounded rect)
+        self.draw_rounded_rect(Point::new(x, y), w, h, 10, Color::new(5, 5, 10));
         
-        // 2. Window Body
-        self.draw_rect(Point::new(x + 2, y + 2), w - 4, h - 4, Color::new(0, 5, 10));
+        // 2. Main Body (Dark Glass / Deep Space)
+        self.draw_rounded_rect(Point::new(x + 1, y + 1), w - 2, h - 2, 8, Color::new(10, 15, 25));
         
-        // 3. Header Bar (using gradient if available, or simple rect)
-        self.draw_gradient_rect(Point::new(x + 2, y + 2), w - 4, 25, Color::new(0, 40, 60), Color::BLACK);
+        // 3. Title Bar (Gradient)
+        self.draw_gradient_rect(Point::new(x + 2, y + 2), w - 4, 32, Color::new(25, 30, 45), Color::new(10, 15, 25));
+
+        // 4. [macOS STYLE] Traffic Light Controls (Red, Yellow, Green)
+        let btn_y = y + 12;
+        let btn_start_x = x + 15;
+        self.draw_circle(Point::new(btn_start_x, btn_y), 6, Color::new(255, 95, 87), 6);    // Close (Red)
+        self.draw_circle(Point::new(btn_start_x + 20, btn_y), 6, Color::new(255, 189, 46), 6); // Min (Yellow)
+        self.draw_circle(Point::new(btn_start_x + 40, btn_y), 6, Color::new(40, 201, 64), 6);  // Max (Green)
+
+        // 5. Title Text (Centered Crystal)
+        let title_x = x + (w / 2) - (title.len() * 4);
+        self.draw_string(Point::new(title_x, y + 12), title, Color::WHITE);
         
-        // 4. Title Text
-        self.draw_string(Point::new(x + 10, y + 8), title, Color::WHITE);
-        
-        // 5. Border Glow
-        self.draw_rect(Point::new(x, y), w, 2, border_color); // Top
-        self.draw_rect(Point::new(x, y + h - 2), w, 2, border_color); // Bottom
-        self.draw_rect(Point::new(x, y), 2, h, border_color); // Left
-        self.draw_rect(Point::new(x + w - 2, y), 2, h, border_color); // Right
+        // 6. Accent Border (Top Glow)
+        self.draw_rect(Point::new(x + 10, y), w - 20, 1, accent);
+    }
+
+    /// [v10.3 SUPREME] Draw a modern futuristic mouse cursor (Hybrid Arrow/Core)
+    fn draw_cursor(&mut self, p: Point) {
+        let white = Color::new(255, 255, 255);
+        let accent = Color::new(100, 255, 255);
+        let x = p.x;
+        let y = p.y;
+        let (max_w, max_h) = (self.width(), self.height());
+
+        // Modern Arrow Shape (Software Rendered)
+        for i in 0..15 {
+            for j in 0..i {
+                if x + j < max_w && y + i < max_h {
+                    self.draw_pixel(Point::new(x + j, y + i), white);
+                }
+            }
+        }
+        // Futuristic Core (Neon Cyan)
+        for i in 4..8 {
+            for j in 1..i-2 {
+                if x + j < max_w && y + i < max_h {
+                    self.draw_pixel(Point::new(x + j, y + i), accent);
+                }
+            }
+        }
     }
 }
 

@@ -47,6 +47,8 @@
 //! - No double-free or use-after-free violations
 //! - Correct size is passed to `deallocate()`
 
+extern crate alloc;
+use alloc::format;
 use core::sync::atomic::{AtomicUsize, AtomicBool, Ordering};
 use core::alloc::{GlobalAlloc, Layout};
 use core::ptr;
@@ -227,9 +229,14 @@ impl MemoryPool {
     }
 
 
-    /// Phase 2: Commit physical memory
+    /// Commit physical memory
     pub fn commit(&self, addr: usize, size: usize) -> Result<(), AllocationError> {
         if addr < self.base || addr + size > self.base + self.size {
+            // [SOVEREIGN] Special case: Allow commit to MMIO regions (like LFB) 
+            // if they are clearly outside the heap range.
+            if addr >= 0x0800_0000 {
+                return Ok(());
+            }
             return Err(AllocationError::InvalidAddress);
         }
         
@@ -240,7 +247,20 @@ impl MemoryPool {
             self.committed.store(offset + size, Ordering::Release);
         }
         
-        Ok(())
+        Ok(());
+    }
+
+    /// [SOVEREIGN] Formal Video Region Mapping (VA=PA for v10.4-alpha)
+    pub fn map_video_region(&self, phys_addr: usize, size: usize) -> usize {
+        // Log the mapping call to internal security audit
+        crate::enterprise::audit::log_security(
+            crate::enterprise::audit::AuditSeverity::Info,
+            "SMME",
+            &format!("Sovereign Video Mapping Registered: 0x{:X} ({} MB)", phys_addr, size / (1024*1024))
+        );
+        
+        // In VA=PA identity mode, return the address directly
+        phys_addr
     }
 
     /// Military Grade: Check canaries for a given data address

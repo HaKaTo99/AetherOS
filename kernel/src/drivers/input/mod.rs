@@ -31,7 +31,7 @@ pub enum KeyState {
 #[derive(Debug, Clone, Copy)]
 pub enum InputEvent {
     Keyboard { key: KeyCode, state: KeyState },
-    Mouse { dx: i32, dy: i32, buttons: u8 },
+    Mouse { dx: i32, dy: i32, left: bool, right: bool, middle: bool },
     Touch { x: u32, y: u32, id: u8, pressed: bool },
     Raw(u8), // [SUPREME DIAGNOSTIC] Raw scancode bypass
 }

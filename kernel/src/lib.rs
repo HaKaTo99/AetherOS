@@ -373,52 +373,45 @@ pub fn kernel_init(info_ptr: usize) {
                 lfb.init(); // Map Physical Memory
                 lfb.set_cursor_pos(crate::drivers::video::Point::new(0, 0));
 
+                // [v10.3 SUPREME] Register as global driver for draw calls
+                crate::drivers::video::register_driver(lfb);
+
                 crate::println!("[v10.3] LFB: framebuffer init addr=0x{:X}, pitch={}, bpp={}, type={}",
                     fb.address, fb.pitch, fb.bpp, fb.fb_type);
 
                 use crate::ui::desktop::DesktopManager;
-                crate::println!("[DESKTOP] Initializing Sovereign Desktop Environment v1.0...");
-                let mut desktop = DesktopManager::new();
-                desktop.initialize_supreme_desktop();
-                
-                // --- SDE v1.0 High-Fidelity Rendering Loop ---
-                platform.puts("[DESKTOP] Visual Sovereignty Active. Press ESC to exit to Shell.\r\n");
-                
-                loop {
-                    // 1. Update Kernel Metrics (Uptime & Memory)
-                    desktop.uptime_ticks = platform.get_ticks();
+                crate::println!("[DESKTOP] Initializing Sovereign Desktop Environment v1.1...");
+                let desktop_lock = DesktopManager::get_instance();
+                {
+                    let mut desktop = desktop_lock.lock();
+                    desktop.initialize_supreme_desktop();
                     
+                    // Update initial metrics
+                    desktop.uptime_ticks = platform.get_ticks();
                     let mem_stats = crate::memory::get_usage_stats();
                     desktop.mem_used_pages = mem_stats.used_pages;
                     desktop.mem_total_pages = mem_stats.total_pages;
 
-                    // 2. Render Frame (Liquid-Smooth 60FPS simulation)
-                    desktop.render(lfb);
-
-                    // 3. Check for Exit Request (Escape key)
-                    if platform.has_data() {
-                        let c = platform.get_char();
-                        if c == 27 { // ESC
-                            platform.puts("[DESKTOP] Exiting to Shell...\r\n");
-                            break;
-                        }
-                    }
-
-                    // 4. Yield CPU to prevent QEMU lockup
-                    platform.cpu_relax();
+                    // [SOVEREIGN v10.4.4] FORCE INITIAL PAINT
+                    desktop.paint_all();
                 }
-
-                crate::drivers::video::register_driver(lfb);
+                
+                platform.puts("[DESKTOP] Visual Sovereignty Active. Launching Unified Shell...\r\n");
+                
+                // [v10.3 SUPREME] The Shell loop now hosts the UI pulse in read_line
+                use crate::enterprise::AetherShell;
+                AetherShell::start();
+                return;
             } else {
                 use crate::drivers::video::vga::VgaTextDriver;
                 let vga = Box::leak(Box::new(VgaTextDriver::new()));
                 crate::drivers::video::register_driver(vga);
+                
+                use crate::enterprise::AetherShell;
+                platform.puts("AetherShell (VGA Mode)>\r\n");
+                AetherShell::start();
+                return;
             }
-
-            use crate::enterprise::AetherShell;
-            platform.puts("AetherShell>\r\n");
-            AetherShell::start();
-            return;
         }
 
         // --- Phase 39.1: Supreme Graphical Splash Initialization ---

@@ -93,7 +93,12 @@ pub struct ConsoleWriter;
 
 impl core::fmt::Write for ConsoleWriter {
     fn write_str(&mut self, s: &str) -> core::fmt::Result {
+        // [SOVEREIGN TEE] 1. Serial/Physical Console
         get_platform().puts(s);
+
+        // 2. UI/Visual Terminal Buffer
+        crate::ui::terminal::log_to_terminal(s);
+        
         Ok(())
     }
 }

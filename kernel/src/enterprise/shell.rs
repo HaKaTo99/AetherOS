@@ -450,6 +450,19 @@ fn execute_command(platform: &dyn hal::Platform, cmd: &str) -> CommandExec {
                 CommandExec::Handled
             }
             "exit" => CommandExec::Exit,
+            "test-modal" => {
+                let mut desktop = crate::ui::DesktopManager::get_instance().lock();
+                let mut modal = crate::ui::Window::new(
+                    44, "System Security Confirm", 
+                    350, 200, 320, 150, 
+                    crate::drivers::video::Color::new(255, 100, 100)
+                );
+                modal.parent_id = Some(3); // Attach to Terminal (ID 3)
+                modal.is_modal = true;
+                desktop.add_window(modal);
+                crate::println!("[v10.4] Modal test dialog spawned.");
+                CommandExec::Handled
+            }
             _ => CommandExec::Unknown,
         },
         CommandPolicy::BridgeDenied => {
@@ -467,8 +480,24 @@ fn read_line(platform: &dyn hal::Platform) -> LineInput {
     let mut line = LineInput::new();
 
     loop {
+        // [v10.3 SUPREME] Non-blocking UI Refresh Pulse + Metrics Update
+        let desktop_lock = crate::ui::DesktopManager::get_instance();
+        {
+            let mut desktop = desktop_lock.lock();
+            desktop.uptime_ticks = platform.get_ticks();
+            let mem_stats = crate::memory::get_usage_stats();
+            desktop.mem_used_pages = mem_stats.used_pages;
+            desktop.mem_total_pages = mem_stats.total_pages;
+            
+            crate::drivers::video::draw(|fb| {
+                desktop.render(fb);
+            });
+        }
+
         let raw = platform.get_char();
         if raw == 0 || raw == 0xFF {
+            // Give CPU a tiny break
+            platform.cpu_relax();
             continue;
         }
 
