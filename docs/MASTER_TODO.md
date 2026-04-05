@@ -200,30 +200,55 @@ Seluruh fase modular telah mencapai stabilitas mutlak 100% melalui **Surgical Ha
 
 ---
 
-## 🌌 **TAHAP IV: THE SOVEREIGN SINGULARITY (FUTURE ROADMAP)**
-*Lompatan evolusi menuju komputasi cerdas yang otonom dan terdistribusi.*
+## 🌌 **TAHAP IV: THE SOVEREIGN SINGULARITY & TRINITY DESKTOP**
 
-### **Phase 30: Evolution Core & OneMind** (✅ Seeded)
-- [x] **Sub-Fase 30.1**: Evolution Core Seeded – Perintah `evolve` aktif.
-- [x] **Sub-Fase 30.2**: OneMind – Sensory integration seeded in `lib.rs`.
-- [ ] **Sub-Fase 30.3**: Restoration: Planetary knowledge preservation protocol (PLANNED).
+**"One Mind, One Mesh, One Desktop to Rule Them All."** 🔥
 
-### **Phase 31: Preemptive Multitasking Kernel (v10.4 – PRIORITAS UTAMA)** [/]
-- [ ] **Sub-Fase 31.0**: Implementasi Global Scheduler dan Context Switcher untuk tugas paralel.
-- [ ] **Sub-Fase 31.1**: Neural Link Interface Diagnostic – Integrasi BCI sensorik.
+### **Visi Desain: "The Trinity Desktop" (SDE v2.0)**
+Menggabungkan keunggulan estetik Ubuntu (GNOME), macOS, dan Windows 11.
 
-### **Phase 32: Distributed Mesh & Self-Healing** [ ]
-- [ ] **Sub-Fase 32.0**: Auto-Discovery – Protokol penemuan node mesh otomatis tanpa konfigurasi.
-- [ ] **Sub-Fase 32.1**: Byzantine Fault Tolerance (BFT) – Konsensus keamanan tingkat tinggi.
-- [ ] **Sub-Fase 32.2**: Autonomous Process Migration – Migrasi proses otonom versi produksi.
+- **Taskbar terpusat + widget** (Windows 11 Inspired)
+- **Global menu bar di atas** (macOS Inspired)
+- **Workspace / Virtual Desktops** (Ubuntu Inspired)
+- **Jendela dengan sudut membulat & bayangan** (Windows 11/macOS)
+- **Search/Launcher (Aether-X)** (Spotlight Inspired)
 
-### **Phase 33–40: The Singularity v11.0** [ ]
-- [x] Phase 37.0: High-Resolution Graphic Driver (LFB) Implementation [ DONE ]
-- [x] Phase 37.1: Multiboot2 High-Res Header Handshake [ DONE ]
-- [x] Phase 37.2: Software Font Rendering (Cyan Glow) [ DONE ]
-- [x] Phase 38.0: Binary Integrity Sync (v10.3.0 Full Synchronization) [ DONE ]
-- [x] Phase 39.0: Supreme Graphical Splash (v10.4 Preview) [ DONE ]
-- [ ] **Phase 40.0**: **Universal Intelligence Fabric** – Puncak kedaulatan total.
+---
+
+## 📋 **Tahapan Detail Pengembangan AetherOS v10.3 SUPREME**
+
+### 🟢 **Opsi A: Pendekatan Bertahap (REKOMENDASI UTAMA)**
+*Target: Membangun Sovereign Desktop Environment (SDE) secara inkremental.*
+
+#### **Tahap A1: Stabilisasi Framebuffer & Teks (SELESAI ✅)**
+- [x] LFB Identity Mapping (0xFD000000) dengan `PWT`/`PCD` hardening.
+- [x] Background stabil (Sovereign Deep Space Blue).
+- [x] Direct vs Buffered Render path verification.
+
+#### **Tahap A2: Jendela Statis (IN PROGRESS [/])**
+- [ ] Tombol Window Manager `draw_window` (Corner Radius 8px).
+- [ ] DesktopManager minimal di `ui/desktop.rs`.
+- [ ] Integrasi `pub mod ui` di `lib.rs`.
+
+#### **Tahap A3: Integrasi AetherShell (PLANNED)**
+- [ ] Jendela Terminal khusus dengan input serial terpadu.
+- [ ] Teks buffer scrolling & history.
+
+---
+
+### 🟡 **Opsi B: Integrasi Penuh (RISIKO TINGGI)**
+*Target: Menyelesaikan semua fitur SDE v1.1 dalam satu siklus.*
+- [ ] Aether-X Launcher as Center Popup.
+- [ ] Terminal terintegrasi dengan copy-paste.
+- [ ] Network Pulse & Power Sentinel.
+- [ ] Glassmorphism Effects (Alpha Blending).
+
+---
+
+### 🔴 **Opsi C: Fokus Fitur Inti (STABILITAS)**
+- [ ] Preemptive Multitasking (v10.4 Priority).
+- [ ] Self-Healing Mesh Discovery (Beacon v2.0).
+- [ ] PQC Hardening (Dilithium Mandatory).
 
 ---
 
