@@ -33,6 +33,9 @@ pub enum KeyCode {
     Q,
     F11,
     Escape,
+    Char(char),
+    Backspace,
+    Enter,
 }
 
 #[derive(Clone)]
@@ -131,6 +134,9 @@ impl InputManager {
                 KeyCode::Q => DesktopKeyCode::Q,
                 KeyCode::F11 => DesktopKeyCode::F11,
                 KeyCode::Escape => DesktopKeyCode::Escape,
+                KeyCode::Char(c) => DesktopKeyCode::Char(c),
+                KeyCode::Backspace => DesktopKeyCode::Backspace,
+                KeyCode::Enter => DesktopKeyCode::Enter,
                 _ => return, // Ignore unsupported keys
             };
 
@@ -146,7 +152,7 @@ impl InputManager {
     /// Update desktop state (notifications, etc.)
     pub fn update(&mut self) {
         // Clean up expired notifications
-        self.desktop.notifications.retain(|n| {
+        self.desktop.notifications.retain(|_n| {
             // Simplified: assume notifications don't expire in this demo
             true
         });

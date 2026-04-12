@@ -1,0 +1,263 @@
+﻿cargo : warning: profiles for the non root package will be ignored, specify profiles at 
+the workspace root:
+At line:1 char:1
++ cargo check --release > build_errors.txt 2>&1
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (warning: profil...workspace root::String) [] 
+   , RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+package:   D:\GitHub\AetherOS\kernel\Cargo.toml
+workspace: D:\GitHub\AetherOS\Cargo.toml
+warning: patch `serde v1.0.190 (D:\GitHub\AetherOS\patches\serde_patched)` was not used 
+in the crate graph
+help: Check that the patched package version and available features are compatible
+      with the dependency requirements. If the patch has a different version from
+      what is locked in the Cargo.lock file, run `cargo update` to use the new
+      version. This may also occur with an optional dependency that is not enabled.
+    Checking aetheros-kernel v10.3.0 (D:\GitHub\AetherOS\kernel)
+error[E0432]: unresolved import `crate::drivers::video::lfb::LFB_DRIVER`
+ --> kernel\src\scheme\display.rs:5:5
+  |
+5 | use crate::drivers::video::lfb::LFB_DRIVER;
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ no `LFB_DRIVER` in `drivers::video::lfb`
+
+error[E0425]: cannot find value `GLOBAL_TPM` in module `crate::security::tpm`
+   --> kernel\src\lib.rs:388:35
+    |
+388 |             crate::security::tpm::GLOBAL_TPM.lock().init();
+    |                                   ^^^^^^^^^^ not found in `crate::security::tpm`
+
+warning: unused import: `alloc::boxed::Box`
+ --> kernel\src\memory\x86_64_paging.rs:4:5
+  |
+4 | use alloc::boxed::Box;
+  |     ^^^^^^^^^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused import: `crate::net::driver::NetError`
+  --> kernel\src\net\mod.rs:13:5
+   |
+13 | use crate::net::driver::NetError;
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused imports: `PACKAGE_MANAGER`, `PackageManifest`, and `Package`
+ --> kernel\src\ecosystem\store.rs:7:27
+  |
+7 | use crate::runtime::apm::{PACKAGE_MANAGER, Package, PackageManifest};
+  |                           ^^^^^^^^^^^^^^^  ^^^^^^^  ^^^^^^^^^^^^^^^
+
+warning: unused import: `alloc::collections::BTreeMap`
+ --> kernel\src\ecosystem\store.rs:8:5
+  |
+8 | use alloc::collections::BTreeMap;
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `crate::ipc::QuantumBus`
+  --> kernel\src\runtime\apm.rs:10:5
+   |
+10 | use crate::ipc::QuantumBus;
+   |     ^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `crate::bus::quantum_bus::Device`
+  --> kernel\src\runtime\apm.rs:11:5
+   |
+11 | use crate::bus::quantum_bus::Device;
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `CRYPTO_ENGINE`
+ --> kernel\src\runtime\browser.rs:6:31
+  |
+6 | use crate::security::crypto::{CRYPTO_ENGINE, SecurityLevel, QuantumSecurity};
+  |                               ^^^^^^^^^^^^^
+
+warning: unused import: `Capability`
+ --> kernel\src\security\sandbox.rs:7:54
+  |
+7 | use crate::security::capabilities::{SecurityContext, Capability, ClearanceLevel};
+  |                                                      ^^^^^^^^^^
+
+warning: unused import: `Ordering`
+ --> kernel\src\scheme\mod.rs:6:39
+  |
+6 | use core::sync::atomic::{AtomicUsize, Ordering};
+  |                                       ^^^^^^^^
+
+warning: unused import: `spin::Mutex`
+ --> kernel\src\scheme\ai.rs:5:5
+  |
+5 | use spin::Mutex;
+  |     ^^^^^^^^^^^
+
+warning: unused import: `spin::Mutex`
+ --> kernel\src\scheme\display.rs:6:5
+  |
+6 | use spin::Mutex;
+  |     ^^^^^^^^^^^
+
+warning: unused import: `spin::Mutex`
+ --> kernel\src\scheme\net.rs:6:5
+  |
+6 | use spin::Mutex;
+  |     ^^^^^^^^^^^
+
+error[E0599]: no method named `verify_binary_signature` found for struct 
+`spin::MutexGuard<'_, AetherQuantumProvider>` in the current scope
+   --> kernel\src\scheduler\active_objects.rs:395:20
+    |
+395 |         if !crypto.verify_binary_signature(payload, signature) {
+    |                    ^^^^^^^^^^^^^^^^^^^^^^^ method not found in 
+`spin::MutexGuard<'_, AetherQuantumProvider>`
+    |
+    = help: items from traits can only be used if the trait is in scope
+help: trait `QuantumSecurity` which provides `verify_binary_signature` is implemented but 
+not in scope; perhaps you want to import it
+    |
+  4 + use crate::security::crypto::QuantumSecurity;
+    |
+
+warning: unused import: `Framebuffer`
+ --> kernel\src\ui\window.rs:4:36
+  |
+4 | use crate::drivers::video::{Color, Framebuffer};
+  |                                    ^^^^^^^^^^^
+
+warning: unused import: `Framebuffer`
+ --> kernel\src\ui\organic_ui.rs:4:49
+  |
+4 | use crate::drivers::video::{draw, Color, Point, Framebuffer};
+  |                                                 ^^^^^^^^^^^
+
+warning: variable does not need to be mutable
+  --> kernel\src\memory\x86_64_paging.rs:48:9
+   |
+48 |     let mut pml4_phys = get_pml4_phys();
+   |         ----^^^^^^^^^
+   |         |
+   |         help: remove this `mut`
+   |
+   = note: `#[warn(unused_mut)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused variable: `width`
+   --> kernel\src\ui\desktop.rs:484:68
+    |
+484 |     fn render_start_menu_internal(&self, fb: &mut dyn Framebuffer, width: usize, 
+height: usize) {
+    |                                                                    ^^^^^ help: if 
+this is intentional, prefix it with an underscore: `_width`
+    |
+    = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused variable: `parent_id`
+   --> kernel\src\ui\window.rs:130:42
+    |
+130 |     pub fn has_active_modal_child(&self, parent_id: usize) -> bool {
+    |                                          ^^^^^^^^^ help: if this is intentional, 
+prefix it with an underscore: `_parent_id`
+
+warning: unused variable: `n`
+   --> kernel\src\ui\input.rs:149:44
+    |
+149 |         self.desktop.notifications.retain(|n| {
+    |                                            ^ help: if this is intentional, prefix 
+it with an underscore: `_n`
+
+warning: variable does not need to be mutable
+   --> kernel\src\drivers\video\mod.rs:302:9
+    |
+302 |     let mut driver_guard = VIDEO_DRIVER.lock();
+    |         ----^^^^^^^^^^^^
+    |         |
+    |         help: remove this `mut`
+
+warning: unused variable: `packet`
+   --> kernel\src\net\virtio_net.rs:119:28
+    |
+119 |     fn transmit(&mut self, packet: &[u8]) -> NetResult<()> {
+    |                            ^^^^^^ help: if this is intentional, prefix it with an 
+underscore: `_packet`
+
+warning: unused variable: `fd`
+  --> kernel\src\syscall\mod.rs:59:20
+   |
+59 | fn sys_scheme_read(fd: usize, buf_ptr: usize, count: usize) -> isize {
+   |                    ^^ help: if this is intentional, prefix it with an underscore: 
+`_fd`
+
+warning: unused variable: `buf_ptr`
+  --> kernel\src\syscall\mod.rs:59:31
+   |
+59 | fn sys_scheme_read(fd: usize, buf_ptr: usize, count: usize) -> isize {
+   |                               ^^^^^^^ help: if this is intentional, prefix it with 
+an underscore: `_buf_ptr`
+
+warning: unused variable: `count`
+  --> kernel\src\syscall\mod.rs:59:47
+   |
+59 | fn sys_scheme_read(fd: usize, buf_ptr: usize, count: usize) -> isize {
+   |                                               ^^^^^ help: if this is intentional, 
+prefix it with an underscore: `_count`
+
+warning: unused variable: `fd`
+  --> kernel\src\syscall\mod.rs:66:21
+   |
+66 | fn sys_scheme_write(fd: usize, buf_ptr: usize, count: usize) -> isize {
+   |                     ^^ help: if this is intentional, prefix it with an underscore: 
+`_fd`
+
+warning: unused variable: `buf_ptr`
+  --> kernel\src\syscall\mod.rs:66:32
+   |
+66 | fn sys_scheme_write(fd: usize, buf_ptr: usize, count: usize) -> isize {
+   |                                ^^^^^^^ help: if this is intentional, prefix it with 
+an underscore: `_buf_ptr`
+
+warning: unused variable: `count`
+  --> kernel\src\syscall\mod.rs:66:48
+   |
+66 | fn sys_scheme_write(fd: usize, buf_ptr: usize, count: usize) -> isize {
+   |                                                ^^^^^ help: if this is intentional, 
+prefix it with an underscore: `_count`
+
+warning: unnecessary `unsafe` block
+   --> kernel\src\syscall\mod.rs:143:5
+    |
+143 |     unsafe {
+    |     ^^^^^^ unnecessary `unsafe` block
+    |
+    = note: `#[warn(unused_unsafe)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused variable: `expected_root`
+  --> kernel\src\runtime\apm.rs:64:45
+   |
+64 |     fn verify_integrity(&self, data: &[u8], expected_root: [u8; 32]) -> bool {
+   |                                             ^^^^^^^^^^^^^ help: if this is 
+intentional, prefix it with an underscore: `_expected_root`
+
+warning: unused variable: `buffer`
+  --> kernel\src\scheme\ai.rs:20:32
+   |
+20 |     fn read(&self, _id: usize, buffer: &mut [u8]) -> Result<usize, SchemeError> {
+   |                                ^^^^^^ help: if this is intentional, prefix it with 
+an underscore: `_buffer`
+
+warning: unused variable: `buffer`
+  --> kernel\src\scheme\net.rs:22:32
+   |
+22 |     fn read(&self, _id: usize, buffer: &mut [u8]) -> Result<usize, SchemeError> {
+   |                                ^^^^^^ help: if this is intentional, prefix it with 
+an underscore: `_buffer`
+
+warning: unused variable: `stack`
+  --> kernel\src\scheme\net.rs:24:21
+   |
+24 |         if let Some(stack) = get_network_stack() {
+   |                     ^^^^^ help: if this is intentional, prefix it with an 
+underscore: `_stack`
+
+Some errors have detailed explanations: E0425, E0432, E0599.
+For more information about an error, try `rustc --explain E0425`.
+warning: `aetheros-kernel` (lib) generated 31 warnings
+error: could not compile `aetheros-kernel` (lib) due to 3 previous errors; 31 warnings 
+emitted

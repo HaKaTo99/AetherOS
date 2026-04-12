@@ -34,6 +34,7 @@ impl Message {
 }
 
 use crate::arch::context::CpuContext;
+use crate::security::crypto::QuantumSecurity;
 
 /// Active Object (Task)
 pub struct ActiveObject {
@@ -347,6 +348,67 @@ impl ActiveObjectScheduler {
         );
         
         Ok(id)
+    }
+
+    /// [PHASE 34 / AUDIT] Create task from a signed Aether Resource Module (.arm)
+    pub fn create_task_from_module(&mut self, priority: u8, module_ptr: *const u8, size: usize) -> Result<u32, ()> {
+        // [AUDIT: TOCTOU Prevention] Mandatory copy to kernel-private buffer before verification
+        if size < 80 || size > 2 * 1024 * 1024 { // 2MB Hard limit for sovereign modules
+            crate::enterprise::audit::log_security(
+                crate::enterprise::audit::AuditSeverity::Critical,
+                "Scheduler", "Sovereignty Violation: Invalid module size or boundary."
+            );
+            return Err(());
+        }
+
+        // [MILITARY GRADE] Allocate secure kernel buffer
+        let mut secure_buf = alloc::vec![0u8; size];
+        unsafe {
+            core::ptr::copy_nonoverlapping(module_ptr, secure_buf.as_mut_ptr(), size);
+        }
+
+        // 1. Verify Packet Format (Magic: AETHEROS)
+        if &secure_buf[0..8] != b"AETHEROS" {
+            crate::enterprise::audit::log_security(
+                crate::enterprise::audit::AuditSeverity::Critical,
+                "Scheduler", "Sovereignty Violation: Invalid ARM magic. Access Denied."
+            );
+            return Err(());
+        }
+
+        let payload_len = u64::from_le_bytes(secure_buf[8..16].try_into().unwrap()) as usize;
+        
+        // [AUDIT] Boundary verification
+        if 80 + payload_len > size {
+            crate::enterprise::audit::log_security(
+                crate::enterprise::audit::AuditSeverity::Critical,
+                "Scheduler", "Sovereignty Violation: Payload length exceeds module boundary."
+            );
+            return Err(());
+        }
+
+        let signature = &secure_buf[16..80];
+        let payload = &secure_buf[80..(80 + payload_len)];
+
+        // 2. Perform PQC Signature Verification (Sovereign Engine)
+        use crate::security::crypto::CRYPTO_ENGINE;
+        let crypto = CRYPTO_ENGINE.lock();
+        if !crypto.verify_binary_signature(payload, signature) {
+            crate::enterprise::audit::log_security(
+                crate::enterprise::audit::AuditSeverity::Critical,
+                "Scheduler", "PQC SIGNATURE VIOLATION: Execution blocked for untrusted binary."
+            );
+            return Err(());
+        }
+
+        crate::enterprise::audit::log_security(
+            crate::enterprise::audit::AuditSeverity::Info,
+            "Scheduler", "Binary Sovereignty Verified (PQC). Starting Sovereign Task..."
+        );
+
+        // 3. Create task using the verified and SECURE payload
+        let entry_point = payload.as_ptr() as u64; 
+        self.create_task(priority, entry_point)
     }
 
     /// Make task ready

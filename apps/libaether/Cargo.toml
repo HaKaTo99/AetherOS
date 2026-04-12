@@ -1,0 +1,7 @@
+[package]
+name = "libaether"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+# No dependencies for the core standard library

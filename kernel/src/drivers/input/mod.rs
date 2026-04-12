@@ -17,6 +17,9 @@ pub enum KeyCode {
     Escape, Enter, Space, Backspace, Tab, CapsLock,
     LShift, RShift, LCtrl, RCtrl, LAlt, RAlt,
     Up, Down, Left, Right,
+    // Numpad Keys
+    Kp0, Kp1, Kp2, Kp3, Kp4, Kp5, Kp6, Kp7, Kp8, Kp9,
+    KpDot, KpDiv, KpMul, KpMinus, KpPlus, KpEnter,
     // Symbols
     Minus, Equal, LBracket, RBracket, Backslash, Semicolon, Quote, Comma, Period, Slash,
     Unknown(u8),
@@ -31,7 +34,7 @@ pub enum KeyState {
 #[derive(Debug, Clone, Copy)]
 pub enum InputEvent {
     Keyboard { key: KeyCode, state: KeyState },
-    Mouse { dx: i32, dy: i32, left: bool, right: bool, middle: bool },
+    Mouse { dx: i32, dy: i32, dz: i32, left: bool, right: bool, middle: bool },
     Touch { x: u32, y: u32, id: u8, pressed: bool },
     Raw(u8), // [SUPREME DIAGNOSTIC] Raw scancode bypass
 }

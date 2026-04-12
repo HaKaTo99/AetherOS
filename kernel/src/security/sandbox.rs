@@ -4,7 +4,7 @@
 //! and other Ring-3 Untrusted payloads, preventing them from accessing
 //! the bare metal HAL layer or Enclaves.
 
-use crate::security::capabilities::{SecurityContext, Capability, ClearanceLevel};
+use crate::security::capabilities::{SecurityContext, ClearanceLevel};
 use crate::enterprise::audit::{AuditSeverity, log_security};
 
 pub struct PayloadSandbox {

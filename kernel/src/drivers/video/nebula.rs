@@ -22,21 +22,23 @@ impl NebulaGenerator {
             fb.draw_rect(Point::new(0, y), w, 1, row_color);
         }
 
-        // 2. Render Nebula Clouds (Sparse Fractal Approximation)
-        for y in (0..h).step_by(4) {
-            for x in (0..w).step_by(4) {
-                let noise = Self::pseudo_noise(x, y);
-                if noise > 130 {
-                    let intensity = noise - 130;
-                    let r = intensity.saturating_mul(2).min(200);
-                    let g = (intensity / 2).min(100);
-                    let b = intensity.saturating_mul(3).min(255);
-                    let cloud = Color::new(r as u8, g as u8, b as u8);
+        // 2. Render Nebula Clouds (Recursive-like noise for depth)
+        for y in (0..h).step_by(3) {
+            for x in (0..w).step_by(3) {
+                let n1 = Self::pseudo_noise(x, y);
+                let n2 = Self::pseudo_noise(x / 2, y / 2);
+                let combined = (n1 as u16 + n2 as u16) / 2;
+                
+                if combined > 140 {
+                    let intensity = (combined - 140) as u8;
+                    // Multi-hued gas (Violet, Blue, Cyan)
+                    let r = intensity.saturating_mul(2);
+                    let g = (intensity / 3) as u8;
+                    let b = intensity.saturating_mul(3);
+                    let cloud = Color::new(r, g, b);
                     
-                    // Render 2x2 block for speed
                     fb.draw_pixel(Point::new(x, y), cloud);
                     if x + 1 < w { fb.draw_pixel(Point::new(x + 1, y), cloud); }
-                    if y + 1 < h { fb.draw_pixel(Point::new(x, y + 1), cloud); }
                 }
             }
         }

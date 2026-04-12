@@ -3,7 +3,7 @@
 
 use alloc::string::String;
 use alloc::vec::Vec;
-use crate::security::crypto::{CRYPTO_ENGINE, SecurityLevel, QuantumSecurity};
+use crate::security::crypto::{SecurityLevel, QuantumSecurity};
 use crate::ui::display::VectorRenderer;
 
 /// A secure browser instance with rendering capability

@@ -18,7 +18,8 @@ pub mod terminal;     // [v10.3] Sovereign Terminal Buffer
 
 // Re-export core APIs for ergonomic access and compatibility
 pub use widget::Rect;
-pub use window::WINDOW_MANAGER;
-pub use desktop::{DesktopManager, Window, MouseEventType, MouseButton};
+pub use window::{Window, WindowManager, WindowState, AppType, WINDOW_MANAGER};
+pub use desktop::{DesktopManager, MouseEventType, MouseButton};
 pub use input::{InputManager, init as init_input, get_manager as get_input_manager};
 pub use terminal::TERMINAL_LOG;
+

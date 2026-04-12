@@ -7,6 +7,39 @@
 use core::arch::global_asm;
 
 global_asm!(r#"
+    .section .multiboot_header, "a"
+    .align 8
+multiboot_header_v2:
+    .long 0xe85250d6                /* magic: multiboot2 */
+    .long 0                         /* architecture: i386 (protected mode) */
+    .long multiboot_header_v2_end - multiboot_header_v2 /* header_length */
+    /* checksum = -(magic + arch + length) mod 2^32 */
+    .long -(0xe85250d6 + 0 + (multiboot_header_v2_end - multiboot_header_v2))
+
+
+
+    .align 8
+    /* Tag 5: Framebuffer Tag (Request 1920x1200x32) */
+    .short 5                        /* type */
+    .short 0                        /* flags */
+    .long 20                        /* size */
+    .long 1920                      /* width */
+    .long 1200                      /* height */
+    .long 32                        /* depth */
+
+    .align 8
+    /* End tag */
+    .short 0                        /* type */
+    .short 0                        /* flags */
+    .long 8                         /* size */
+multiboot_header_v2_end:
+
+    .align 8
+multiboot_header_v1:
+    .long 0x1BADB002                /* magic: multiboot1 */
+    .long 0x00000003                /* flags: ALIGN + MEMINFO (Standard ELF) */
+    .long -(0x1BADB002 + 0x00000003) /* checksum */
+
     .section .note.pvh, "a"
     .align 4
 pvh_note_start:
@@ -16,54 +49,16 @@ pvh_note_start:
     .ascii "Xen\0"               /* name */
     .long _multiboot_entry       /* desc: physical entry point */
 
-    .section .multiboot_header, "ax"
-.code32
-.global _multiboot_entry
-
-/* ---- Multiboot 2 Header ---- */
-
-.align 8
-mb2_header_start:
-    .long 0xe85250d6                              /* magic */
-    .long 0                                       /* architecture: i386 */
-    .long mb2_header_end - mb2_header_start       /* header length */
-    .long -(0xe85250d6 + 0 + (mb2_header_end - mb2_header_start)) /* checksum */
-
-    /* entry address tag */
-    .align 8
-    .word 3    /* type: entry address */
-    .word 0    /* flags */
-    .long 12   /* size */
-    .long _multiboot_entry
-
-    /* framebuffer request tag (Sovereign High-Res) */
-    .align 8
-    .word 5    /* type: framebuffer request */
-    .word 0    /* flags */
-    .long 20   /* size */
-    .long 1024 /* width */
-    .long 768  /* height */
-    .long 32   /* depth */
-
-    /* end tag */
-    .align 8
-    .word 0
-    .word 0
-    .long 8
-mb2_header_end:
-
     .section .boot_code, "ax"
 .code32
+.global _multiboot_entry
 _multiboot_entry:
     cli
     mov esp, offset stack_top
 
-    /* Save Multiboot2 magic (eax) and info pointer (ebx) before we clobber registers */
+    /* Save Multiboot magic and info pointer */
     mov [mb2_magic], eax
     mov [mb2_info], ebx
-
-    /* Check Multiboot magic (0x36d76289 for MB2, or 0x336ec578 for PVH entry) */
-    /* For simplicity, we assume we want to boot if we reached here from a known loader */
 
     /* 1. Setup Paging (Identity Map first 1GB) */
     /* Map P4[0] -> P3 */
@@ -72,6 +67,7 @@ _multiboot_entry:
     mov [p4_table], eax
 
     /* Map P3[0] -> P2 */
+    mov eax, offset p3_table
     mov eax, offset p2_table
     or eax, 0b11 /* present + writable */
     mov [p3_table], eax
@@ -82,7 +78,9 @@ _multiboot_entry:
     mov eax, 0x200000 /* 2MB */
     mul ecx
     or eax, 0b10000011 /* present + writable + huge */
+    /* WRITE 64-BIT PDE (EDX is high dword from MUL) */
     mov [p2_table + ecx * 8], eax
+    mov [p2_table + ecx * 8 + 4], edx
     inc ecx
     cmp ecx, 512
     jne .map_p2
@@ -113,14 +111,6 @@ _multiboot_entry:
 
 .code64
 _start_64:
-    /* Set all segments to 0 */
-    mov ax, 0
-    mov ss, ax
-    mov ds, ax
-    mov es, ax
-    mov fs, ax
-    mov gs, ax
-
     /* Jump to kernel_main_grub defined in main.rs */
     mov rax, offset kernel_main_grub
     mov rdi, [mb2_magic]

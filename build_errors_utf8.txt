@@ -1,0 +1,111 @@
+﻿cargo : warning: profiles for the non root package will be ignored, specify profiles at 
+the workspace root:
+At line:1 char:1
++ cargo +nightly check --manifest-path kernel/Cargo.toml --target x86_6 ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (warning: profil...workspace root::String) [] 
+   , RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+package:   D:\GitHub\AetherOS\kernel\Cargo.toml
+workspace: D:\GitHub\AetherOS\Cargo.toml
+warning: patch `serde v1.0.190 (D:\GitHub\AetherOS\patches\serde_patched)` was not used 
+in the crate graph
+help: Check that the patched package version and available features are compatible
+      with the dependency requirements. If the patch has a different version from
+      what is locked in the Cargo.lock file, run `cargo update` to use the new
+      version. This may also occur with an optional dependency that is not enabled.
+    Checking aetheros-kernel v10.3.0 (D:\GitHub\AetherOS\kernel)
+error[E0433]: cannot find type `NetError` in this scope
+  --> kernel\src\net\virtio_net.rs:97:24
+   |
+97 |             return Err(NetError::NotReady);
+   |                        ^^^^^^^^ use of undeclared type `NetError`
+   |
+help: consider importing this enum through its public re-export
+   |
+ 4 + use crate::net::NetError;
+   |
+
+error[E0433]: cannot find type `NetError` in this scope
+   --> kernel\src\net\virtio_net.rs:120:43
+    |
+120 |         if !self.initialized { return Err(NetError::NotReady); }
+    |                                           ^^^^^^^^ use of undeclared type `NetError`
+    |
+help: consider importing this enum through its public re-export
+    |
+  4 + use crate::net::NetError;
+    |
+
+error[E0433]: cannot find type `NetError` in this scope
+   --> kernel\src\net\virtio_net.rs:126:45
+    |
+126 |         if !self.can_receive() { return Err(NetError::RxBufferEmpty); }
+    |                                             ^^^^^^^^ use of undeclared type 
+`NetError`
+    |
+help: consider importing this enum through its public re-export
+    |
+  4 + use crate::net::NetError;
+    |
+
+error[E0433]: cannot find type `Box` in this scope
+   --> kernel\src\lib.rs:361:35
+    |
+361 |             mgr.register("debug", Box::new(crate::scheme::debug::DebugScheme));
+    |                                   ^^^ use of undeclared type `Box`
+    |
+help: consider importing one of these structs
+    |
+ 18 + use alloc::boxed::Box;
+    |
+ 18 + use heapless::pool::Box;
+    |
+ 18 + use heapless::pool::singleton::Box;
+    |
+
+error[E0433]: cannot find type `Box` in this scope
+   --> kernel\src\lib.rs:362:36
+    |
+362 |             mgr.register("fabric", Box::new(crate::scheme::fabric::FabricScheme));
+    |                                    ^^^ use of undeclared type `Box`
+    |
+help: consider importing one of these structs
+    |
+ 18 + use alloc::boxed::Box;
+    |
+ 18 + use heapless::pool::Box;
+    |
+ 18 + use heapless::pool::singleton::Box;
+    |
+
+error[E0433]: cannot find type `Box` in this scope
+   --> kernel\src\lib.rs:363:37
+    |
+363 |             mgr.register("display", 
+Box::new(crate::scheme::display::DisplayScheme::new()));
+    |                                     ^^^ use of undeclared type `Box`
+    |
+help: consider importing one of these structs
+    |
+ 18 + use alloc::boxed::Box;
+    |
+ 18 + use heapless::pool::Box;
+    |
+ 18 + use heapless::pool::singleton::Box;
+    |
+
+error[E0433]: cannot find type `Box` in this scope
+   --> kernel\src\lib.rs:364:33
+    |
+364 |             mgr.register("net", Box::new(crate::scheme::net::NetScheme::new()));
+    |                                 ^^^ use of undeclared type `Box`
+    |
+help: consider importing one of these structs
+    |
+ 18 + use alloc::boxed::Box;
+    |
+ 18 + use heapless::pool::Box;
+    |
+ 18 + use heapless::pool::singleton::Box;

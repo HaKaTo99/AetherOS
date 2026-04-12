@@ -7,7 +7,11 @@ pub const SYS_READ: usize = 0;
 pub const SYS_WRITE: usize = 1;
 pub const SYS_OPEN: usize = 2;
 pub const SYS_CLOSE: usize = 3;
+pub const SYS_SCHEME_OPEN: usize = 10;
+pub const SYS_SCHEME_READ: usize = 11;
+pub const SYS_SCHEME_WRITE: usize = 12;
 pub const SYS_EXIT: usize = 60;
+pub const SYS_SPAWN: usize = 100;
 pub const SYS_AI_SYNC: usize = 500; // [NEW] Phase 27.x Cognitive Sync
 
 /// Generic System Call Handler
@@ -31,9 +35,36 @@ pub fn syscall_handler(call_num: usize, arg1: usize, arg2: usize, arg3: usize) -
     match call_num {
         SYS_WRITE => sys_write(arg1, arg2, arg3),
         SYS_EXIT => sys_exit(arg1),
+        SYS_SCHEME_OPEN => sys_scheme_open(arg1, arg2, arg3),
+        SYS_SCHEME_READ => sys_scheme_read(arg1, arg2, arg3),
+        SYS_SCHEME_WRITE => sys_scheme_write(arg1, arg2, arg3),
+        SYS_SPAWN => sys_spawn(arg1, arg2, arg3), // (ptr_to_arm, size, priority)
         SYS_AI_SYNC => sys_ai_sync(arg1), // Professional Orchestration
         _ => -1, // ENOSYS
     }
+}
+
+/// sys_scheme_open(uri_ptr, uri_len, flags)
+fn sys_scheme_open(uri_ptr: usize, uri_len: usize, flags: usize) -> isize {
+    unsafe {
+        let uri = core::str::from_utf8(core::slice::from_raw_parts(uri_ptr as *const u8, uri_len)).unwrap_or("");
+        match crate::scheme::open(uri, flags) {
+            Ok((_, id)) => id as isize,
+            Err(_) => -1,
+        }
+    }
+}
+
+/// sys_scheme_read(fd, buf_ptr, count)
+fn sys_scheme_read(_fd: usize, _buf_ptr: usize, _count: usize) -> isize {
+    // Basic routing (assuming fd maps to a scheme resource)
+    // Implementation would involve a proper FD-to-Resource map
+    -1 
+}
+
+/// sys_scheme_write(fd, buf_ptr, count)
+fn sys_scheme_write(_fd: usize, _buf_ptr: usize, _count: usize) -> isize {
+    -1
 }
 
 /// write(fd, buf, count)
@@ -105,4 +136,16 @@ fn sys_ai_sync(options: usize) -> isize {
     }
     
     0 // Success
+}
+
+/// [PHASE 34 / AUDIT] spawn(ptr_to_arm_module, size, priority)
+fn sys_spawn(arm_ptr: usize, size: usize, priority: usize) -> isize {
+    let module_ptr = arm_ptr as *const u8;
+    
+    use crate::SCHEDULER;
+    let mut sched = SCHEDULER.lock();
+    match sched.create_task_from_module(priority as u8, module_ptr, size) {
+        Ok(id) => id as isize,
+        Err(_) => -1, // EPERM/EAUTH
+    }
 }

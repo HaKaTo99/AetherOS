@@ -24,6 +24,19 @@ pub trait Platform: Sync {
     fn get_char(&self) -> u8;
     fn has_data(&self) -> bool;
     fn clear(&self);
+    
+    /// [NEW Phase 10.4] Non-blocking character read with timeout
+    /// Returns Some(u8) if character available, None if no input buffered
+    /// Does NOT block - returns immediately
+    fn read_char_nonblocking(&self) -> Option<u8> {
+        // Default implementation: try to read if data available
+        if self.has_data() {
+            // This still uses blocking get_char(), but at least checks first
+            // Platform implementations should override for true non-blocking
+            return Some(self.get_char());
+        }
+        None
+    }
 
     // Default implementation for string output
     fn puts(&self, s: &str) {

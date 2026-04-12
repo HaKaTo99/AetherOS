@@ -49,7 +49,7 @@ global_asm!(
 pub fn init() {
     gdt::init();
     interrupts::init();
-    crate::println!("[x86_64] GDT/IDT Initialized. Stability Guard Active.");
+    crate::println!("GDT/IDT Initialized. Stability Guard Active.");
     // Hardware Memory Encryption check
     sme::SmeContext::enforce_memory_encryption();
 }

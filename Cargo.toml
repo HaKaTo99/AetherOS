@@ -4,10 +4,15 @@ members = [
     "kernel",
     "compiler",
     "booter",
+    "drivers/*",
+    "services/*",
+    "apps/*",
+    "infra/*",
 ]
 
 [patch.crates-io]
 bitvec = { path = "patches/bitvec/bitvec" }
+serde = { path = "patches/serde_patched" }
 
 
 [profile.dev]

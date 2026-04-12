@@ -4,6 +4,7 @@ use super::Platform;
 use crate::drivers::input::{InputEvent, KeyCode, KeyState};
 
 use core::arch::asm;
+use core::sync::atomic::{AtomicBool, Ordering};
 
 // --- VGA Buffer ---
 const VGA_BUFFER: usize = 0xb8000;
@@ -14,6 +15,13 @@ pub struct VgaWriter {
     column_position: usize,
     buffer: *mut u16,
     pub color_attribute: u8,
+}
+
+/// [v10.5.18] Legacy VGA Kill Switch (Atomic for Multi-Core Safety)
+pub static VGA_MUTED: AtomicBool = AtomicBool::new(false);
+
+pub fn mute_vga() {
+    VGA_MUTED.store(true, Ordering::SeqCst);
 }
 
 impl VgaWriter {
@@ -53,8 +61,10 @@ impl VgaWriter {
                 let color_byte = self.color_attribute;
                 
                 unsafe {
-                    *self.buffer.add(row * VGA_WIDTH + col) = 
-                        (color_byte as u16) << 8 | (byte as u16);
+                    if !VGA_MUTED.load(Ordering::Relaxed) {
+                        *self.buffer.add(row * VGA_WIDTH + col) = 
+                            (color_byte as u16) << 8 | (byte as u16);
+                    }
                 }
                 
                 self.column_position += 1;
@@ -78,8 +88,10 @@ impl VgaWriter {
         for row in 1..VGA_HEIGHT {
             for col in 0..VGA_WIDTH {
                 unsafe {
-                    let character = *self.buffer.add(row * VGA_WIDTH + col);
-                    *self.buffer.add((row - 1) * VGA_WIDTH + col) = character;
+                    if !VGA_MUTED.load(Ordering::Relaxed) {
+                        let character = *self.buffer.add(row * VGA_WIDTH + col);
+                        *self.buffer.add((row - 1) * VGA_WIDTH + col) = character;
+                    }
                 }
             }
         }
@@ -91,7 +103,9 @@ impl VgaWriter {
         let blank = (self.color_attribute as u16) << 8 | (b' ' as u16);
         for col in 0..VGA_WIDTH {
             unsafe {
-                *self.buffer.add(row * VGA_WIDTH + col) = blank;
+                if !VGA_MUTED {
+                    *self.buffer.add(row * VGA_WIDTH + col) = blank;
+                }
             }
         }
     }
@@ -135,9 +149,11 @@ impl SerialPort {
 
     pub fn clear(&self) {
         unsafe {
-            // Drain receiver
-            while (inb(0x3F8 + 5) & 1) != 0 {
+            // Drain receiver with safety limit (Military Grade Hardening)
+            let mut limit = 0;
+            while (inb(0x3F8 + 5) & 1) != 0 && limit < 1024 {
                 let _ = inb(0x3F8);
+                limit += 1;
             }
         }
     }
@@ -214,46 +230,37 @@ impl X86Platform {
         Self {}
     }
 
-    fn init_ps2_keyboard_minimal(&self) {
-        // [SUPREME COMPATIBILITY] Use the hardened driver init sequence
-        unsafe {
-            crate::drivers::input::ps2::KEYBOARD.init();
-        }
-    }
 
-    /// Pompa data dari hardware ke internal buffer (Phase 10.0 Harmony)
+    /// Pompa data dari hardware ke internal buffer (Phase 10.4 Unified Matrix)
     pub fn poll_hardware(&self) {
-        // Path A: official PS/2 driver events (set-1)
         unsafe {
-            let mut event_limit = 0;
-            while event_limit < 32 {
-                match crate::drivers::input::ps2::KEYBOARD.poll() {
-                    Some(InputEvent::Keyboard { key, state }) if state == KeyState::Pressed => {
-                        if let Some(c) = self.map_keycode_to_ascii(key) {
-                            self.process_input_byte(c);
-                        }
-                        event_limit += 1;
-                    }
-                    Some(InputEvent::Raw(c)) => {
-                        self.process_input_byte(c);
-                        event_limit += 1;
-                    }
-                    Some(_) => {
-                        event_limit += 1;
-                    }
-                    None => break,
-                }
-            }
-        }
+            // [MILITARY GRADE] Drain PS/2 controller until empty
+            // We use a safe limit (128) to prevent being stuck in a loop if hardware malfunctions
+            for _ in 0..128 {
+                let status = inb(0x64);
+                if (status & 0x01) == 0 { break; } // No more data to read
 
-        // Path B: PS/2 Mouse (v10.3 Supreme Interactivity)
-        unsafe {
-            while let Some(event) = crate::drivers::input::ps2::MOUSE.poll() {
-                if let InputEvent::Mouse { dx, dy, left, .. } = event {
-                    // Dispatch to DesktopManager Singleton
-                    let desktop_lock = crate::ui::DesktopManager::get_instance();
-                    let mut desktop = desktop_lock.lock();
-                    desktop.update_mouse(dx, dy, left);
+                if (status & 0x20) != 0 {
+                    // Port 2: MOUSE / TOUCHPAD
+                    if let Some(event) = crate::drivers::input::ps2::MOUSE.poll_with_status(status) {
+                        if let InputEvent::Mouse { dx, dy, left, .. } = event {
+                            // Minimize lock duration for stability
+                            let desktop_lock = crate::ui::DesktopManager::get_instance();
+                            let mut desktop = desktop_lock.lock();
+                            desktop.update_mouse(dx, dy, left);
+                        }
+                    }
+                } else {
+                    // Port 1: KEYBOARD
+                    if let Some(event) = crate::drivers::input::ps2::KEYBOARD.poll_with_status(status) {
+                        if let InputEvent::Keyboard { key, state } = event {
+                            if state == KeyState::Pressed {
+                                if let Some(c) = self.map_keycode_to_ascii(key) {
+                                    self.process_input_byte(c);
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -412,7 +419,7 @@ impl Platform for X86Platform {
             crate::drivers::input::ps2::KEYBOARD.init(); 
             crate::drivers::input::ps2::MOUSE.init();
         }
-        self.init_ps2_keyboard_minimal();
+
         self.puts("X86_64 HAL Initialized (v10.3 Supreme Grade)\n");
     }
 
@@ -439,8 +446,10 @@ impl Platform for X86Platform {
     fn put_char(&self, c: u8) {
         unsafe {
             SERIAL.send(c);
-            let vga_ptr = core::ptr::addr_of_mut!(VGA);
-            (*vga_ptr).write_byte(c);
+            if !VGA_MUTED.load(Ordering::SeqCst) {
+                let vga_ptr = core::ptr::addr_of_mut!(VGA);
+                (*vga_ptr).write_byte(c);
+            }
         }
     }
 
@@ -460,6 +469,17 @@ impl Platform for X86Platform {
     fn has_data(&self) -> bool {
         self.poll_hardware();
         !INPUT_QUEUE.lock().is_empty()
+    }
+    
+    /// [NEW] Non-blocking character read for x86_64 (Phase 10.4)
+    /// Returns immediately with buffered character or None
+    /// Does NOT block = critical for rendering loop integration
+    fn read_char_nonblocking(&self) -> Option<u8> {
+        // Poll hardware once to collect any available input
+        self.poll_hardware();
+        
+        // Try to pop from input queue (non-blocking)
+        INPUT_QUEUE.lock().pop()
     }
 
     fn clear(&self) {

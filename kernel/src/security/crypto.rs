@@ -57,6 +57,7 @@ pub trait QuantumSecurity {
     fn sign(&self, message: &[u8], private_key: &[u8], level: SecurityLevel) -> Vec<u8>;
     fn verify(&self, message: &[u8], signature: &[u8], public_key: &[u8], level: SecurityLevel) -> bool;
     fn verify_trust_anchor(&self, level: SecurityLevel) -> bool;
+    fn verify_binary_signature(&self, payload: &[u8], signature: &[u8]) -> bool;
 }
 
 pub struct AetherQuantumProvider;
@@ -174,6 +175,13 @@ impl QuantumSecurity for AetherQuantumProvider {
                 false
             }
         }
+    }
+
+    /// [PHASE 34] Verify Sovereignty of a Binary Resource Module (.arm)
+    fn verify_binary_signature(&self, payload: &[u8], signature: &[u8]) -> bool {
+        // Using the Sovereign Root Key (Tactical Baseline)
+        let hardware_key = b"AETHEROS_SECURE_FUSE_KEY_001_HARDENED_V10";
+        self.verify(payload, signature, hardware_key, SecurityLevel::Advance)
     }
 }
 

@@ -3,23 +3,26 @@
 
 use alloc::string::String;
 use alloc::vec::Vec;
-use crate::ui::window::{WINDOW_MANAGER, WindowId};
+use crate::ui::window::{Window, WINDOW_MANAGER};
 use crate::ui::widget::Rect;
 use crate::runtime::apm::PACKAGE_MANAGER;
 use crate::ui::display::VectorRenderer;
 
+
 pub struct StoreApp {
-    pub window_id: WindowId,
+    pub window_id: usize,
     pub available_packages: Vec<String>,
 }
 
 impl StoreApp {
     pub fn new() -> Self {
         let mut wm = WINDOW_MANAGER.lock();
-        let window_id = wm.create_window(
-            Rect { x: 100, y: 100, width: 600, height: 400 },
-            "Sovereign Store"
-        );
+        let window_id = wm.add_window(Window::new(
+            0,
+            "Sovereign Store",
+            100, 100, 600, 400,
+            crate::drivers::video::Color::new(100, 180, 255)
+        ));
         
         StoreApp {
             window_id,

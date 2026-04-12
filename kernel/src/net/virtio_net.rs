@@ -57,7 +57,7 @@ pub struct VirtIONet {
     mac: [u8; 6],
     initialized: bool,
     rx_queue: Mutex<VirtQueue>,
-    tx_queue: Mutex<VirtQueue>,
+    _tx_queue: Mutex<VirtQueue>,
 }
 
 impl VirtIONet {
@@ -72,7 +72,7 @@ impl VirtIONet {
                 used: VirtioUsed { flags: 0, idx: 0, ring: [VirtioUsedItem { id: 0, len: 0 }; 256] },
                 last_used_idx: 0,
             }),
-            tx_queue: Mutex::new(VirtQueue {
+            _tx_queue: Mutex::new(VirtQueue {
                 descs: [VirtioDesc { addr: 0, len: 0, flags: 0, next: 0 }; 256],
                 avail: VirtioAvail { flags: 0, idx: 0, ring: [0; 256] },
                 used: VirtioUsed { flags: 0, idx: 0, ring: [VirtioUsedItem { id: 0, len: 0 }; 256] },
@@ -116,7 +116,7 @@ impl NetworkDriver for VirtIONet {
         rx.avail.idx != rx.used.idx
     }
 
-    fn transmit(&mut self, packet: &[u8]) -> NetResult<()> {
+    fn transmit(&mut self, _packet: &[u8]) -> NetResult<()> {
         if !self.initialized { return Err(NetError::NotReady); }
         // Queue the packet into VirtioDesc ring for DMA pickup
         Ok(())

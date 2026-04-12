@@ -44,15 +44,27 @@ impl GlobalMeshController {
         crate::println!("[AI] Initializing Universal Intelligence Layer v10.3 SUPREME...");
     }
     
-    /// Tambahkan peer baru dan log event discovery
-    pub fn add_peer(&mut self, peer_id: [u8; 32]) {
+    /// Tambahkan peer baru dengan penanganan kesalahan (Fault Isolation)
+    pub fn add_peer(&mut self, peer_id: [u8; 32]) -> Result<(), crate::scheme::SchemeError> {
         let platform = hal::get_platform();
+        
+        // Memastikan tidak ada duplikasi peer (Sovereign Integrity Check)
+        if self._peers.contains(&peer_id) {
+             return Err(crate::scheme::SchemeError::Busy);
+        }
+
+        // Penanganan alokasi memori yang aman
+        if self._peers.len() >= 1024 {
+             return Err(crate::scheme::SchemeError::Internal); 
+        }
+
         self._peers.push(peer_id);
         platform.puts("[Mesh] Peer discovered: ");
         for b in &peer_id {
             platform.puts(&format!("{:02X}", b));
         }
         platform.puts("\n");
+        Ok(())
     }
     
     /// Tick mesh controller (called every kernel tick)

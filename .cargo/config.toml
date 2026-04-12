@@ -11,4 +11,5 @@ rustflags = [
     "-C", "relocation-model=static",
     "-C", "code-model=kernel",
     "-C", "no-redzone",
+    "-C", "link-arg=-Tkernel/src/arch/x86_64/fabric_v10_gold.ld",
 ]

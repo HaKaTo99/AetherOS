@@ -137,39 +137,91 @@ impl AetherShell {
         platform.puts("Type 'help' (or 1) for commands.\r\n");
         platform.puts("Shortcuts: 1=help, 2=calc, 3=clear, 0=exit\r\n");
 
+        // [NEW Phase 10.4] Desktop Rendering + Non-Blocking Input Integration
+        let mut cmd_buffer = LineInput::new();
+        let mut prompt_shown = false;
+        let mut frame_count = 0usize;
+        
         loop {
-            platform.puts("\r\nAetherShell> ");
-            let line = read_line(platform);
-            if line.is_empty() {
-                continue;
-            }
-
-            let core = resolve_core_command(line.as_slice());
-            match execute_command(platform, core) {
-                CommandExec::Handled => {}
-                CommandExec::Exit => break,
-                CommandExec::Unknown => {
-                    platform.puts("\r\nUnknown command. Type 'help'.\r\n");
-                    platform.puts("[DEBUG] Raw input: ");
-                    for b in line.as_slice() {
-                        platform.puts(&format!("{:02X} ", b));
-                    }
-                    platform.puts(" | ");
-                    for b in line.as_slice() {
-                        let c = *b as char;
-                        if c.is_ascii_graphic() || c == ' ' {
-                            platform.puts(&format!("{}", c));
-                        } else {
-                            platform.puts(".");
-                        }
-                    }
-                    platform.puts("\r\n");
+            // ✅ [CRITICAL FIX] RENDER DESKTOP EVERY ITERATION (60FPS target)
+            {
+                let mut desktop = crate::ui::desktop::DesktopManager::get_instance().lock();
+                crate::drivers::video::draw(|fb| {
+                    desktop.paint_all(fb);
+                });
+                desktop.uptime_ticks += 1;
+                frame_count += 1;
+                
+                // Debug trace every 300 frames (~5 seconds at 60FPS)
+                if frame_count % 300 == 0 {
+                    // Uncomment for debug: platform.puts("[RENDER] Frames:");
                 }
             }
-        }
 
-        platform.puts("\r\nShutting down...\r\n");
-        platform.shutdown();
+            // Show prompt on first iteration
+            if !prompt_shown {
+                platform.puts("\r\nAetherShell> ");
+                prompt_shown = true;
+            }
+
+            // [NEW] Non-blocking input with immediate return (no blocking)
+            if let Some(byte) = platform.read_char_nonblocking() {
+                let c = byte as char;
+                
+                match c {
+                    // === ENTER: Execute command ===
+                    '\r' | '\n' => {
+                        platform.puts("\r\n");
+                        
+                        if !cmd_buffer.is_empty() {
+                            let core = resolve_core_command(cmd_buffer.as_slice());
+                            match execute_command(platform, core) {
+                                CommandExec::Handled => {}
+                                CommandExec::Exit => return,  // Clean exit from shell
+                                CommandExec::Unknown => {
+                                    platform.puts("\r\nUnknown command. Type 'help'.\r\n");
+                                }
+                            }
+                            cmd_buffer = LineInput::new();  // Clear buffer
+                            prompt_shown = false;  // Will show prompt on next iteration
+                        }
+                    }
+                    
+                    // === BACKSPACE: Delete last character ===
+                    '\x08' | '\x7F' => {
+                        if !cmd_buffer.is_empty() {
+                            cmd_buffer.len -= 1;
+                            platform.puts("\x08 \x08");  // BS, space, BS
+                        }
+                    }
+                    
+                    // === PRINTABLE CHARACTERS ===
+                    c if c.is_ascii_graphic() || c == ' ' => {
+                        if cmd_buffer.len < INPUT_MAX {
+                            cmd_buffer.buf[cmd_buffer.len] = c as u8;
+                            cmd_buffer.len += 1;
+                            platform.put_char(byte);
+                        }
+                    }
+                    
+                    // === CTRL-C: Interrupt (optional) ===
+                    '\x03' => {
+                        platform.puts("^C\r\n");
+                        cmd_buffer = LineInput::new();
+                        prompt_shown = false;
+                    }
+                    
+                    _ => {
+                        // Ignore other characters (escape sequences, etc)
+                    }
+                }
+            } else {
+                // No input available - rendering continues above!
+                // This allows smooth animation while waiting for user input
+                // Optional: Brief yield to prevent CPU spinning
+                // core::hint::spin_loop() is called implicitly by rendering
+            }
+        }
     }
 
     pub fn handle_command(cmd: &str) {
@@ -310,8 +362,15 @@ fn execute_command(platform: &dyn hal::Platform, cmd: &str) -> CommandExec {
                 CommandExec::Handled
             }
             "meshstatus" => {
-                use crate::mesh::GLOBAL_MESH;
-                GLOBAL_MESH.lock().debug_print_status();
+                let _ = crate::scheme::open("fabric:status", 0).map(|(_, id)| {
+                    let mut buf = [0u8; 128];
+                    if let Ok(n) = crate::scheme::SCHEME_MANAGER.lock().get("fabric").unwrap().read(id, &mut buf) {
+                        if let Ok(s) = core::str::from_utf8(&buf[..n]) {
+                            platform.puts("\r\n[SCHEME] fabric:status -> ");
+                            platform.puts(s);
+                        }
+                    }
+                });
                 CommandExec::Handled
             }
             "omni" => {
@@ -335,8 +394,15 @@ fn execute_command(platform: &dyn hal::Platform, cmd: &str) -> CommandExec {
             }
             "onemind" => {
                 platform.puts("\r\n[ONEMIND] Entering Global Fabric Consciousness Dashboard...\r\n");
-                let t_intel = crate::mesh::GLOBAL_MESH.lock().get_total_intelligence_score();
-                platform.puts(&alloc::format!("[ONEMIND] Collective Intelligence: {} TFLOPS\r\n", t_intel));
+                let _ = crate::scheme::open("fabric:intelligence", 0).map(|(_, id)| {
+                    let mut buf = [0u8; 64];
+                    if let Ok(n) = crate::scheme::SCHEME_MANAGER.lock().get("fabric").unwrap().read(id, &mut buf) {
+                         if let Ok(s) = core::str::from_utf8(&buf[..n]) {
+                            platform.puts("[SCHEME] fabric:intelligence -> ");
+                            platform.puts(s);
+                        }
+                    }
+                });
                 platform.puts("[ONEMIND] Active Synchronization: 100% Synced (Zero Compromise)\r\n");
                 platform.puts("[ONEMIND] Intent Prediction: Development Mode (Confident 98%)\r\n");
                 CommandExec::Handled
@@ -476,6 +542,7 @@ fn execute_command(platform: &dyn hal::Platform, cmd: &str) -> CommandExec {
     }
 }
 
+#[allow(dead_code)]
 fn read_line(platform: &dyn hal::Platform) -> LineInput {
     let mut line = LineInput::new();
 

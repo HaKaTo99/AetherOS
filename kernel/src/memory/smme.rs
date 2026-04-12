@@ -247,7 +247,7 @@ impl MemoryPool {
             self.committed.store(offset + size, Ordering::Release);
         }
         
-        Ok(());
+        Ok(())
     }
 
     /// [SOVEREIGN] Formal Video Region Mapping (VA=PA for v10.4-alpha)

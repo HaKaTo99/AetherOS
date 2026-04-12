@@ -80,6 +80,9 @@ pub trait Framebuffer: Send + Sync {
 
     /// Trigger the full graphical dashboard frame (Neo-Vision)
     fn draw_dashboard(&mut self) {}
+
+    /// Get the physical/virtual address of the framebuffer (for MMAP)
+    fn get_fb_ptr(&self) -> usize { 0 }
     
     // --- High-level primitives (default implementations) ---
     
@@ -98,7 +101,7 @@ pub trait Framebuffer: Send + Sync {
     fn draw_char(&mut self, p: Point, c: char, color: Color) {
         if (c as u32) > 0x7F { return; } // Only ASCII for now
         
-        let font_idx = (c as usize) * 8;
+        let font_idx = (c as usize).saturating_sub(16) * 8;
         if font_idx + 8 > crate::drivers::video::font::FONT_8X8.len() { return; }
         
         let bitmap = &crate::drivers::video::font::FONT_8X8[font_idx..font_idx+8];
@@ -176,38 +179,40 @@ pub trait Framebuffer: Send + Sync {
         }
     }
 
-    /// Draw a filled rectangle with rounded corners (8px default)
+    /// Draw a filled rectangle with rounded corners (Optimized Path)
+    /// Draw a filled rectangle with rounded corners (Optimized Path)
     fn draw_rounded_rect(&mut self, p: Point, w: usize, h: usize, radius: usize, color: Color) {
         let max_w = self.width();
         let max_h = self.height();
         let r = radius as i32;
+        let fw = w as i32;
+        let fh = h as i32;
 
         for y in 0..h {
+            let py = p.y + y;
+            if py >= max_h { break; }
+            let dy = y as i32;
+
             for x in 0..w {
                 let px = p.x + x;
-                let py = p.y + y;
-                if px >= max_w || py >= max_h { continue; }
+                if px >= max_w { break; }
+                let dx = x as i32;
 
                 let mut draw = true;
-                let dx = x as i32;
-                let dy = y as i32;
-                let fw = w as i32;
-                let fh = h as i32;
+                
+                // Only perform expensive circle math within the corner areas
+                let in_top_zone = dy < r;
+                let in_bottom_zone = dy >= fh - r;
+                let in_left_zone = dx < r;
+                let in_right_zone = dx >= fw - r;
 
-                // Top-left corner
-                if dx < r && dy < r {
+                if in_top_zone && in_left_zone {
                     if (dx - r) * (dx - r) + (dy - r) * (dy - r) > r * r { draw = false; }
-                }
-                // Top-right corner
-                else if dx >= fw - r && dy < r {
+                } else if in_top_zone && in_right_zone {
                     if (dx - (fw - r)) * (dx - (fw - r)) + (dy - r) * (dy - r) > r * r { draw = false; }
-                }
-                // Bottom-left corner
-                else if dx < r && dy >= fh - r {
+                } else if in_bottom_zone && in_left_zone {
                     if (dx - r) * (dx - r) + (dy - (fh - r)) * (dy - (fh - r)) > r * r { draw = false; }
-                }
-                // Bottom-right corner
-                else if dx >= fw - r && dy >= fh - r {
+                } else if in_bottom_zone && in_right_zone {
                     if (dx - (fw - r)) * (dx - (fw - r)) + (dy - (fh - r)) * (dy - (fh - r)) > r * r { draw = false; }
                 }
 
@@ -219,53 +224,53 @@ pub trait Framebuffer: Send + Sync {
     }
 
     /// [v10.3 SUPREME] Draw a high-fidelity Sovereign Window with rounded corners and traffic lights
-    fn draw_sovereign_window(&mut self, title: &str, x: usize, y: usize, w: usize, h: usize, accent: Color) {
-        // 1. Shadow/Outer Glow (Simulated with a slightly larger rounded rect)
-        self.draw_rounded_rect(Point::new(x, y), w, h, 10, Color::new(5, 5, 10));
+    fn draw_sovereign_window(&mut self, title: &str, x: usize, y: usize, w: usize, h: usize, accent: Color) where Self: Sized {
+        // [v10.5.20] Trinity Composition Bridge: Use high-end glass panel logic
+        crate::ui::organic_ui::OrganicUIDriver::draw_glass_panel(self, x as u32, y as u32, w as u32, h as u32, accent);
         
-        // 2. Main Body (Dark Glass / Deep Space)
-        self.draw_rounded_rect(Point::new(x + 1, y + 1), w - 2, h - 2, 8, Color::new(10, 15, 25));
-        
-        // 3. Title Bar (Gradient)
-        self.draw_gradient_rect(Point::new(x + 2, y + 2), w - 4, 32, Color::new(25, 30, 45), Color::new(10, 15, 25));
+        // [macOS STYLE] Traffic Light Controls (Refined Colors & Anti-aliased simulation)
+        let btn_y = y + 14;
+        let btn_start_x = x + 18;
+        self.draw_circle(Point::new(btn_start_x, btn_y), 6, Color::new(255, 95, 87), 6);    // Close
+        self.draw_circle(Point::new(btn_start_x + 22, btn_y), 6, Color::new(255, 189, 46), 6); // Minimize
+        self.draw_circle(Point::new(btn_start_x + 44, btn_y), 6, Color::new(40, 201, 64), 6);  // Maximize
 
-        // 4. [macOS STYLE] Traffic Light Controls (Red, Yellow, Green)
-        let btn_y = y + 12;
-        let btn_start_x = x + 15;
-        self.draw_circle(Point::new(btn_start_x, btn_y), 6, Color::new(255, 95, 87), 6);    // Close (Red)
-        self.draw_circle(Point::new(btn_start_x + 20, btn_y), 6, Color::new(255, 189, 46), 6); // Min (Yellow)
-        self.draw_circle(Point::new(btn_start_x + 40, btn_y), 6, Color::new(40, 201, 64), 6);  // Max (Green)
-
-        // 5. Title Text (Centered Crystal)
+        // Title Text (Crystal White - Centered on the title bar area)
         let title_x = x + (w / 2) - (title.len() * 4);
-        self.draw_string(Point::new(title_x, y + 12), title, Color::WHITE);
-        
-        // 6. Accent Border (Top Glow)
-        self.draw_rect(Point::new(x + 10, y), w - 20, 1, accent);
+        self.draw_string(Point::new(title_x, y + 14), title, Color::new(220, 240, 255));
     }
 
     /// [v10.3 SUPREME] Draw a modern futuristic mouse cursor (Hybrid Arrow/Core)
     fn draw_cursor(&mut self, p: Point) {
-        let white = Color::new(255, 255, 255);
-        let accent = Color::new(100, 255, 255);
+        let core = Color::WHITE;
+        let pneu = Color::new(0, 255, 255); // Neon Cyan energy
         let x = p.x;
         let y = p.y;
         let (max_w, max_h) = (self.width(), self.height());
 
-        // Modern Arrow Shape (Software Rendered)
-        for i in 0..15 {
+        // [v10.5.20] Energy Core Arrow (Cyberpunk tactical)
+        for i in 0..16 {
             for j in 0..i {
                 if x + j < max_w && y + i < max_h {
-                    self.draw_pixel(Point::new(x + j, y + i), white);
+                    // Outer glow/plasma shadow
+                    if j == i - 1 || j == 0 || i == 15 {
+                        self.draw_pixel(Point::new(x + j, y + i), pneu);
+                    } else if j < 4 && i < 8 {
+                        self.draw_pixel(Point::new(x + j, y + i), core);
+                    } else {
+                        // Semi-transparent trailing effect simulation (dithered)
+                        if (x + j + y + i) % 2 == 0 {
+                            self.draw_pixel(Point::new(x + j, y + i), Color::new(0, 100, 100));
+                        }
+                    }
                 }
             }
         }
-        // Futuristic Core (Neon Cyan)
-        for i in 4..8 {
-            for j in 1..i-2 {
-                if x + j < max_w && y + i < max_h {
-                    self.draw_pixel(Point::new(x + j, y + i), accent);
-                }
+        
+        // Center spine glow
+        for i in 0..12 {
+            if x < max_w && y + i < max_h {
+                self.draw_pixel(Point::new(x, y + i), core);
             }
         }
     }
@@ -275,12 +280,17 @@ pub trait Framebuffer: Send + Sync {
 // Uses spinlock for thread safety
 use spin::Mutex;
 
-static VIDEO_DRIVER: Mutex<Option<&'static mut dyn Framebuffer>> = Mutex::new(None);
+// Wrapper to make raw pointers compatible with Send + Sync requirements
+struct SendableFb(*mut dyn Framebuffer);
+unsafe impl Send for SendableFb {}
+unsafe impl Sync for SendableFb {}
+
+static VIDEO_DRIVER: Mutex<Option<SendableFb>> = Mutex::new(None);
 
 /// Register a video driver as the global display
 pub fn register_driver(driver: &'static mut dyn Framebuffer) {
     let mut driver_guard = VIDEO_DRIVER.lock();
-    *driver_guard = Some(driver);
+    *driver_guard = Some(SendableFb(driver as *mut dyn Framebuffer));
 }
 
 /// Get access to the video driver to draw
@@ -288,8 +298,13 @@ pub fn draw<F>(f: F)
 where
     F: FnOnce(&mut dyn Framebuffer),
 {
-    let mut driver_guard = VIDEO_DRIVER.lock();
-    if let Some(driver) = driver_guard.as_mut() {
-        f(*driver);
+    let driver_guard = VIDEO_DRIVER.lock();
+    if let Some(SendableFb(driver_ptr)) = *driver_guard {
+        // SAFETY: The pointer is valid as long as the driver is registered and we hold the lock
+        unsafe {
+            if !driver_ptr.is_null() {
+                f(&mut *driver_ptr);
+            }
+        }
     }
 }

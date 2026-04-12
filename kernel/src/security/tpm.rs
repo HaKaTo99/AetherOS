@@ -12,6 +12,11 @@ impl TpmDevice {
     pub const fn new(base_addr: usize) -> Self {
         Self { base_addr }
     }
+
+    pub fn init(&self) {
+        crate::println!("[TPM] Initializing CRB Interface Trust Anchor...");
+        self.verify_boot_state();
+    }
     
     pub fn read_pcr(&self, index: u8) -> Result<[u8; 32], &'static str> {
         if index > 23 { return Err("Invalid PCR index"); }

@@ -10,7 +10,7 @@ use smoltcp::iface::{Config, Interface, SocketSet};
 use smoltcp::time::Instant;
 use smoltcp::wire::{EthernetAddress, IpAddress, IpCidr};
 use smoltcp::phy::{Device, DeviceCapabilities, RxToken, TxToken};
-use crate::net::driver::NetError;
+
 use self::loopback::LoopbackDevice;
 use self::virtio_net::VirtIONet;
 

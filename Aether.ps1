@@ -63,7 +63,7 @@ function Start-AetherOS {
     if ($Headless) {
         & $qemuPath -cdrom $IsoPath -m 1024M -nographic -serial mon:stdio
     } else {
-        & $qemuPath -cdrom $IsoPath -m 1024M -display gtk
+        & $qemuPath -cdrom $IsoPath -m 2G -vga std -display gtk
     }
 }
 

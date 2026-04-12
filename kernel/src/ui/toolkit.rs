@@ -2,7 +2,7 @@
 //! Simplified widget API for app developers
 
 use crate::ui::widget::Rect;
-use crate::ui::window::WINDOW_MANAGER;
+use crate::ui::window::{Window, WINDOW_MANAGER};
 use alloc::string::String;
 use alloc::vec::Vec;
 
@@ -74,7 +74,12 @@ impl AppUI {
     /// Build and register the window
     pub fn build(self) -> usize {
         let mut wm = WINDOW_MANAGER.lock();
-        let rect = Rect::new(50, 50, self.width, self.height);
-        wm.create_window(rect, self.window_title)
+        let w = Window::new(
+            0,
+            self.window_title,
+            50, 50, self.width, self.height,
+            crate::drivers::video::Color::new(150, 150, 180)
+        );
+        wm.add_window(w)
     }
 }

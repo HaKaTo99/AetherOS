@@ -60,6 +60,7 @@ impl LfbVideoDriver {
         (self.info.width as usize) * (self.info.height as usize)
     }
 
+    #[allow(dead_code)]
     #[inline(always)]
     fn index_for(&self, x: usize, y: usize) -> usize {
         y * (self.info.width as usize) + x
@@ -71,52 +72,24 @@ impl LfbVideoDriver {
         (y * self.info.pitch as usize) + (x * (self.info.bpp as usize / 8))
     }
 
-    fn draw_char(&mut self, p: Point, c: char, color: Color) {
-        let code = c as usize;
-        let (x, y) = (p.x, p.y);
-        // [SUPREME CALIBRATION] font.rs starts printable chars (ASCII 32) at index 128 (char 16).
-        if code < 32 || code >= 127 { return; }
-        let char_offset = (code - 16) * 8;
-        
-        let font_data = &crate::drivers::video::font::FONT_8X8;
-        
-        for row in 0..8 {
-            let row_data = font_data[char_offset + row];
-            for col in 0..8 {
-                if (row_data & (1 << (7 - col))) != 0 {
-                    self.draw_pixel(Point::new(x + col, y + row), color);
-                }
-            }
-        }
-    }
-
     /// Merender jendela profesional dengan tombol kontrol kedaulatifan [R][Y][G]
-    fn draw_window(&mut self, title: &str, x: usize, y: usize, w: usize, h: usize, border_color: Color) {
-        // [SOVEREIGN UI] 1. Semi-transparent-look Background
+    fn draw_window_internal(&mut self, title: &str, x: usize, y: usize, w: usize, h: usize, border_color: Color) {
         self.draw_rect(Point::new(x, y), w, h, Color::new(0, 5, 15));
-        
-        // 2. Window Body
         self.draw_rect(Point::new(x + 2, y + 2), w - 4, h - 4, Color::new(0, 2, 5));
-        
-        // 3. Header Bar with Radiant Gradient
         self.draw_gradient_rect(Point::new(x + 2, y + 2), w - 4, 30, Color::new(0, 60, 80), Color::BLACK);
         
-        // 4. Control Buttons (Standard OS Grade: R/Y/G Glow)
         let btn_y = y + 10;
         let btn_right = x + w - 70;
+        self.draw_rect(Point::new(btn_right + 40, btn_y), 12, 12, Color::new(255, 60, 60));
+        self.draw_rect(Point::new(btn_right + 20, btn_y), 12, 12, Color::new(255, 200, 40));
+        self.draw_rect(Point::new(btn_right, btn_y), 12, 12, Color::new(40, 255, 40));
         
-        self.draw_rect(Point::new(btn_right + 40, btn_y), 12, 12, Color::new(255, 60, 60));   // [X] Close
-        self.draw_rect(Point::new(btn_right + 20, btn_y), 12, 12, Color::new(255, 200, 40));  // [+] Max
-        self.draw_rect(Point::new(btn_right, btn_y), 12, 12, Color::new(40, 255, 40));        // [-] Min
-        
-        // 5. Title Text (White Crystal)
         self.draw_string(Point::new(x + 15, y + 10), title, Color::WHITE);
         
-        // 6. Border Glow Architecture
-        self.draw_rect(Point::new(x, y), w, 2, border_color); // Top
-        self.draw_rect(Point::new(x, y + h - 2), w, 2, border_color); // Bottom
-        self.draw_rect(Point::new(x, y), 2, h, border_color); // Left
-        self.draw_rect(Point::new(x + w - 2, y), 2, h, border_color); // Right
+        self.draw_rect(Point::new(x, y), w, 2, border_color); 
+        self.draw_rect(Point::new(x, y + h - 2), w, 2, border_color);
+        self.draw_rect(Point::new(x, y), 2, h, border_color);
+        self.draw_rect(Point::new(x + w - 2, y), 2, h, border_color);
     }
 
     /// Internal logic for drawing the high-resolution dashboard
@@ -131,12 +104,12 @@ impl LfbVideoDriver {
         NebulaGenerator::render(self);
 
         // 2. Render Windowings (The "Windows" Experience)
-        self.draw_window("SYSTEM STATUS", 30, 80, 400, 250, cyan);
-        self.draw_window("SECURITY PROTOCOLS", 550, 80, 400, 350, magenta);
-        self.draw_window("AETHER CONNECT", 150, 400, 700, 300, cyan);
+        self.draw_window_internal("SYSTEM STATUS", 30, 80, 400, 250, cyan);
+        self.draw_window_internal("SECURITY PROTOCOLS", 550, 80, 400, 350, magenta);
+        self.draw_window_internal("AETHER CONNECT", 150, 400, 700, 300, cyan);
 
         // 3. Top HUD (Time & Global Status)
-        self.draw_window("HUD", w/2 - 100, 10, 200, 50, Color::WHITE);
+        self.draw_window_internal("HUD", w/2 - 100, 10, 200, 50, Color::WHITE);
         self.draw_string(Point::new(w/2 - 35, 25), "23:48", Color::WHITE);
 
         // 4. Bottom Taskbar (Icon Simulation)
@@ -152,29 +125,28 @@ unsafe impl Sync for LfbVideoDriver {}
 
 impl Framebuffer for LfbVideoDriver {
     fn init(&mut self) {
-        // [MILITARY GRADE] Sovereign Memory Mapping for x86_64 Visuals
         unsafe {
-            // [SOVEREIGN v10.4.4] Use SMME formal mapping interface
-            let smme = crate::SMME.lock();
-            let virtual_addr = smme.map_video_region(self.info.address as usize, 0x1000_0000);
-            LFB_VIRTUAL_ADDR = virtual_addr; 
+            LFB_VIRTUAL_ADDR = self.info.address as usize;
             
-            #[cfg(target_arch = "x86_64")]
-            crate::memory::x86_64_paging::map_lfb_identity(self.info.address, 0x1000_0000); // 256MB
+            // [v10.5.18] Segmented Physical Scrub: Clear LFB row-by-row to remove VGA artifacts
+            // This prevents a single massive write from hanging the memory bus.
+            if LFB_VIRTUAL_ADDR != 0 {
+                let pitch = self.info.pitch as usize;
+                for y in 0..self.info.height as usize {
+                    let row_ptr = (LFB_VIRTUAL_ADDR + y * pitch) as *mut u8;
+                    core::ptr::write_bytes(row_ptr, 0, pitch);
+                }
+            }
         }
         
-        crate::println!("[v10.3] LFB: Visual Sovereignty Active at 0x{:X} [ {}x{} ]", 
-            self.info.address, self.info.width, self.info.height);
-        crate::println!("[MEMORY] LFB Mapping: SMME-REG-0xFD [SUCCESS]");
+        // [v10.5.17] Visibility Extraction: Back-buffer will be allocated LAZILY on first draw
+        self.back_buffer = None;
         
-        // --- HIGH-SPEED BUFFER INITIALIZATION ---
-        let size = self.buffer_size();
-        let mut v: Vec<u32> = Vec::new();
-        v.resize(size, Color::new(10, 15, 30).to_u32());
-        self.back_buffer = Some(v.into_boxed_slice());
-        
-        // Final Sync
-        self.flush();
+        self.dirty.min_x = 0;
+        self.dirty.min_y = 0;
+        self.dirty.max_x = (self.info.width as usize).saturating_sub(1);
+        self.dirty.max_y = (self.info.height as usize).saturating_sub(1);
+        self.dirty.active = true;
     }
 
     fn clear(&mut self, color: Color) {
@@ -188,13 +160,16 @@ impl Framebuffer for LfbVideoDriver {
     fn draw_pixel(&mut self, p: Point, color: Color) {
         let width = self.info.width as usize;
         let height = self.info.height as usize;
-        if p.x >= width || p.y >= height {
-            return;
-        }
+        if p.x >= width || p.y >= height { return; }
 
+        // [v10.5.18] Lazy Logic: Allocation attempt happens outside hot pixel-loop normally,
+        // but here we check for presence to maintain absolute stability.
         if let Some(ref mut buf) = self.back_buffer {
             let idx = p.y * width + p.x;
-            buf[idx] = color.to_u32();
+            buf[idx] = color.to_u16_rgb565() as u32; // Fallback to safe 16-bit or 32-bit as needed
+            if self.info.bpp == 32 {
+                buf[idx] = color.to_u32();
+            }
             self.dirty.update(p.x, p.y);
         } else {
             let offset = self.get_offset(p.x, p.y);
@@ -223,6 +198,9 @@ impl Framebuffer for LfbVideoDriver {
                     buf[idx] = val;
                 }
             }
+            self.dirty.update(p.x, p.y);
+            self.dirty.update(end_x.saturating_sub(1), end_y.saturating_sub(1));
+            self.dirty.active = true;
         } else {
             unsafe {
                 for y in p.y..end_y {
@@ -238,70 +216,86 @@ impl Framebuffer for LfbVideoDriver {
 
     fn flush(&mut self) {
         if !self.dirty.active { return; }
-
         if let Some(ref buf) = self.back_buffer {
             unsafe {
                 if LFB_VIRTUAL_ADDR == 0 { return; }
                 let fb_base = LFB_VIRTUAL_ADDR as *mut u32;
                 let width = self.info.width as usize;
+                let height = self.info.height as usize;
                 let pitch_pixels = self.info.pitch as usize / 4;
 
-                // [v10.3 SUPREME] Optimized Partial Flush (Dirty-Rect)
                 let start_y = self.dirty.min_y;
-                let end_y = (self.dirty.max_y + 1).min(self.info.height as usize);
-                
-                for y in start_y..end_y {
-                    let dest_row = fb_base.add(y * pitch_pixels + self.dirty.min_x);
-                    let src_row = buf.as_ptr().add(y * width + self.dirty.min_x);
-                    let copy_width = (self.dirty.max_x - self.dirty.min_x + 1).min(width - self.dirty.min_x);
-                    
-                    core::ptr::copy_nonoverlapping(src_row, dest_row, copy_width);
+                let end_y = (self.dirty.max_y + 1).min(height);
+                let start_x = self.dirty.min_x;
+                let end_x = (self.dirty.max_x + 1).min(width);
+                let copy_width = end_x - start_x;
+
+                // [v10.5.16] Sovereign Recovery Path: Optimized Block Copy if stride permits
+                if start_x == 0 && end_x == width && (width * 4) == self.info.pitch as usize {
+                    let total_pixels = width * (end_y - start_y);
+                    core::ptr::copy_nonoverlapping(
+                        buf.as_ptr().add(start_y * width),
+                        fb_base.add(start_y * width),
+                        total_pixels
+                    );
+                } else {
+                    // Precision Path: Row-by-row copy for non-standard pitches or partial regions
+                    for y in start_y..end_y {
+                        let dest_row = fb_base.add(y * pitch_pixels + start_x);
+                        let src_row = buf.as_ptr().add(y * width + start_x);
+                        core::ptr::copy_nonoverlapping(src_row, dest_row, copy_width);
+                    }
                 }
             }
             self.dirty.reset();
         }
     }
 
-    fn width(&self) -> usize {
-        self.info.width as usize
-    }
-
-    fn height(&self) -> usize {
-        self.info.height as usize
-    }
+    fn width(&self) -> usize { self.info.width as usize }
+    fn height(&self) -> usize { self.info.height as usize }
 
     fn set_cursor_pos(&mut self, _p: Point) {
-        unsafe {
-            CURSOR_X = _p.x;
-            CURSOR_Y = _p.y;
-        }
+        unsafe { CURSOR_X = _p.x; CURSOR_Y = _p.y; }
     }
 
     fn write_char(&mut self, c: char, color: Color) {
         unsafe {
             if c == '\n' {
                 CURSOR_X = 0;
-                CURSOR_Y += 10; // 8px font + 2px spacing
+                CURSOR_Y += 10;
             } else if c == '\r' {
                 CURSOR_X = 0;
             } else {
                 self.draw_char(Point::new(CURSOR_X * 8, CURSOR_Y * 10), c, color);
                 CURSOR_X += 1;
-                if CURSOR_X * 8 >= self.info.width as usize - 160 { // Wrapping before side HUD
+                if CURSOR_X * 8 >= self.info.width as usize - 160 {
                     CURSOR_X = 0;
                     CURSOR_Y += 10;
                 }
             }
-
-            // Simple scroll/reset if we hit bottom
             if CURSOR_Y * 10 >= (self.info.height as usize - 40) {
-                CURSOR_Y = 4; // Start back at top within HUD
+                CURSOR_Y = 4;
                 self.render_dashboard();
             }
         }
     }
 
-    fn draw_dashboard(&mut self) {
-        self.render_dashboard();
+    fn draw_dashboard(&mut self) { self.render_dashboard(); }
+    fn get_fb_ptr(&self) -> usize { self.info.address as usize }
+
+    fn draw_char(&mut self, p: Point, c: char, color: Color) {
+        let code = c as usize;
+        // [SUPREME CALIBRATION] Final offset: 16
+        if code < 32 || code >= 127 { return; }
+        let char_offset = (code - 16) * 8;
+        let font_data = &crate::drivers::video::font::FONT_8X8;
+        for row in 0..8 {
+            let row_data = font_data[char_offset + row];
+            for col in 0..8 {
+                if (row_data & (1 << (7 - col))) != 0 {
+                    self.draw_pixel(Point::new(p.x + col, p.y + row), color);
+                }
+            }
+        }
     }
 }

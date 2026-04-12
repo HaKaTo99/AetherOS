@@ -1,54 +1,40 @@
 //! Brain-Computer Interface (BCI) Driver (Phase 19.4)
-//! Simulates Neural Link signals for thought-controlled UI.
+//! Simulates Neural Link signals for intent-controlled UI.
 
-use crate::drivers::{Driver, DriverType};
-
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct BrainSignal {
-    pub alpha_wave: f32, // Relaxation (8-13 Hz)
-    pub beta_wave: f32,  // Active thinking (13-30 Hz)
-    pub gamma_wave: f32, // Deep focus (>30 Hz)
+    pub alpha: f32, // Relaxation
+    pub beta: f32,  // Active focus
+    pub gamma: f32, // Peak cognitive load / Intent
 }
 
 pub struct NeuralLink {
-    base_addr: usize,
     connected: bool,
+    ticks: u64,
 }
 
 impl NeuralLink {
-    pub const fn new(base_addr: usize) -> Self {
-        Self { base_addr, connected: false }
+    pub const fn new() -> Self {
+        Self { connected: false, ticks: 0 }
     }
 
-    pub fn calibrate(&mut self) {
-        crate::println!("[BCI] Calibrating Neural Link at 0x{:X}...", self.base_addr);
+    pub fn init(&mut self) {
         self.connected = true;
+        crate::println!("[BCI] Neural Link established. Synchronizing with Sovereign Operator.");
     }
 
-    pub fn read_signal(&self) -> Option<BrainSignal> {
+    pub fn read_signal(&mut self) -> Option<BrainSignal> {
         if !self.connected { return None; }
+        self.ticks += 1;
         
-        // Simulate reading
-        Some(BrainSignal {
-            alpha_wave: 0.5,
-            beta_wave: 0.8,
-            gamma_wave: 0.2,
-        })
+        // Simpler wave-like behavior without sin/cos (avoiding no_std f32 issues)
+        let phase = (self.ticks % 100) as f32 / 100.0;
+        let alpha = 0.5 + phase * 0.1;
+        let beta = 0.7 - phase * 0.05;
+        let gamma = if self.ticks % 500 > 480 { 0.95 } else { 0.1 };
+
+        Some(BrainSignal { alpha, beta, gamma })
     }
 }
 
-impl Driver for NeuralLink {
-    fn compatible(&self) -> &str {
-        "neural,link-v1"
-    }
-
-    unsafe fn init(&mut self) -> Result<(), &'static str> {
-        self.calibrate();
-        crate::println!("[BCI] Neural Link Online. Thinking is Input.");
-        Ok(())
-    }
-
-    fn device_type(&self) -> DriverType {
-        DriverType::BCI
-    }
-}
+pub static mut GLOBAL_NEURAL_LINK: NeuralLink = NeuralLink::new();
